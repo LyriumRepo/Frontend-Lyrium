@@ -145,7 +145,6 @@ export default function SessionsPageClient() {
         title="Revocar sesión"
         subtitle="SEGURIDAD"
         size="sm"
-        accentColor="from-rose-500 to-red-600"
       >
         <div className="flex flex-col items-center text-center py-4">
           <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center mb-4">

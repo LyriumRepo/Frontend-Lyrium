@@ -5,11 +5,29 @@ import Image from 'next/image';
 import { Product, etiquetasFromProduct } from '@/features/seller/catalog/types';
 import Icon from '@/components/ui/Icon';
 
+const PRODUCT_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+    approved:       { label: 'Aprobado',  className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400' },
+    inactive:       { label: 'Inactivo',  className: 'bg-gray-500/10 text-gray-500 border-gray-500/20' },
+    pending_review: { label: 'Pendiente', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400' },
+    rejected:       { label: 'Rechazado', className: 'bg-red-500/10 text-red-500 border-red-500/20' },
+    draft:          { label: 'Borrador',  className: 'bg-gray-500/10 text-gray-500 border-gray-500/20' },
+};
+
+export function ProductStatusBadge({ status }: { status?: string }) {
+    const config = PRODUCT_STATUS_CONFIG[status ?? 'draft'] ?? PRODUCT_STATUS_CONFIG.draft;
+    return (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-lg border text-[9px] font-black uppercase tracking-widest whitespace-nowrap ${config.className}`}>
+            {config.label}
+        </span>
+    );
+}
+
 interface ProductCardProps {
     product:    Product;
     onEdit:     (product: Product) => void;
     onDelete:   (productId: string) => void;
     onViewInfo: (product: Product) => void;
+    onToggleVisibility?: (productId: string, visible: boolean) => void;
     renderPrice?: () => ReactNode;
 }
 
@@ -18,6 +36,7 @@ export default function ProductCard({
     onEdit,
     onDelete,
     onViewInfo,
+    onToggleVisibility,
     renderPrice,
 }: ProductCardProps) {
 
@@ -92,6 +111,25 @@ export default function ProductCard({
                         </span>
                     )}
                 </span>
+            </td>
+
+            {/* ── Estado / Visibilidad ── */}
+            <td className="px-4 py-3 whitespace-nowrap">
+                {(product.status === 'approved' || product.status === 'inactive') && onToggleVisibility ? (
+                    <button
+                        onClick={() => onToggleVisibility(product.id, product.status !== 'approved')}
+                        className={`relative inline-flex items-center h-5 w-9 rounded-full transition-colors ${
+                            product.status === 'approved' ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'
+                        }`}
+                        title={product.status === 'approved' ? 'Ocultar producto' : 'Publicar producto'}
+                    >
+                        <span className={`inline-block w-3.5 h-3.5 bg-white rounded-full transition-transform ${
+                            product.status === 'approved' ? 'translate-x-[18px]' : 'translate-x-1'
+                        }`} />
+                    </button>
+                ) : (
+                    <ProductStatusBadge status={product.status} />
+                )}
             </td>
 
             {/* ── Acciones ── */}

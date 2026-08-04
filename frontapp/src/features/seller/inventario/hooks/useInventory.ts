@@ -20,6 +20,7 @@ function productToInventoryItem(product: Product): InventoryItem {
     price: product.price,
     imageUrl: product.image || undefined,
     updatedAt: product.updatedAt ? new Date(product.updatedAt) : new Date(),
+    approvalStatus: product.status ?? 'draft',
   };
 }
 
@@ -39,6 +40,7 @@ export function useInventory() {
     search: '',
     status: 'all',
     category: 'all',
+    approvalStatus: 'all',
   });
 
   const { data: products = [], isLoading, error, refetch } = useQuery<Product[]>({
@@ -73,7 +75,9 @@ export function useInventory() {
         filters.status === 'all' || getStockStatus(item) === filters.status;
       const matchCategory =
         filters.category === 'all' || item.category === filters.category;
-      return matchSearch && matchStatus && matchCategory;
+      const matchApprovalStatus =
+        filters.approvalStatus === 'all' || item.approvalStatus === filters.approvalStatus;
+      return matchSearch && matchStatus && matchCategory && matchApprovalStatus;
     });
   }, [items, filters]);
 

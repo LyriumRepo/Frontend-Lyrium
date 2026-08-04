@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import ModalsPortal from '@/components/layout/shared/ModalsPortal';
-import { X, Store, Mail, Phone, CheckCircle2, ShieldAlert, ChevronDown, CheckCircle, Sparkles, Calendar, User } from 'lucide-react';
+import { X, Store, Mail, Phone, CheckCircle2, ShieldAlert, CheckCircle, Sparkles, Calendar, User } from 'lucide-react';
 import BaseButton from '@/components/ui/BaseButton';
+import { LyriumSelect } from '@/components/ui';
 
 interface SellerManagementDetailsModalProps {
     isOpen: boolean;
@@ -140,27 +141,19 @@ export default function SellerManagementDetailsModal({ isOpen, onClose, contract
                         ) : (
                             <>
                                 <div>
-                                    <label htmlFor="contract-select" className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-3 ml-2">
+                                    <label className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-3 ml-2">
                                         Selecciona un vendedor
                                     </label>
-                                    <div className="relative">
-                                        <select
-                                            id="contract-select"
-                                            value={selectedContractId}
-                                            onChange={(e) => setSelectedContractId(e.target.value)}
-                                            className="w-full p-5 bg-[var(--bg-muted)] border border-[var(--border-subtle)] rounded-2xl font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-[var(--icons-green)]/10 focus:border-[var(--border-focus)] appearance-none transition-all cursor-pointer text-sm"
-                                        >
-                                            <option value="" className="bg-[var(--bg-card)] text-[var(--text-secondary)]">-- Selecciona un vendedor --</option>
-                                            {contracts.map((c) => (
-                                                <option key={c.id} value={c.id} className="bg-[var(--bg-card)] text-[var(--text-primary)]">
-                                                    {c.company} ({c.id}) - [{getStatusText(c.status)}]
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-secondary)]">
-                                            <ChevronDown className="w-5 h-5" />
-                                        </div>
-                                    </div>
+                                    <LyriumSelect
+                                        value={selectedContractId}
+                                        onChange={setSelectedContractId}
+                                        placeholder="-- Selecciona un vendedor --"
+                                        searchable
+                                        options={contracts.map((c) => ({
+                                            value: String(c.id),
+                                            label: `${c.company} (${c.id}) - [${getStatusText(c.status)}]`
+                                        }))}
+                                    />
                                 </div>
 
                                 {!selectedContractId ? (

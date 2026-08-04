@@ -4,7 +4,7 @@ import React from 'react';
 import SmartSidebar from '@/components/layout/shared/SmartSidebar';
 import { customerNavigation } from '@/shared/lib/constants/customer-nav';
 import { useAuth } from '@/shared/lib/context/AuthContext';
-import { useChatUnreadCount } from '@/shared/hooks/useChatUnreadCount';
+import { useNavNotificationBadges } from '@/shared/hooks/useNavNotificationBadges';
 
 interface CustomerSidebarProps {
     isMobileOpen: boolean;
@@ -13,7 +13,7 @@ interface CustomerSidebarProps {
 
 export default function CustomerSidebar({ isMobileOpen, onClose }: CustomerSidebarProps) {
     const { user } = useAuth();
-    const chatUnread = useChatUnreadCount();
+    const notificationBadges = useNavNotificationBadges('customer');
 
     const customerUser = {
         name: user?.display_name || "Mi Cuenta",
@@ -21,7 +21,7 @@ export default function CustomerSidebar({ isMobileOpen, onClose }: CustomerSideb
         avatar: user?.avatar
     };
 
-    const badges: Record<string, number> = chatUnread > 0 ? { chat: chatUnread } : {};
+    const badges: Record<string, number> = { ...notificationBadges };
 
     return (
         <SmartSidebar

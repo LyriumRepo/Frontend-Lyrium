@@ -69,7 +69,7 @@ export default function PublicCartDrawer() {
                                             src={item.imagen_url || '/img/placeholder.png'}
                                             alt={item.producto_nombre || 'Producto'}
                                             fill
-                                            className="object-contain md:object-cover"
+                                            className="object-cover"
                                         />
                                     </div>
                                     

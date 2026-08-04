@@ -1,9 +1,14 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
-import { useControlVendedores } from '@/features/admin/sellers/hooks/useControlVendedores';
+import {
+  useControlVendedores,
+  type TabKey,
+} from '@/features/admin/sellers/hooks/useControlVendedores';
+import { ProfileRequestReview } from '@/features/admin/sellers/ProfileRequestReview';
 import {
   ProductModeration,
   ServiceModeration,
@@ -14,14 +19,15 @@ import {
   Users,
   Search,
   ShieldAlert,
-  Sliders,
   X,
   FileCheck,
   Store,
   CheckCircle,
   Clock,
   Bell,
+  FileEdit,
 } from 'lucide-react';
+import { LyriumSelect } from '@/components/ui';
 import { SellerStatus, ProductStatus, ServiceStatus } from '@/features/admin/sellers/types';
 import Skeleton, { SkeletonRow } from '@/components/ui/Skeleton';
 import ModalsPortal from '@/components/layout/shared/ModalsPortal';
@@ -82,6 +88,10 @@ const ManagementModal = ({
   suggested,
   sellerContractStatus,
 }: ManagementModalProps) => {
+  const [status, setStatus] = useState(
+    suggested ?? (type === 'seller' ? 'ACTIVE' : 'APPROVED'),
+  );
+
   if (!isOpen) return null;
 
   return (
@@ -116,7 +126,7 @@ const ManagementModal = ({
             >
               <ShieldAlert className="w-5 h-5" />
             </div>
-            <h3 className="text-xl font-black text-[var(--text-primary)] tracking-tighter uppercase">
+            <h3 className="text-base sm:text-xl font-black text-[var(--text-primary)] tracking-tighter uppercase">
               {title}
             </h3>
           </div>
@@ -133,57 +143,37 @@ const ManagementModal = ({
               e.preventDefault();
               const fd = new FormData(e.currentTarget);
               onSubmit({
-                status: fd.get('status') as string,
+                status,
                 reason: fd.get('reason') as string,
               });
             }}
           >
             <div>
               <label
-                htmlFor="seller-status"
                 className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-3 ml-2"
               >
                 Nuevo Estado Transaccional
               </label>
-              <div className="relative">
-                <select
-                  id="seller-status"
-                  name="status"
-                  defaultValue={suggested}
-                  required
-                  className="w-full p-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl font-black text-[var(--text-primary)] focus:ring-4 focus:ring-[var(--icons-green)]/10 appearance-none transition-all"
-                >
-                  {type === 'seller' ? (
-                    <>
-                      <option
-                        value="ACTIVE"
-                        disabled={sellerContractStatus !== 'VIGENTE'}
-                      >
-                        ACTIVA - Operación Normal{' '}
-                        {sellerContractStatus !== 'VIGENTE'
-                          ? '(BLOQUEADO)'
-                          : ''}
-                      </option>
-                      <option value="SUSPENDED">
-                        SUSPENDIDA - Bloqueo Temporal
-                      </option>
-                      <option value="REJECTED">BAJA LÓGICA - Cese Total</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="APPROVED">
-                        APROBADO - Publicación Inmediata
-                      </option>
-                      <option value="REJECTED">
-                        RECHAZADO - Violación de Políticas
-                      </option>
-                    </>
-                  )}
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-secondary)]">
-                  <Sliders className="w-4 h-4" />
-                </div>
-              </div>
+              <LyriumSelect
+                value={status}
+                onChange={setStatus}
+                options={
+                  type === 'seller'
+                    ? [
+                        {
+                          value: 'ACTIVE',
+                          label: `ACTIVA - Operación Normal${sellerContractStatus !== 'VIGENTE' ? ' (BLOQUEADO)' : ''}`,
+                          disabled: sellerContractStatus !== 'VIGENTE',
+                        },
+                        { value: 'SUSPENDED', label: 'SUSPENDIDA - Bloqueo Temporal' },
+                        { value: 'REJECTED', label: 'BAJA LÓGICA - Cese Total' },
+                      ]
+                    : [
+                        { value: 'APPROVED', label: 'APROBADO - Publicación Inmediata' },
+                        { value: 'REJECTED', label: 'RECHAZADO - Violación de Políticas' },
+                      ]
+                }
+              />
             </div>
 
             <div>
@@ -239,7 +229,20 @@ export function SellersPageClient(_props: SellersPageClientProps) {
     products,
     services,
     servicesLoading,
+    profileRequests,
+    profileRequestsLoading,
+    profileRequestsError,
+    pendingProfileRequestsCount,
   } = useControlVendedores();
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && (['vendedores', 'aprobacion', 'servicios', 'validacion', 'contratos'] as TabKey[]).includes(tab as TabKey)) {
+      setCurrentTab(tab as TabKey);
+    }
+  }, [searchParams, setCurrentTab]);
 
   const { state: contractsState, actions: contractsActions } = useContratos();
 
@@ -376,6 +379,13 @@ export function SellersPageClient(_props: SellersPageClientProps) {
             badge={services.filter(s => s.status === 'PENDING' || s.status === 'en_espera').length}
           />
           <TabButton
+            active={currentTab === 'validacion'}
+            onClick={() => setCurrentTab('validacion')}
+            label="Cambio de Datos"
+            icon={<FileEdit className="w-5 h-5" />}
+            badge={pendingProfileRequestsCount}
+          />
+          <TabButton
             active={currentTab === 'contratos'}
             onClick={() => setCurrentTab('contratos' as any)}
             label="Contratos"
@@ -481,6 +491,16 @@ export function SellersPageClient(_props: SellersPageClientProps) {
           </div>
         )}
 
+        {currentTab === 'validacion' && (
+          <ProfileRequestReview
+            requests={profileRequests}
+            loading={profileRequestsLoading}
+            error={profileRequestsError}
+            onApprove={actions.approveProfileRequest}
+            onReject={actions.rejectProfileRequest}
+          />
+        )}
+
         {currentTab === 'contratos' && (
           <div className="space-y-6 animate-fadeIn">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
@@ -496,6 +516,7 @@ export function SellersPageClient(_props: SellersPageClientProps) {
             <ContratosModule state={contractsState} actions={contractsActions} />
           </div>
         )}
+
       </div>
 
       <ManagementModal

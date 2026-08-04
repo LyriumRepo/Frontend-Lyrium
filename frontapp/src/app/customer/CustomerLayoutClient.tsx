@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import CustomerSidebar from '@/components/layout/customer/CustomerSidebar';
 import CustomerHeader from '@/components/layout/customer/CustomerHeader';
@@ -18,6 +18,96 @@ import { WELCOME_MODAL_LIGHT_TEXT, WELCOME_MODAL_LIGHT_BADGE, WELCOME_MODAL_LIGH
 
 interface CustomerLayoutClientProps {
     children: React.ReactNode;
+}
+
+// ─── Secuenciador de bienvenida / cumpleaños / tour ────────────────────────
+// Orden fijo: bienvenida → (margen) → cumpleaños si aplica → (margen) → fin.
+// El tour (WelcomeGuide/ProfileCompletionGuide, features/customer/onboarding)
+// espera a que el marcador `data-lyrium-welcome-toast` desaparezca del DOM —
+// ese marcador lo controla ÚNICAMENTE este secuenciador (ver <OnboardingGate>
+// más abajo) durante TODA la ventana, incluyendo el margen entre animaciones,
+// para que nunca haya un hueco en el que el tour pueda colarse de más.
+const WELCOME_VISIBLE_MS = 4000;
+const WELCOME_EXIT_MS = 540;
+const BDAY_VISIBLE_MS = 8500;
+const BDAY_EXIT_MS = 530;
+const ONBOARDING_GAP_MS = 2500; // pausa entre el fin de una animación y el inicio de la siguiente
+
+type OnboardingStage = 'pending' | 'welcome' | 'gap' | 'birthday' | 'done';
+
+function isBirthdayToday(birthday: string | null | undefined): boolean {
+    if (!birthday) return false;
+    const [, month, day] = birthday.split(/[-T]/);
+    const today = new Date();
+    return (
+        today.getMonth() + 1 === parseInt(month, 10) &&
+        today.getDate() === parseInt(day, 10)
+    );
+}
+
+function useCustomerOnboardingSequence() {
+    const { user } = useAuth();
+    const [stage, setStage] = useState<OnboardingStage>('pending');
+    const decidedRef = useRef(false);
+    const birthdayPendingRef = useRef(false);
+
+    const decide = useCallback((birthdayEligible: boolean) => {
+        if (decidedRef.current) return;
+        decidedRef.current = true;
+
+        const welcomeKey = 'lyrium_customer_welcome_session';
+        const showWelcome = !sessionStorage.getItem(welcomeKey);
+        if (showWelcome) sessionStorage.setItem(welcomeKey, '1');
+
+        let showBirthday = false;
+        if (birthdayEligible) {
+            const bdayKey = `lyrium_bday_${new Date().getFullYear()}`;
+            if (!localStorage.getItem(bdayKey)) {
+                localStorage.setItem(bdayKey, '1');
+                showBirthday = true;
+            }
+        }
+        birthdayPendingRef.current = showBirthday;
+
+        setStage(showWelcome ? 'welcome' : showBirthday ? 'birthday' : 'done');
+    }, []);
+
+    // Vía principal: en cuanto el usuario esté disponible se evalúa su cumpleaños.
+    useEffect(() => {
+        if (!user) return;
+        const birthday = user.birthday;
+        queueMicrotask(() => decide(isBirthdayToday(birthday)));
+    }, [user, decide]);
+
+    // Vía de respaldo: evento que dispara la página de perfil si detecta el
+    // cumpleaños antes de que este layout tenga `user.birthday` disponible.
+    useEffect(() => {
+        const handler = () => decide(true);
+        window.addEventListener('lyrium:birthday', handler);
+        return () => window.removeEventListener('lyrium:birthday', handler);
+    }, [decide]);
+
+    // Red de seguridad: si por algún motivo nunca se decide (p. ej. `user` nunca
+    // llega a resolver), no se bloquea el tour para siempre.
+    useEffect(() => {
+        const safety = setTimeout(() => decide(false), 8000);
+        return () => clearTimeout(safety);
+    }, [decide]);
+
+    const handleWelcomeFinished = useCallback(() => {
+        if (birthdayPendingRef.current) {
+            setStage('gap');
+            setTimeout(() => setStage('birthday'), ONBOARDING_GAP_MS);
+        } else {
+            setStage('done');
+        }
+    }, []);
+
+    const handleBirthdayFinished = useCallback(() => {
+        setStage('done');
+    }, []);
+
+    return { stage, handleWelcomeFinished, handleBirthdayFinished };
 }
 
 // ─── Paleta bienvenida cliente ─────────────────────────────────────────────
@@ -143,13 +233,17 @@ function CwStarSVG({ size }: { size: number }) {
 }
 
 // ─── CustomerWelcomeToast ──────────────────────────────────────────────────
-function CustomerWelcomeToast() {
+// Componente controlado: el secuenciador (useCustomerOnboardingSequence) decide
+// CUÁNDO se muestra vía `active`; este componente solo se encarga de la
+// animación y avisa con `onFinished` cuando termina (auto-cierre o manual).
+function CustomerWelcomeToast({ active, onFinished }: { active: boolean; onFinished: () => void }) {
     const { user } = useAuth();
     const [visible,   setVisible]   = useState(false);
     const [exiting,   setExiting]   = useState(false);
     const [nameReady, setNameReady] = useState(true);
     const [tilt,      setTilt]      = useState({ x: 0, y: 0 });
     const [isDark,    setIsDark]    = useState(true);
+    const finishedRef = useRef(false);
 
     // Detectar modo día/noche — observa clase "dark" en <html>
     useEffect(() => {
@@ -160,10 +254,19 @@ function CustomerWelcomeToast() {
         return () => observer.disconnect();
     }, []);
 
+    const finish = useCallback(() => {
+        if (finishedRef.current) return;
+        finishedRef.current = true;
+        onFinished();
+    }, [onFinished]);
+
     const close = useCallback(() => {
         setExiting(true);
-        setTimeout(() => setVisible(false), 540);
-    }, []);
+        setTimeout(() => {
+            setVisible(false);
+            finish();
+        }, WELCOME_EXIT_MS);
+    }, [finish]);
 
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -189,11 +292,8 @@ function CustomerWelcomeToast() {
     }, [close, isDark]);
 
     useEffect(() => {
-        if (!user) return;
-        const key = 'lyrium_customer_welcome_session';
-        if (sessionStorage.getItem(key)) return;
-        sessionStorage.setItem(key, '1');
-
+        if (!active) return;
+        finishedRef.current = false;
         setExiting(false);
         setNameReady(true);
         setVisible(true);
@@ -213,16 +313,13 @@ function CustomerWelcomeToast() {
             });
         }, 700);
 
+        const autoCloseTimer = setTimeout(close, WELCOME_VISIBLE_MS);
+
         return () => {
             clearTimeout(confettiTimer);
+            clearTimeout(autoCloseTimer);
         };
-    }, [user, close, isDark]);
-
-    useEffect(() => {
-        if (!visible) return;
-        const autoClose = setTimeout(close, 4000);
-        return () => clearTimeout(autoClose);
-    }, [visible, close]);
+    }, [active, isDark, close]);
 
     if (!visible) return null;
 
@@ -288,7 +385,6 @@ function CustomerWelcomeToast() {
 
             {/* Overlay */}
             <div
-                data-lyrium-welcome-toast=""
                 className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                 style={{
                     backdropFilter: 'blur(22px) saturate(160%)',
@@ -671,13 +767,17 @@ function StarSVG({ size }: { size: number }) {
 }
 
 // ─── BirthdayToast ─────────────────────────────────────────────────────────
-function BirthdayToast() {
+// Componente controlado — mismo patrón que CustomerWelcomeToast: el
+// secuenciador decide cuándo (`active`), este componente solo anima y avisa
+// con `onFinished` al terminar.
+function BirthdayToast({ active, onFinished }: { active: boolean; onFinished: () => void }) {
     const { user } = useAuth();
     const [visible,   setVisible]   = useState(false);
     const [exiting,   setExiting]   = useState(false);
     const [nameReady, setNameReady] = useState(false);
     const [tilt,      setTilt]      = useState({ x: 0, y: 0 });
     const [isDark,    setIsDark]    = useState(true);
+    const finishedRef = useRef(false);
 
     useEffect(() => {
         const check = () => setIsDark(document.documentElement.classList.contains('dark'));
@@ -687,10 +787,19 @@ function BirthdayToast() {
         return () => observer.disconnect();
     }, []);
 
+    const finish = useCallback(() => {
+        if (finishedRef.current) return;
+        finishedRef.current = true;
+        onFinished();
+    }, [onFinished]);
+
     const close = useCallback(() => {
         setExiting(true);
-        setTimeout(() => setVisible(false), 530);
-    }, []);
+        setTimeout(() => {
+            setVisible(false);
+            finish();
+        }, BDAY_EXIT_MS);
+    }, [finish]);
 
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -715,11 +824,9 @@ function BirthdayToast() {
         close();
     }, [close, isDark]);
 
-    const triggerToast = useCallback(() => {
-        const today = new Date();
-        const key = `lyrium_bday_${today.getFullYear()}`;
-        if (localStorage.getItem(key)) return;
-        localStorage.setItem(key, '1');
+    useEffect(() => {
+        if (!active) return;
+        finishedRef.current = false;
         setExiting(false);
         setNameReady(false);
         setVisible(true);
@@ -748,33 +855,14 @@ function BirthdayToast() {
             });
         }, 680);
 
-        const autoClose = setTimeout(close, 8500);
+        const autoCloseTimer = setTimeout(close, BDAY_VISIBLE_MS);
+
         return () => {
             clearTimeout(nameTimer);
             clearTimeout(confettiTimer);
-            clearTimeout(autoClose);
+            clearTimeout(autoCloseTimer);
         };
-    }, [close]);
-
-    // Escucha el evento que dispara la página de perfil cuando detecta cumpleaños hoy
-    useEffect(() => {
-        const handler = () => triggerToast();
-        window.addEventListener('lyrium:birthday', handler);
-        return () => window.removeEventListener('lyrium:birthday', handler);
-    }, [triggerToast]);
-
-    // También se dispara si el auth context ya trae birthday = hoy
-    useEffect(() => {
-        if (!user?.birthday) return;
-        const today = new Date();
-        const [, bdayMonth, bdayDay] = user.birthday.split(/[-T]/);
-        const isToday =
-            today.getMonth() + 1 === parseInt(bdayMonth, 10) &&
-            today.getDate()       === parseInt(bdayDay,   10);
-        if (!isToday) return;
-        triggerToast();
-    }, [user, triggerToast]);
-
+    }, [active, isDark, close]);
 
     if (!visible) return null;
 
@@ -1159,6 +1247,7 @@ function BirthdayToast() {
 // ─── Layout ────────────────────────────────────────────────────────────────
 export function CustomerLayoutClient({ children }: CustomerLayoutClientProps) {
     const { sidebarOpen, toggleSidebar, closeSidebar } = useUIStore();
+    const { stage, handleWelcomeFinished, handleBirthdayFinished } = useCustomerOnboardingSequence();
 
     return (
         <DashboardLayout
@@ -1171,8 +1260,12 @@ export function CustomerLayoutClient({ children }: CustomerLayoutClientProps) {
         >
             {children}
             <ChatBotWidget />
-            <CustomerWelcomeToast />
-            <BirthdayToast />
+            {/* Marcador único que el tour (waitForWelcomeToastGone) espera a que
+                desaparezca — presente sin huecos durante bienvenida, margen y
+                cumpleaños, hasta que el secuenciador llega a 'done'. */}
+            {stage !== 'done' && <div data-lyrium-welcome-toast="" style={{ display: 'none' }} aria-hidden="true" />}
+            <CustomerWelcomeToast active={stage === 'welcome'} onFinished={handleWelcomeFinished} />
+            <BirthdayToast active={stage === 'birthday'} onFinished={handleBirthdayFinished} />
         </DashboardLayout>
     );
 }

@@ -181,9 +181,7 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
             level = 'WARNING';
             title = '📋 Solicitud de perfil';
             message = notification.subject ?? `${notification.seller_name ?? 'Un vendedor'} actualizó su perfil`;
-            if (notification.store_id) {
-                action = { type: 'store', id: notification.store_id, label: 'Ver tienda' };
-            }
+            action = { type: 'profile_request', id: notification.store_id ?? undefined, label: 'Revisar solicitud' };
             break;
         case 'store_profile_updated':
         case 'StoreProfileUpdatedNotification':

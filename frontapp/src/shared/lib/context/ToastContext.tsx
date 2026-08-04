@@ -87,7 +87,7 @@ const BaseToastItem = ({ toast, onClose }: { toast: Toast, onClose: () => void }
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
                     Sistema Operativo
                 </p>
-                <p className="text-[11px] font-black text-gray-800 leading-tight">
+                <p className="text-[11px] font-black text-gray-800 leading-tight line-clamp-3">
                     {toast.message}
                 </p>
             </div>

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import AdminModal from '@/components/admin/AdminModal';
+import { LyriumSelect } from '@/components/ui';
 import type { PlanData, PlanFeature, DetailedBenefit } from '@/features/seller/plans/types';
 
 interface Props {
@@ -210,16 +211,22 @@ export default function PlanEditorModal({ open, title, activeTab, editingPlan: e
                   onChange={e => onUpdatePlan({ bgImage: e.target.value })} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2.5">
                   <div className="flex items-center gap-2">
-                    <label htmlFor="plan-bg-fit" className="text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap">Ajuste:</label>
-                    <select id="plan-bg-fit" className="flex-1 px-2.5 py-1.5 border border-[var(--border-subtle)] rounded-md text-xs font-semibold text-[var(--text-primary)] cursor-pointer" value={p.bgImageFit ?? 'cover'} onChange={e => onUpdatePlan({ bgImageFit: e.target.value as 'cover'|'contain' })}>
-                      {FIT_OPTIONS.map(([v,l]) => <option key={v} value={v}>{l}</option>)}
-                    </select>
+                    <label className="text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap">Ajuste:</label>
+                    <LyriumSelect
+                      className="flex-1"
+                      value={p.bgImageFit ?? 'cover'}
+                      onChange={(v) => onUpdatePlan({ bgImageFit: v as 'cover'|'contain' })}
+                      options={FIT_OPTIONS.map(([v, l]) => ({ value: v, label: l }))}
+                    />
                   </div>
                   <div className="flex items-center gap-2">
-                    <label htmlFor="plan-bg-position" className="text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap">Posición:</label>
-                    <select id="plan-bg-position" className="flex-1 px-2.5 py-1.5 border border-[var(--border-subtle)] rounded-md text-xs font-semibold text-[var(--text-primary)] cursor-pointer" value={p.bgImagePosition ?? 'center'} onChange={e => onUpdatePlan({ bgImagePosition: e.target.value })}>
-                      {POS_OPTIONS.map(([v,l]) => <option key={v} value={v}>{l}</option>)}
-                    </select>
+                    <label className="text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap">Posición:</label>
+                    <LyriumSelect
+                      className="flex-1"
+                      value={p.bgImagePosition ?? 'center'}
+                      onChange={(v) => onUpdatePlan({ bgImagePosition: v })}
+                      options={POS_OPTIONS.map(([v, l]) => ({ value: v, label: l }))}
+                    />
                   </div>
                 </div>
                 <label className="flex items-center gap-2.5 p-2.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg cursor-pointer mt-2.5">

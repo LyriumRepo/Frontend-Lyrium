@@ -9,9 +9,13 @@ import { allowOnlyNumbers } from '@/shared/lib/utils/validation';
 import BaseLoading from '@/components/ui/BaseLoading';
 import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
+import { LyriumSelect } from '@/components/ui';
 import { useSellerProfile } from '@/features/seller/profile/hooks/useSellerProfile';
 import type { VendorProfileData } from '@/features/seller/profile/types';
 import { useToast } from '@/shared/lib/context/ToastContext';
+import { useAuth } from '@/shared/lib/context/AuthContext';
+import SellerProfileCompletionGuide from '@/features/seller/onboarding/SellerProfileCompletionGuide';
+import DigitalAgreementCard from '@/features/seller/profile/components/DigitalAgreementCard';
 
 interface ProfilePageClientProps {
     // TODO Tarea 3: Recibir datos iniciales del Server Component
@@ -62,6 +66,8 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
     const moduleConfig = sellerNavigation
         .flatMap(section => section.items)
         .find(item => item.id === 'mis-datos')!;
+
+    const { user } = useAuth();
 
     const {
         data: hookData,
@@ -133,10 +139,13 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
             if (!validateForm()) return;
             try {
                 await updateProfile(data);
+                // Solo salir de modo edición y avisar éxito si updateProfile
+                // realmente guardó (lanza si la validación de formato falla).
                 setIsEditMode(false);
                 setErrors({});
                 showToast('Cambios guardados correctamente.', 'success');
             } catch (err) {
+                // Se queda en modo edición: el guardado no ocurrió.
                 showToast(
                     err instanceof Error ? err.message : 'No se pudo guardar el perfil. Intenta nuevamente.',
                     'error',
@@ -170,19 +179,33 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
         });
     };
 
+    const handleSelectChange = (name: string) => (value: string) => {
+        handleInputChange({ target: { name, value } } as unknown as React.ChangeEvent<HTMLSelectElement>);
+    };
+
     const handlePhotoClick = () => {
         if (isEditMode && fileInputRef.current) fileInputRef.current.click();
     };
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                if (ev.target?.result && data) setData({ ...data, rep_legal_foto: ev.target.result as string });
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            showToast('El archivo debe ser una imagen.', 'error');
+            return;
         }
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('La imagen no debe superar 5MB.', 'error');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            if (ev.target?.result && data) {
+                setPhotoError(false);
+                setData({ ...data, rep_legal_foto: ev.target.result as string });
+            }
+        };
+        reader.readAsDataURL(file);
     };
 
     const fieldCls = `w-full text-sm font-black text-gray-800 dark:text-[var(--text-primary)] bg-transparent p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 transition-all`;
@@ -201,7 +224,9 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
             isLoading={isSaving}
             variant="action"
             leftIcon={isEditMode ? "Save" : "Edit3"}
-            size="md"
+            size="lg"
+            fullWidth
+            className="sm:w-auto"
         >
             {isEditMode ? "Guardar Cambios" : "Editar Información"}
         </BaseButton>
@@ -219,13 +244,31 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
     return (
         <div className="space-y-4 sm:space-y-6 animate-fadeIn">
 
+            {user && <SellerProfileCompletionGuide userId={user.id} profile={data} />}
+
             <ModuleHeader
                 title={moduleConfig.label}
                 subtitle={moduleConfig.description || ''}
                 icon={moduleConfig.icon || 'User'}
             />
 
-            <div className="flex justify-center sm:justify-end">
+            {data.profileRequest?.status === 'pending' && (
+                <div className="flex items-center gap-3 p-4 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800/30 rounded-2xl text-sm text-sky-700 dark:text-sky-400">
+                    <Icon name="Clock" className="w-5 h-5 flex-shrink-0" />
+                    Tienes una solicitud de cambio de datos críticos en revisión. Te avisaremos cuando el admin la resuelva.
+                </div>
+            )}
+            {data.profileRequest?.status === 'rejected' && (
+                <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-2xl text-sm text-amber-700 dark:text-amber-400">
+                    <Icon name="AlertTriangle" className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <span>
+                        Tu última solicitud de cambio de datos críticos fue rechazada
+                        {data.profileRequest.admin_notes ? `: ${data.profileRequest.admin_notes}` : '.'}
+                    </span>
+                </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mx-auto md:mx-0 md:ml-auto sm:justify-end">
                 {editBtn}
             </div>
 
@@ -240,7 +283,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                                 <Icon name="Building2" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
                             <div className="min-w-0">
-                                <h3 className="text-base sm:text-xl font-black tracking-tight leading-none text-white truncate">
+                                <h3 className="text-base sm:text-xl font-bold md:font-black tracking-tight leading-none text-white truncate">
                                     Datos Empresariales
                                 </h3>
                                 <div className="flex flex-wrap items-center gap-1.5 mt-1">
@@ -362,21 +405,22 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                             </div>
 
                             <div className="space-y-1">
-                                <label htmlFor="tax_condition" className="text-xs font-black text-gray-400 dark:text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    Condición Tributaria
-                                </label>
-                                <select id="tax_condition" name="tax_condition" disabled={!isEditMode}
-                                    value={data.tax_condition} onChange={handleInputChange}
-                                    className={`${fieldCls} cursor-pointer ${isEditMode ? EDIT_FIELD_CLASSES : READONLY_FIELD_CLASSES}`}>
-                                    <option value="">Seleccionar...</option>
-                                    <option value="Régimen General">Régimen General</option>
-                                    <option value="Régimen MYPE Tributario">Régimen MYPE Tributario</option>
-                                    <option value="Régimen Especial de Renta">Régimen Especial de Renta (RER)</option>
-                                    <option value="Nuevo RUS">Nuevo RUS</option>
-                                    <option value="Agente de Retención">Agente de Retención</option>
-                                    <option value="Agente de Percepción">Agente de Percepción</option>
-                                    <option value="Buen Contribuyente">Buen Contribuyente</option>
-                                </select>
+                                <LyriumSelect
+                                    label="Condición Tributaria"
+                                    value={data.tax_condition}
+                                    onChange={handleSelectChange('tax_condition')}
+                                    disabled={!isEditMode}
+                                    options={[
+                                        { value: '', label: 'Seleccionar...' },
+                                        { value: 'Régimen General', label: 'Régimen General' },
+                                        { value: 'Régimen MYPE Tributario', label: 'Régimen MYPE Tributario' },
+                                        { value: 'Régimen Especial de Renta', label: 'Régimen Especial de Renta (RER)' },
+                                        { value: 'Nuevo RUS', label: 'Nuevo RUS' },
+                                        { value: 'Agente de Retención', label: 'Agente de Retención' },
+                                        { value: 'Agente de Percepción', label: 'Agente de Percepción' },
+                                        { value: 'Buen Contribuyente', label: 'Buen Contribuyente' }
+                                    ]}
+                                />
                             </div>
                         </div>
 
@@ -442,7 +486,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                                 <Icon name="UserCog" className="w-5 h-5 text-white" />
                             </div>
                             <div className="min-w-0">
-                                <h3 className="text-base sm:text-lg font-black tracking-tight leading-none text-white truncate">Admin del Panel</h3>
+                                <h3 className="text-base sm:text-lg font-bold md:font-black tracking-tight leading-none text-white truncate">Admin del Panel</h3>
                                 <p className="text-[10px] font-black text-white/70 uppercase tracking-widest mt-1 whitespace-nowrap truncate">Contacto Directo</p>
                             </div>
                         </div>
@@ -544,7 +588,7 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                                 <Icon name="Receipt" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
                             <div>
-                                <h3 className="text-base sm:text-xl font-black tracking-tight leading-none text-white">Finanzas</h3>
+                                <h3 className="text-base sm:text-xl font-bold md:font-black tracking-tight leading-none text-white">Finanzas</h3>
                                 <p className="text-[10px] sm:text-xs font-black text-white/70 uppercase tracking-widest mt-1">
                                     Facturación y Cuentas
                                 </p>
@@ -638,6 +682,9 @@ export function ProfilePageClient(_props: ProfilePageClientProps) {
                         </div>
                     </div>
                 </div>
+
+                {/* ── 4. CONVENIO DIGITAL ── */}
+                <DigitalAgreementCard />
 
             </form>
         </div>

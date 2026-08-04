@@ -167,6 +167,9 @@
   --celeste-500: #69BEEB;
   --azulCeleste-100: #D0E8F8;
   --azulCeleste-500: #5AAFE6;
+
+  /* Acento de candado/bloqueo por plan: celeste de alto contraste en modo día */
+  --plan-lock-accent: var(--brand-sky-active);
 }
 
 /* ========================================================================== */
@@ -237,6 +240,9 @@
   --verde-500: var(--brand-green);
   --turquesa-100: rgba(143, 195, 161, 0.15);
   --verde-100: rgba(42, 90, 77, 0.2);
+
+  /* Acento de candado/bloqueo por plan: verde fluorescente en modo noche */
+  --plan-lock-accent: var(--lima-500);
 
   /* Gradiante en los paneles */
   --brand-gradient-1: var(--brand-green);

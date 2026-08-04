@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Supplier } from '@/features/admin/operations/types/operations';
+import { LyriumSelect } from '@/components/ui';
 
 type ProviderType = 'Economista' | 'Contador' | 'Ingeniero';
 
@@ -50,8 +51,6 @@ function getDynamicFields(type: ProviderType) {
 
 const inputCls =
   'text-[13px] border border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-[var(--bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--border-focus)] w-full';
-const selectCls =
-  'text-[13px] border border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-[var(--bg-card)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] w-full';
 const labelCls = 'block text-[11px] font-medium text-[var(--text-secondary)] mb-1';
 
 // ─── ProviderModal ────────────────────────────────────────────────────────────
@@ -107,16 +106,16 @@ export const ProviderModal: React.FC<{
           />
         </div>
         <div>
-          <label className={labelCls}>Perfil operativo</label>
-          <select
+          <LyriumSelect
+            label="Perfil operativo"
             value={formData.tipo ?? 'Economista'}
-            onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-            className={selectCls}
-          >
-            <option value="Economista">Economista</option>
-            <option value="Contador">Contador</option>
-            <option value="Ingeniero">Ingeniero</option>
-          </select>
+            onChange={(v) => setFormData({ ...formData, tipo: v })}
+            options={[
+              { value: 'Economista', label: 'Economista' },
+              { value: 'Contador', label: 'Contador' },
+              { value: 'Ingeniero', label: 'Ingeniero' }
+            ]}
+          />
         </div>
       </div>
 
@@ -156,22 +155,22 @@ export const ProviderModal: React.FC<{
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelCls}>Estado de vínculo</label>
-          <select
+          <LyriumSelect
+            label="Estado de vínculo"
             value={formData.estado ?? 'Activo'}
-            onChange={(e) =>
+            onChange={(v) =>
               setFormData({
                 ...formData,
-                estado: e.target.value as Supplier['estado'],
+                estado: v as Supplier['estado'],
               })
             }
-            className={selectCls}
-          >
-            <option value="Activo">Activo</option>
-            <option value="En Pausa">En pausa</option>
-            <option value="Suspendido">Suspendido</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
+            options={[
+              { value: 'Activo', label: 'Activo' },
+              { value: 'En Pausa', label: 'En pausa' },
+              { value: 'Suspendido', label: 'Suspendido' },
+              { value: 'Inactivo', label: 'Inactivo' }
+            ]}
+          />
         </div>
         <div>
           <label className={labelCls}>Fecha de renovación</label>

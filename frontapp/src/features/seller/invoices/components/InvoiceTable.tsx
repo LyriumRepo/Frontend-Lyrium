@@ -73,7 +73,7 @@ function MobileInvoiceCard({ voucher: v, onViewDetail }: MobileInvoiceCardProps)
 
                 {/* Serie-número + tipo */}
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-[var(--text-primary)] font-mono tracking-tight leading-tight">
+                    <p className="text-sm font-bold md:font-black text-[var(--text-primary)] font-mono tracking-tight leading-tight">
                         {v.series}-{v.number}
                     </p>
                     <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded-md inline-block mt-0.5">
@@ -94,7 +94,7 @@ function MobileInvoiceCard({ voucher: v, onViewDetail }: MobileInvoiceCardProps)
                         variant="large"
                         customClass="gap-1.5 rounded-xl font-black text-[10px]"
                     />
-                    <span className="text-sm font-black text-[var(--text-primary)]">
+                    <span className="text-sm font-bold md:font-black text-[var(--text-primary)]">
                         S/ {monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
                     </span>
                 </div>
@@ -112,30 +112,30 @@ function MobileInvoiceCard({ voucher: v, onViewDetail }: MobileInvoiceCardProps)
                     {/* Tienda */}
                     <div className="flex items-start justify-between gap-3">
                         <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] pt-0.5 flex-shrink-0">Tienda</span>
-                        <div className="text-right">
-                            <p className="text-xs font-bold text-[var(--text-primary)] leading-tight">{v.store_name}</p>
+                        <div className="text-right min-w-0">
+                            <p className="text-xs font-bold text-[var(--text-primary)] leading-tight break-words">{v.store_name}</p>
                             <p className="text-[10px] font-black text-[var(--text-secondary)] font-mono">{v.store_ruc}</p>
                         </div>
                     </div>
 
-                    {/* Pedido + Fecha en fila */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Pedido</p>
-                            <span className="text-[10px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-100 inline-block">
-                                {v.order_id}
-                            </span>
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Emisión</p>
-                            <p className="text-[10px] font-bold text-[var(--text-secondary)]">{formatDate(v.emission_date)}</p>
-                        </div>
+                    {/* Pedido */}
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Pedido</span>
+                        <span className="text-[10px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-100 inline-block">
+                            {v.order_id}
+                        </span>
+                    </div>
+
+                    {/* Emisión */}
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Emisión</span>
+                        <span className="text-[10px] font-bold text-[var(--text-secondary)]">{formatDate(v.emission_date)}</span>
                     </div>
 
                     {/* Monto */}
                     <div className="flex items-center justify-between">
                         <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Monto</span>
-                        <span className="text-sm font-black text-[var(--text-primary)]">
+                        <span className="text-sm font-bold md:font-black text-[var(--text-primary)]">
                             S/ {monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
                         </span>
                     </div>

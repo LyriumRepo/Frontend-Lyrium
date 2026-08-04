@@ -109,7 +109,7 @@ export default function AdminPlanInvoiceDrawer({ invoice, isOpen, onClose }: Pro
                 </div>
 
                 {/* Scrollable body */}
-                <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-5 green-scrollbar">
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-6 space-y-5 green-scrollbar">
 
                     {/* Store chip */}
                     <div className="inline-flex items-center gap-2 bg-teal-50 border border-teal-100 text-teal-700 rounded-full px-4 py-2 text-sm font-semibold dark:bg-teal-900/20 dark:border-teal-800 dark:text-teal-300">
@@ -146,6 +146,10 @@ export default function AdminPlanInvoiceDrawer({ invoice, isOpen, onClose }: Pro
                                     <p className="text-sm font-bold text-[var(--text-primary)]">
                                         {invoice.months > 0 ? `${invoice.months} ${invoice.months === 1 ? 'mes' : 'meses'}` : '—'}
                                     </p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Método de Pago</p>
+                                    <p className="text-sm font-bold text-[var(--text-primary)]">{invoice.payment_method}</p>
                                 </div>
                             </div>
                         </div>

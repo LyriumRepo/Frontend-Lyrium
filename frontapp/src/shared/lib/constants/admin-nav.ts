@@ -80,17 +80,19 @@ export const adminNavigation: PanelNavigation = [
             },
         ],
     },
-    {
-        title: 'Reportes',
-        items: [
-            {
-                id: 'reportes',
-                label: 'Centro de Reportes',
-                href: '/admin/reportes',
-                icon: 'BarChart3',
-            },
-        ],
-    },
+    // Oculto temporalmente a pedido del usuario (2026-07-26). Para restaurar,
+    // descomentar este bloque.
+    // {
+    //     title: 'Reportes',
+    //     items: [
+    //         {
+    //             id: 'reportes',
+    //             label: 'Centro de Reportes',
+    //             href: '/admin/reportes',
+    //             icon: 'BarChart3',
+    //         },
+    //     ],
+    // },
     {
         title: 'Gestión',
         items: [

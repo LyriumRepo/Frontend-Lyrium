@@ -43,6 +43,10 @@ export class WPProductRepository implements IProductRepository {
         throw new Error('TODO Tarea 3: Conectar endpoint real');
     }
 
+    async toggleProductVisibility(id: string, visible: boolean): Promise<Product> {
+        throw new Error('TODO Tarea 3: Conectar endpoint real');
+    }
+
     async uploadProductImage(productId: string, file: File): Promise<{ url: string }> {
         throw new Error('Not implemented for WooCommerce');
     }

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Icon from '@/components/ui/Icon';
+import { LyriumSelect } from '@/components/ui';
 import { InventoryFilters } from '../types';
 
 const STATUS_OPTIONS: { value: InventoryFilters['status']; label: string }[] = [
@@ -12,16 +13,25 @@ const STATUS_OPTIONS: { value: InventoryFilters['status']; label: string }[] = [
     { value: 'out',      label: 'Agotado'    },
 ];
 
+const APPROVAL_STATUS_OPTIONS: { value: InventoryFilters['approvalStatus']; label: string }[] = [
+    { value: 'all',            label: 'Todos'      },
+    { value: 'approved',       label: 'Aprobado'   },
+    { value: 'pending_review', label: 'Pendiente'  },
+    { value: 'rejected',       label: 'Rechazado'  },
+    { value: 'inactive',       label: 'Inactivo'   },
+];
+
 interface Props {
     filters: InventoryFilters;
     categories: string[];
     onSearch: (v: string) => void;
     onStatus: (v: InventoryFilters['status']) => void;
     onCategory: (v: string) => void;
+    onApprovalStatus: (v: InventoryFilters['approvalStatus']) => void;
     actions?: React.ReactNode;
 }
 
-export function InventoryFiltersBar({ filters, categories, onSearch, onStatus, onCategory, actions }: Props) {
+export function InventoryFiltersBar({ filters, categories, onSearch, onStatus, onCategory, onApprovalStatus, actions }: Props) {
     return (
         <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)] animate-fadeIn">
 
@@ -41,7 +51,7 @@ export function InventoryFiltersBar({ filters, categories, onSearch, onStatus, o
                     </div>
                 </div>
                 <button
-                    onClick={() => { onSearch(''); onStatus('all'); onCategory('all'); }}
+                    onClick={() => { onSearch(''); onStatus('all'); onCategory('all'); onApprovalStatus('all'); }}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-sky-500/25 dark:shadow-emerald-900/25 hover:shadow-xl hover:-translate-y-0.5 transition-all"
                     title="Limpiar Filtros"
                 >
@@ -64,8 +74,8 @@ export function InventoryFiltersBar({ filters, categories, onSearch, onStatus, o
                 </div>
             </div>
 
-            {/* Status + Categoría + Acciones */}
-            <div className={`grid grid-cols-1 sm:grid-cols-2 ${actions ? 'xl:grid-cols-3' : ''} gap-4`}>
+            {/* Status + Aprobación + Categoría + Acciones */}
+            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${actions ? 'xl:grid-cols-4' : ''} gap-4`}>
                 <div className="space-y-2">
                     <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Estado de Stock</label>
                     <div className="brand-scrollbar flex items-center gap-0.5 sm:gap-1 bg-[var(--bg-secondary)] rounded-xl p-1 border border-[var(--border-subtle)] overflow-x-auto pb-2">
@@ -84,27 +94,41 @@ export function InventoryFiltersBar({ filters, categories, onSearch, onStatus, o
                         ))}
                     </div>
                 </div>
+
                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Categoría</label>
-                    <div className="relative">
-                        <select
-                            value={filters.category}
-                            onChange={(e) => onCategory(e.target.value)}
-                            className="appearance-none w-full p-3 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--icons-green)]/20 cursor-pointer outline-none"
-                        >
-                            {categories.map((cat) => (
-                                <option key={cat} value={cat}>
-                                    {cat === 'all' ? 'Todas las categorías' : cat}
-                                </option>
-                            ))}
-                        </select>
-                        <Icon name="ChevronDown" className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)] pointer-events-none" />
+                    <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Estado de Aprobación</label>
+                    <div className="brand-scrollbar flex items-center gap-0.5 sm:gap-1 bg-[var(--bg-secondary)] rounded-xl p-1 border border-[var(--border-subtle)] overflow-x-auto pb-2">
+                        {APPROVAL_STATUS_OPTIONS.map(({ value, label }) => (
+                            <button
+                                key={value}
+                                onClick={() => onApprovalStatus(value)}
+                                className={`shrink-0 px-2 sm:px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                                    filters.approvalStatus === value
+                                        ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]'
+                                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
                     </div>
+                </div>
+
+                <div className="space-y-2">
+                    <LyriumSelect
+                        label="Categoría"
+                        value={filters.category}
+                        onChange={(v) => onCategory(v)}
+                        options={categories.map((cat) => ({
+                            value: cat,
+                            label: cat === 'all' ? 'Todas las categorías' : cat
+                        }))}
+                    />
                 </div>
 
                 {/* Acciones (Alertas, Excel, PDF) */}
                 {actions && (
-                    <div className="space-y-2 sm:col-span-2 xl:col-span-1">
+                    <div className="space-y-2 sm:col-span-2 lg:col-span-3 xl:col-span-1">
                         <label className="hidden xl:block text-[10px] font-black text-transparent uppercase tracking-widest ml-1 select-none">.</label>
                         <div className="flex flex-wrap items-center justify-center xl:justify-end gap-3">
                             {actions}

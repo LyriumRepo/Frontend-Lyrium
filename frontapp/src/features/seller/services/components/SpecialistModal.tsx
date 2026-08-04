@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
+import { LyriumSelect } from '@/components/ui';
 import {
   Specialist,
   AvailabilityStatus,
@@ -426,26 +427,20 @@ export default function SpecialistModal({
 
             {/* L1 */}
             <div className="space-y-1">
-              <select
+              <LyriumSelect
                 value={catL1}
-                onChange={(e) => {
-                  const l1 = e.target.value;
-                  setCatL1(l1);
+                onChange={(v) => {
+                  setCatL1(v);
                   setCatL2('');
-                  set('categoria', l1);
+                  set('categoria', v);
                   setErrors((p) => ({ ...p, categoria: undefined }));
                 }}
-                className={inputCls(!!errors.categoria)}
-              >
-                <option value="" disabled>
-                  1. Categoría principal...
-                </option>
-                {SPECIALIST_CATEGORY_TREE.map((c) => (
-                  <option key={c.label} value={c.label}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+                placeholder="1. Categoría principal..."
+                options={SPECIALIST_CATEGORY_TREE.map((c) => ({
+                  value: c.label,
+                  label: c.label
+                }))}
+              />
               {errors.categoria && (
                 <p className="text-[10px] text-rose-500 font-semibold">
                   {errors.categoria}
@@ -461,25 +456,19 @@ export default function SpecialistModal({
                 );
                 return l1Node ? (
                   <div className="pl-3 border-l-2 border-sky-500/20 dark:border-[#8FC3A1]/20">
-                    <select
+                    <LyriumSelect
                       value={catL2}
-                      onChange={(e) => {
-                        const l2 = e.target.value;
-                        setCatL2(l2);
-                        set('categoria', l2 ? `${catL1} > ${l2}` : catL1);
+                      onChange={(v) => {
+                        setCatL2(v);
+                        set('categoria', v ? `${catL1} > ${v}` : catL1);
                         setErrors((p) => ({ ...p, categoria: undefined }));
                       }}
-                      className={inputCls(false)}
-                    >
-                      <option value="" disabled>
-                        2. Subcategoría...
-                      </option>
-                      {l1Node.children.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </select>
+                      placeholder="2. Subcategoría..."
+                      options={l1Node.children.map((c) => ({
+                        value: c,
+                        label: c
+                      }))}
+                    />
                   </div>
                 ) : null;
               })()}
@@ -515,25 +504,20 @@ export default function SpecialistModal({
                 className={inputCls(false)}
               />
             </Field>
-            <Field label="Años de experiencia (opci..)">
-              <select
-                value={form.aniosExperiencia ?? ''}
-                onChange={(e) =>
-                  set(
-                    'aniosExperiencia',
-                    e.target.value ? Number(e.target.value) : undefined,
-                  )
-                }
-                className={inputCls(false)}
-              >
-                <option value="">—</option>
-                {EXPERIENCIA_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <div>
+              <LyriumSelect
+                label="Años de experiencia (opci.)"
+                value={form.aniosExperiencia != null ? String(form.aniosExperiencia) : ''}
+                onChange={(v) => set('aniosExperiencia', v ? Number(v) : undefined)}
+                options={[
+                  { value: '', label: '—' },
+                  ...EXPERIENCIA_OPTIONS.map((opt) => ({
+                    value: String(opt.value),
+                    label: opt.label
+                  }))
+                ]}
+              />
+            </div>
           </div>
 
           {/* Disponibilidad */}

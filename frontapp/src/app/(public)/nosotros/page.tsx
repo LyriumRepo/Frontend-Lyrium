@@ -1,25 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Image from 'next/image';
-import { motion, type Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Icon from '@/components/ui/Icon';
 import { aboutData } from '@/features/public/nosotros/data/aboutData';
-
-const fadeUp: Variants = {
-    hidden: { opacity: 0, y: 28 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
-};
-
-const staggerContainer: Variants = {
-    hidden: {},
-    show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
-};
-
-const cardItem: Variants = {
-    hidden: { opacity: 0, y: 24, scale: 0.97 },
-    show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
-};
+import { useScrollParallax, useScrollReveal, useScrollProgressLine } from '@/shared/hooks/useGsapScroll';
+import { fadeUp, staggerContainer, cardItem, wordUp } from '@/shared/lib/motion/variants';
 
 export default function AboutPage() {
     const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -32,39 +19,56 @@ export default function AboutPage() {
         });
     };
 
+    const heroRef = useRef<HTMLElement>(null);
+    const orb1Ref = useRef<HTMLDivElement>(null);
+    const orb2Ref = useRef<HTMLDivElement>(null);
+    const aboutImageRef = useRef<HTMLDivElement>(null);
+    const acrosticLineRef = useRef<HTMLDivElement>(null);
+    const acrosticSectionRef = useRef<HTMLElement>(null);
+
+    // Scroll-linked choreography via the shared GSAP hooks (src/shared/hooks/useGsapScroll.ts):
+    // hero parallax, image reveal, and timeline-growth lines. Each hook is self-cleaning and
+    // reduced-motion-gated — no local gsap.context() bookkeeping needed here.
+    useScrollParallax(orb1Ref, { yPercent: -30, xPercent: 10 }, { trigger: heroRef, start: 'top top', end: 'bottom top', scrub: 0.6 });
+    useScrollParallax(orb2Ref, { yPercent: 24, xPercent: -8 }, { trigger: heroRef, start: 'top top', end: 'bottom top', scrub: 0.6 });
+    useScrollReveal(aboutImageRef, { from: 'inset(0 0 100% 0 round 2.5rem)', to: 'inset(0 0 0% 0 round 2.5rem)' });
+    useScrollProgressLine(acrosticLineRef, { trigger: acrosticSectionRef, start: 'top 65%', end: 'bottom 75%' });
+
     return (
         <main className="min-h-screen bg-[#f8f9fa] dark:bg-[var(--bg-primary)] overflow-hidden">
 
             {/* ── Hero ── */}
-            <section className="relative min-h-[560px] md:min-h-[640px] flex items-center overflow-hidden">
+            <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden">
                 <div
-                    className="absolute inset-0 bg-cover bg-center bg-fixed scale-105"
+                    className="absolute inset-0 bg-cover bg-center bg-fixed"
                     style={{ backgroundImage: `url('/${aboutData.hero.bgImage1}')` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-black/70 dark:from-black/80 dark:via-black/55 dark:to-[var(--bg-primary)]" />
                 <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/20 via-transparent to-cyan-300/10 dark:from-[var(--brand-green)]/30 dark:to-transparent" />
 
-                {/* Orbes decorativos */}
+                {/* Orbes decorativos — flotan ambientalmente y además responden al scroll */}
                 <motion.div
+                    ref={orb1Ref}
                     aria-hidden
-                    className="absolute -top-20 -left-10 w-72 h-72 rounded-full bg-sky-400/25 dark:bg-[var(--icons-green)]/15 blur-[90px] pointer-events-none"
+                    className="absolute -top-20 -left-10 w-72 h-72 rounded-full bg-sky-400/25 dark:bg-[var(--icons-green)]/15 blur-[90px] pointer-events-none will-change-transform"
                     animate={{ y: [0, 22, 0] }}
                     transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
                 />
                 <motion.div
+                    ref={orb2Ref}
                     aria-hidden
-                    className="absolute -bottom-24 -right-16 w-96 h-96 rounded-full bg-cyan-300/20 dark:bg-[var(--brand-green)]/25 blur-[100px] pointer-events-none"
+                    className="absolute -bottom-24 -right-16 w-96 h-96 rounded-full bg-cyan-300/20 dark:bg-[var(--brand-green)]/25 blur-[100px] pointer-events-none will-change-transform"
                     animate={{ y: [0, -26, 0] }}
                     transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
                 />
 
-                <div className="relative z-10 px-6 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-center py-16">
+                <div className="relative z-10 px-6 max-w-7xl mx-auto w-full flex flex-col items-center text-center py-16">
 
                     <motion.div
                         initial="hidden"
                         animate="show"
                         variants={staggerContainer}
-                        className="text-center lg:text-left"
+                        className="text-center"
                     >
                         <motion.p
                             variants={fadeUp}
@@ -75,21 +79,30 @@ export default function AboutPage() {
                         </motion.p>
 
                         <motion.h1
-                            variants={fadeUp}
-                            className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.02] tracking-tighter drop-shadow-2xl"
+                            className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.02] tracking-tighter drop-shadow-2xl flex flex-wrap items-center justify-center gap-x-4"
+                            style={{ perspective: 800 }}
                         >
-                            {aboutData.hero.title}
+                            {aboutData.hero.title.split(' ').map((word, i) => (
+                                <motion.span key={`${word}-${i}`} variants={wordUp} className="inline-block">
+                                    {word}
+                                </motion.span>
+                            ))}
                         </motion.h1>
 
                         <motion.p
                             variants={fadeUp}
-                            className="mt-5 text-base md:text-xl text-white/85 font-semibold max-w-xl mx-auto lg:mx-0 tracking-tight"
+                            className="mt-5 text-base md:text-xl text-white/85 font-semibold max-w-xl mx-auto tracking-tight"
                         >
                             {aboutData.hero.subtitle}
                         </motion.p>
 
-                        <motion.div variants={fadeUp} className="mt-9 flex items-center justify-center lg:justify-start gap-4">
-                            <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden ring-4 ring-white/30 shadow-[0_0_24px_rgba(56,189,248,0.45)] dark:shadow-[0_0_24px_rgba(143,195,161,0.4)]">
+                        <motion.div variants={fadeUp} className="mt-9 flex items-center justify-center gap-4">
+                            <motion.div
+                                whileHover={{ rotateY: 18, rotateX: -8, scale: 1.06 }}
+                                transition={{ type: 'spring', stiffness: 220, damping: 16 }}
+                                style={{ perspective: 600 }}
+                                className="relative w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden ring-4 ring-white/30 shadow-[0_0_24px_rgba(56,189,248,0.45)] dark:shadow-[0_0_24px_rgba(143,195,161,0.4)]"
+                            >
                                 <Image
                                     src="/img/nosotros/organic-1024x1024.avif"
                                     alt="Lyrium BioMarketplace — bienestar natural"
@@ -97,38 +110,12 @@ export default function AboutPage() {
                                     sizes="64px"
                                     className="object-cover"
                                 />
-                            </div>
+                            </motion.div>
                             <div className="h-8 w-px bg-white/25" />
                             <p className="text-white/75 text-xs md:text-sm font-semibold uppercase tracking-widest text-left">
                                 Bio comunidad<br className="hidden sm:block" /> certificada
                             </p>
                         </motion.div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.92, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                        className="hidden lg:flex justify-center"
-                    >
-                        <div className="relative group cursor-pointer">
-                            <div className="absolute -inset-1.5 bg-gradient-to-r from-sky-400 via-cyan-300 to-sky-500 dark:from-[var(--icons-green)] dark:via-[var(--brand-green)] dark:to-[var(--icons-green)] rounded-[2rem] opacity-40 group-hover:opacity-80 blur-xl transition-all duration-700" />
-
-                            <div className="relative bg-white/10 backdrop-blur-xl rounded-[1.5rem] p-2 border border-white/30 group-hover:border-white/50 dark:border-[var(--border-subtle)] dark:group-hover:border-[var(--icons-green)]/50 transition-colors duration-500 shadow-2xl">
-                                <Image
-                                    src={`/${aboutData.aboutSection.image}`}
-                                    alt="Lyrium BioMarketplace"
-                                    width={420}
-                                    height={320}
-                                    className="rounded-[1.25rem] object-cover w-full h-[280px] md:h-[320px] transform group-hover:scale-[1.03] transition-transform duration-700"
-                                />
-                                <div className="absolute bottom-5 left-5 right-5 p-3 bg-white/85 dark:bg-[var(--bg-secondary)]/85 backdrop-blur-md rounded-xl text-center shadow-lg border border-white/40 dark:border-[var(--border-subtle)]">
-                                    <p className="text-sky-600 dark:text-[var(--icons-green)] font-black text-xs uppercase tracking-widest">
-                                        Lyrium BioMarketplace
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
                     </motion.div>
 
                 </div>
@@ -197,13 +184,16 @@ export default function AboutPage() {
                         className="relative group"
                     >
                         <div className="absolute -inset-4 bg-sky-400/20 dark:bg-[var(--brand-green)]/60 rounded-[3rem] blur-2xl group-hover:bg-sky-400/30 dark:group-hover:bg-[var(--icons-green)]/30 transition-all duration-700" />
-                        <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white dark:border-[#111A15] aspect-[4/3]">
+                        <div
+                            ref={aboutImageRef}
+                            className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white dark:border-[#111A15] aspect-[4/3]"
+                        >
                             <Image
                                 src={`/${aboutData.aboutSection.image}`}
                                 alt="Lyrium BioMarketplace"
                                 fill
                                 sizes="(max-width: 768px) 100vw, 50vw"
-                                className="object-cover transform group-hover:scale-105 transition-transform duration-[2000ms]"
+                                className="object-cover object-[center_25%] transform group-hover:scale-105 transition-transform duration-[2000ms]"
                             />
                             <div className="absolute bottom-6 left-6 right-6 p-5 bg-white/90 dark:bg-[var(--bg-secondary)]/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/50 dark:border-[var(--border-subtle)]">
                                 <p className="text-sky-600 dark:text-[#6BAF7B] font-black uppercase text-xs tracking-widest mb-1">Especialistas en BioSalud</p>
@@ -240,8 +230,33 @@ export default function AboutPage() {
                             {aboutData.values.title}
                         </motion.h2>
                         <motion.div variants={fadeUp} className="h-1 w-16 bg-gradient-to-r from-sky-400 to-sky-600 dark:from-[var(--icons-green)] dark:to-[var(--brand-green)] rounded-full" />
+
+                        {/* Imagen decorativa — flota en loop continuo, en cualquier dispositivo */}
+                        <motion.div variants={fadeUp} className="relative mt-6">
+                            <motion.div
+                                aria-hidden
+                                animate={{ opacity: [0.35, 0.65, 0.35], scale: [1, 1.05, 1] }}
+                                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                                className="absolute -inset-3 -z-10 rounded-[2rem] bg-gradient-to-br from-sky-300/40 to-cyan-200/30 dark:from-[var(--icons-green)]/25 dark:to-transparent blur-2xl pointer-events-none"
+                            />
+                            <motion.div
+                                animate={{ y: [0, -10, 0] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                                className="relative rounded-3xl overflow-hidden shadow-xl border border-sky-100 dark:border-[var(--border-subtle)]"
+                            >
+                                <Image
+                                    src="/img/nosotros/Mucho.jpg"
+                                    alt="Equipo de salud Lyrium acompañando con cuidado a un paciente"
+                                    width={640}
+                                    height={480}
+                                    className="w-full h-44 sm:h-52 md:h-60 object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-slate-900/0 to-transparent" />
+                            </motion.div>
+                        </motion.div>
                     </motion.div>
 
+                    <div style={{ perspective: '1000px' }}>
                     <motion.div
                         initial="hidden"
                         whileInView="show"
@@ -253,6 +268,7 @@ export default function AboutPage() {
                             <motion.div
                                 key={val.title}
                                 variants={cardItem}
+                                whileHover={{ y: -4, rotateX: 3, rotateY: -2, scale: 1.01 }}
                                 className="group flex items-start gap-5 md:gap-6 p-6 md:p-7 rounded-2xl border border-slate-100 dark:border-[var(--border-subtle)] hover:border-sky-200 dark:hover:border-[var(--icons-green)]/40 hover:bg-[#f8f9fa] dark:hover:bg-[var(--bg-primary)]/60 transition-colors duration-300"
                             >
                                 <span className="shrink-0 pt-1 text-sm font-black text-sky-200 dark:text-[var(--icons-green)]/40 tabular-nums tracking-tight">
@@ -272,11 +288,12 @@ export default function AboutPage() {
                             </motion.div>
                         ))}
                     </motion.div>
+                    </div>
                 </div>
             </section>
 
             {/* ── Nuestra Relación Contigo · Acróstico LYRIUM ── */}
-            <section className="relative py-24 md:py-32 px-6 overflow-hidden bg-[#f8f9fa] dark:bg-[var(--bg-primary)]">
+            <section ref={acrosticSectionRef} className="relative py-24 md:py-32 px-6 overflow-hidden bg-[#f8f9fa] dark:bg-[var(--bg-primary)]">
                 <div className="relative max-w-6xl mx-auto">
                     <motion.div
                         initial="hidden"
@@ -325,18 +342,39 @@ export default function AboutPage() {
                                 </span>
                             ))}
                         </motion.div>
+
+                        {/* Pista didáctica — visible en cualquier dispositivo hasta que el usuario toque una letra */}
+                        {expanded.size === 0 && (
+                            <motion.p
+                                variants={fadeUp}
+                                animate={{ opacity: [0.5, 1, 0.5], y: [2, -2, 2] }}
+                                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                                className="flex items-center justify-center gap-1.5 text-xs font-bold text-sky-500 dark:text-[var(--icons-green)] pt-1"
+                            >
+                                <Icon name="MousePointerClick" className="w-3.5 h-3.5" />
+                                Toca cualquier letra para descubrirla
+                            </motion.p>
+                        )}
                     </motion.div>
 
                     {/* ── Lista vertical: una letra por fila ── */}
+                    <div style={{ perspective: '1000px' }}>
                     <motion.div
                         initial="hidden"
                         whileInView="show"
                         viewport={{ once: true, margin: '-60px' }}
                         variants={staggerContainer}
                         className="relative flex flex-col gap-4 md:gap-5"
+                        style={{ transformStyle: 'preserve-3d' }}
                     >
-                        {/* Línea conectora del timeline */}
-                        <div className="absolute left-8 md:left-10 top-2 bottom-2 w-px bg-gradient-to-b from-sky-200 via-sky-200 to-transparent dark:from-[var(--border-subtle)] dark:via-[var(--border-subtle)] pointer-events-none" />
+                        {/* Línea conectora del timeline — crece con el progreso real de scroll */}
+                        <div className="absolute left-8 md:left-10 top-2 bottom-2 w-px bg-sky-100 dark:bg-[var(--border-subtle)] pointer-events-none overflow-hidden">
+                            <div
+                                ref={acrosticLineRef}
+                                className="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-sky-400 via-sky-500 to-sky-300 dark:from-[var(--icons-green)] dark:via-[var(--brand-green)] dark:to-transparent"
+                                style={{ transform: 'scaleY(0)' }}
+                            />
+                        </div>
 
                         {aboutData.acrosticSection.items.map((item, idx) => {
                             const isOpen = expanded.has(item.letter);
@@ -355,7 +393,7 @@ export default function AboutPage() {
                                             toggleExpanded(item.letter);
                                         }
                                     }}
-                                    whileHover={{ y: -2 }}
+                                    whileHover={{ y: -4, rotateX: 3, rotateY: -1 }}
                                     className={`group relative flex items-center gap-4 sm:gap-5 md:gap-7 cursor-pointer select-none bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border transition-all duration-500 p-5 md:p-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 dark:focus-visible:ring-[var(--icons-green)] ${
                                         isOpen
                                             ? 'border-sky-400 dark:border-[var(--icons-green)] shadow-xl ring-1 ring-sky-100 dark:ring-[var(--icons-green)]/30'
@@ -368,6 +406,15 @@ export default function AboutPage() {
                                             isOpen ? 'scale-110 shadow-lg ring-4 ring-sky-200/60 dark:ring-[var(--icons-green)]/25' : 'group-hover:scale-105 group-hover:shadow-lg'
                                         }`}
                                     >
+                                        {/* Pulso continuo — invita a tocar en cualquier dispositivo, no solo hover */}
+                                        {!isOpen && (
+                                            <motion.span
+                                                aria-hidden
+                                                className="absolute inset-0 rounded-2xl ring-2 ring-sky-300 dark:ring-[var(--icons-green)]/70 pointer-events-none"
+                                                animate={{ opacity: [0.7, 0, 0.7], scale: [1, 1.22, 1] }}
+                                                transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut', delay: idx * 0.15 }}
+                                            />
+                                        )}
                                         <span className="text-2xl sm:text-3xl md:text-4xl font-black text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)] select-none">
                                             {item.letter}
                                         </span>
@@ -409,12 +456,13 @@ export default function AboutPage() {
                             );
                         })}
                     </motion.div>
+                    </div>
                 </div>
             </section>
 
             {/* ── Premium Icons: Orgánico · Natural · Bienestar · Saludable ── */}
             <section className="py-24 md:py-32 bg-white dark:bg-[var(--bg-secondary)] relative overflow-hidden">
-                <div className="max-w-7xl mx-auto px-6">
+                <div className="w-full px-4 md:px-10">
                     <motion.div
                         initial="hidden"
                         whileInView="show"
@@ -435,18 +483,25 @@ export default function AboutPage() {
                         whileInView="show"
                         viewport={{ once: true, margin: '-80px' }}
                         variants={staggerContainer}
-                        className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-16"
+                        className="grid grid-cols-2 xl:grid-cols-4 gap-8 md:gap-10 xl:gap-12"
                     >
-                        {aboutData.premiumIcons.map((icon) => (
+                        {aboutData.premiumIcons.map((icon, idx) => (
                             <motion.div
                                 key={icon.title}
                                 variants={cardItem}
                                 className="flex flex-col items-center text-center group"
                             >
-                                <div className="relative w-32 h-32 md:w-44 md:h-44 mb-8">
+                                <div className="relative w-36 h-36 md:w-44 md:h-44 xl:w-52 xl:h-52 mb-8">
+                                    {/* Anillo tipo "manecilla de reloj" — gira en loop continuo, siempre en movimiento */}
+                                    <motion.div
+                                        aria-hidden
+                                        className="absolute -inset-3 rounded-full bg-[conic-gradient(from_0deg,transparent_0%,rgba(14,165,233,0.35)_10%,transparent_22%)] dark:bg-[conic-gradient(from_0deg,transparent_0%,rgba(107,175,123,0.4)_10%,transparent_22%)] pointer-events-none"
+                                        animate={{ rotate: 360 }}
+                                        transition={{ duration: 7 + idx, repeat: Infinity, ease: 'linear' }}
+                                    />
                                     <div className="absolute -inset-2 border border-sky-100 dark:border-[var(--border-subtle)] rounded-full group-hover:border-sky-300 dark:group-hover:border-[var(--icons-green)]/50 transition-colors duration-500" />
 
-                                    <div className="relative w-full h-full bg-white dark:bg-[var(--bg-secondary)] rounded-full shadow-md flex items-center justify-center p-6 border border-sky-50 dark:border-[var(--border-subtle)] group-hover:shadow-xl group-hover:shadow-sky-500/10 dark:group-hover:shadow-black/30 transition-all duration-500 transform group-hover:-translate-y-2">
+                                    <div className="relative w-full h-full bg-white dark:bg-emerald-50 rounded-full shadow-md flex items-center justify-center p-6 border border-sky-50 dark:border-[var(--border-subtle)] group-hover:shadow-xl group-hover:shadow-sky-500/10 dark:group-hover:shadow-black/30 transition-all duration-500 transform group-hover:-translate-y-2">
                                         <Image
                                             src={`/${icon.image}`}
                                             alt={icon.title}

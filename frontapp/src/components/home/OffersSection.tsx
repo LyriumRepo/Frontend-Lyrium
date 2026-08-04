@@ -121,7 +121,7 @@ function OfferCard({
 
        <div className="py-1.5 px-2 sm:py-2.5 sm:px-3 w-full text-center flex flex-col items-center">
         <h3 className="text-[11px] min-[360px]:text-[12px] sm:text-[15px] font-bold truncate w-full text-slate-900 dark:text-white">{producto.titulo}</h3>
-        <p className="text-[12px] min-[360px]:text-[13px] sm:text-[17px] font-extrabold text-[var(--celeste-500)] dark:text-[var(--azulCeleste-500)]">S/ {producto.precio.toFixed(2)}</p>
+        <p className="text-[12px] min-[360px]:text-[13px] sm:text-[17px] font-extrabold text-slate-900 dark:text-white">S/ {producto.precio.toFixed(2)}</p>
         <div className="flex justify-center gap-0.5 mt-0.5 sm:mt-0.5">
           {Array.from({ length: 5 }).map((_, idx) => {
             const isFilled = idx < (producto.estrellas ? producto.estrellas.length : 5);

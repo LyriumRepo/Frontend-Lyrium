@@ -26,6 +26,7 @@ export const ITEM_STATUS_LABELS: Record<ItemStatus, string> = {
 export interface OrderItem {
     id: string;
     storeId: number;
+    storeName?: string;
     isOwn: boolean;
     name: string;
     qty: number;
@@ -92,6 +93,12 @@ export interface Order {
     sellerShipping?: number;
     sellerTotal?: number;
     isMultiStore?: boolean;
+    /** Resumen por tienda (incluye las demás tiendas del pedido) — solo presente cuando isMultiStore es true. */
+    storesSummary?: { storeId: number; storeName: string; isOwn: boolean; confirmed: boolean }[];
+    /** True si alguno de MIS items está en pending_seller (la espera es mía). */
+    needsMyAction?: boolean;
+    /** True si es multi-tienda y todos MIS items ya salieron de pending_seller (espero a otra tienda). */
+    waitingOnOtherStore?: boolean;
     statusLabel: string;
     fecha: string;
     updatedAt: string;

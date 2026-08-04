@@ -905,7 +905,7 @@ function RelatedProductCard({ rel }: { rel: LaravelProduct }) {
               alt={rel.images[0]?.alt ?? rel.name}
               fill
               sizes="288px"
-              className="object-contain p-6 group-hover:scale-110 transition-transform duration-500 ease-out"
+              className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
             />
             {rel.sticker && (
               <div className="absolute top-2 left-2">
@@ -1245,9 +1245,58 @@ export function ProductDetailPageClient({
       'success',
     );
   }, [isAuthenticated, isWishlisted, toggleWishlist, showToast]);
+
+  // Tamaño (px) del cuadrado de la galería, y si hay espacio real para partir
+  // en dos columnas (imagen + info de compra) o si hay que apilarlas.
+  //
+  // Antes esto se decidía con un breakpoint fijo de CSS (lg: 1024px de
+  // ventana), sin verificar si el contenedor realmente tenía espacio. La
+  // columna de compra ocupa hasta 420px + 32px de gap: si el contenedor no
+  // llega a los ~772px (imagen mínima decente + buy-box máximo + gap), forzar
+  // dos columnas exprime la imagen a un cuadrado diminuto — pasaba con
+  // ventanas angostas, zoom del navegador, o DevTools abierto, aunque la
+  // ventana completa fuera "de escritorio". Por eso ahora se mide el ancho
+  // real del contenedor y se decide apilar o partir en función de eso, no del
+  // ancho de la ventana.
   const [gallerySize, setGallerySize] = useState<number | null>(null);
+  const [twoColumnLayout, setTwoColumnLayout] = useState(false);
   const gridContainerRef = useRef<HTMLDivElement | null>(null);
   const buyBoxColRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const gridContainer = gridContainerRef.current;
+    const buyBoxCol = buyBoxColRef.current;
+    if (!gridContainer || !buyBoxCol) return;
+
+    const MIN_GALLERY_SIZE = 320;
+    const BUY_BOX_MAX_WIDTH = 420;
+    const GRID_GAP = 32;
+    const MIN_TWO_COLUMN_WIDTH = MIN_GALLERY_SIZE + BUY_BOX_MAX_WIDTH + GRID_GAP;
+
+    const recompute = () => {
+      const gridWidth = gridContainer.clientWidth;
+      const canFitTwoColumns = gridWidth >= MIN_TWO_COLUMN_WIDTH;
+      setTwoColumnLayout(canFitTwoColumns);
+
+      if (!canFitTwoColumns) {
+        setGallerySize(null);
+        return;
+      }
+
+      const buyBoxRect = buyBoxCol.getBoundingClientRect();
+      const availableWidth = gridWidth - buyBoxRect.width - GRID_GAP;
+      const buyBoxHeight = buyBoxRect.height;
+      const rawSize = Math.min(availableWidth, buyBoxHeight);
+      const size = Math.min(availableWidth, Math.max(rawSize, MIN_GALLERY_SIZE));
+      setGallerySize(size > 0 ? size : null);
+    };
+
+    recompute();
+    const observer = new ResizeObserver(recompute);
+    observer.observe(gridContainer);
+    observer.observe(buyBoxCol);
+    return () => observer.disconnect();
+  }, []);
 
   // Stock RT (Retiro en Tienda)
   const [rtStock, setRtStock] = useState<number | null>(null);
@@ -1272,31 +1321,6 @@ export function ProductDetailPageClient({
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const gridContainer = gridContainerRef.current;
-    const buyBoxCol = buyBoxColRef.current;
-    if (!gridContainer || !buyBoxCol) return;
-
-    const recompute = () => {
-      const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-      if (!isDesktop) {
-        setGallerySize(null);
-        return;
-      }
-      // 32px = gap-8 entre columnas; se mide el ancho real de la columna de compra
-      // en vez de asumir un valor fijo, para que siempre calce con el layout actual
-      const availableWidth = gridContainer.clientWidth - buyBoxCol.getBoundingClientRect().width - 32;
-      const size = Math.min(buyBoxCol.clientHeight, availableWidth);
-      setGallerySize(size > 0 ? size : null);
-    };
-
-    recompute();
-    const observer = new ResizeObserver(recompute);
-    observer.observe(gridContainer);
-    observer.observe(buyBoxCol);
-    return () => observer.disconnect();
-  }, []);
-
   const {
     addToCart,
     loading: cartLoading,
@@ -1310,7 +1334,7 @@ export function ProductDetailPageClient({
   const discount = discountPercent(product.price, product.regular_price);
 
   return (
-    <main className="max-w-7xl mx-auto px-4 py-6 space-y-10">
+    <main className="w-full max-w-7xl mx-auto px-4 py-6 space-y-10">
       {/* Navegación */}
       <Button
         variant="ghost"
@@ -1323,9 +1347,15 @@ export function ProductDetailPageClient({
       </Button>
 
       {/* ── NIVEL 1: Imagen + Info de compra ─────────────────────────────── */}
-      <div ref={gridContainerRef} className="grid lg:grid-cols-[1fr_minmax(360px,420px)] gap-8 items-stretch">
+      <div
+        ref={gridContainerRef}
+        className={cn(
+          'grid gap-8 items-stretch',
+          twoColumnLayout ? 'grid-cols-[1fr_minmax(360px,420px)]' : 'grid-cols-1',
+        )}
+      >
         {/* Columna izquierda: galería */}
-        <div className="sticky top-24 h-full flex flex-col justify-center">
+        <div className={cn('flex flex-col justify-start', twoColumnLayout && 'sticky top-24 h-full')}>
           <ProductGallery images={product.images} name={product.name} size={gallerySize} productId={product.id} storeLogo={product.store?.logo_marketplace} />
         </div>
 
@@ -1707,7 +1737,7 @@ function ProductGallery({
           alt={images[active]?.alt ?? name}
           fill
           sizes="(max-width:768px) 100vw, 50vw"
-          className="object-contain p-8 transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
           onMouseMove={(e: any) => {
             handlePointer(e.clientX, e.clientY);
             setZooming(true);

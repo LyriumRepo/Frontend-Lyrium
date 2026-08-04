@@ -98,6 +98,7 @@ export default function ServiceDetailModal({
     const serviceAppointments = appointments.filter((a) => a.serviceId === service.id);
 
     const active = isServiceActive(service);
+    const approved = !!service.reviewedAt;
     const scheduleSubtitle = buildScheduleSubtitle(service);
     const totalSessions = countTotalSessions(service.diasAtencion, service.duracion);
 
@@ -107,13 +108,20 @@ export default function ServiceDetailModal({
                 Cerrar
             </BaseButton>
             <BaseButton
-                onClick={() => { onEdit(service); onClose(); }}
-                variant="primary"
+                onClick={() => {
+                    if (approved) {
+                        onEdit(service);
+                        onClose();
+                    }
+                }}
+                variant={approved ? 'primary' : 'ghost'}
                 leftIcon="Pencil"
-                className="flex-[2] !rounded-2xl"
+                disabled={!approved}
+                title={approved ? undefined : 'Esperando aprobación del admin'}
+                className={`flex-[2] !rounded-2xl ${!approved ? 'opacity-50' : ''}`}
                 size="md"
             >
-                Editar Servicio
+                {approved ? 'Editar Servicio' : 'Esperando aprobación'}
             </BaseButton>
         </div>
     );

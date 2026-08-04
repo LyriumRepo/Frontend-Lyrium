@@ -40,7 +40,9 @@ export default function ServiceCardMobile({
   onPublish,
 }: ServiceCardMobileProps) {
   const isPublished = service.estado === 'publicado';
-  const publishable = canPublish(service);
+  const wasApproved = !!service.reviewedAt;
+  const canEdit = wasApproved;
+  const canTogglePublication = canPublish(service) && (wasApproved || isPublished);
 
   const assignedSpecialists = service.especialistasAsignados
     .map((id) => specialists.find((e) => e.id === id))
@@ -171,23 +173,34 @@ export default function ServiceCardMobile({
                 <Icon name="ArrowRight" className="w-3.5 h-3.5" />
               </button>
               <button
-                onClick={() => onEdit(service)}
-                title="Editar"
-                className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-sky-500/10 hover:text-sky-500 dark:hover:bg-[#8FC3A1]/10 dark:hover:text-[#8FC3A1] transition-colors"
+                onClick={() => canEdit && onEdit(service)}
+                title={canEdit ? 'Editar' : 'Esperando aprobación del admin'}
+                disabled={!canEdit}
+                className={`w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-secondary)] transition-colors ${
+                  canEdit
+                    ? 'hover:bg-sky-500/10 hover:text-sky-500 dark:hover:bg-[#8FC3A1]/10 dark:hover:text-[#8FC3A1]'
+                    : 'opacity-25 cursor-not-allowed'
+                }`}
               >
                 <Icon name="Pencil" className="w-3.5 h-3.5" />
               </button>
               <button
-                onClick={() => { if (publishable || isPublished) onPublish(service); }}
-                disabled={!publishable && !isPublished}
-                title={isPublished ? 'Despublicar' : publishable ? 'Publicar' : 'Asigna un especialista para publicar'}
+                onClick={() => { if (canTogglePublication) onPublish(service); }}
+                disabled={!canTogglePublication}
+                title={
+                  !canPublish(service)
+                    ? 'Asigna un especialista para publicar'
+                    : !wasApproved
+                      ? 'Esperando aprobación del admin'
+                      : !isPublished
+                        ? 'Re-publicar'
+                        : 'Despublicar'
+                }
                 className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors
                   ${
-                    isPublished
+                    canTogglePublication
                       ? 'text-sky-500 dark:text-[#8FC3A1] hover:bg-red-500/10 hover:text-red-400 dark:hover:text-red-400'
-                      : publishable
-                        ? 'text-gray-400 hover:bg-sky-500/10 hover:text-sky-500 dark:hover:text-[#8FC3A1]'
-                        : 'text-[var(--text-secondary)] opacity-25 cursor-not-allowed'
+                      : 'text-[var(--text-secondary)] opacity-25 cursor-not-allowed'
                   }`}
               >
                 <Icon name={isPublished ? 'EyeOff' : 'Eye'} className="w-3.5 h-3.5 stroke-2" />

@@ -6,6 +6,7 @@ export { default as BaseSkeleton } from './BaseSkeleton';
 export { default as Skeleton, SkeletonRow } from './Skeleton';
 export { default as BaseInputField } from './BaseInputField';
 export { default as BaseSelectField } from './BaseSelectField';
+export { default as LyriumSelect } from './LyriumSelect';
 export { default as BaseDatePicker } from './BaseDatePicker';
 export { default as BaseErrorState } from './BaseErrorState';
 export { default as BaseEmptyState } from './BaseEmptyState';

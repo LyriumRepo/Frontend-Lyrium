@@ -201,6 +201,7 @@ export interface AdminServiceItem {
   id: number;
   name: string;
   slug: string;
+  image: string | null;
   price: string;
   status: string;
   rejection_reason: string | null;

@@ -6,12 +6,11 @@ import {
   OperationalRole,
   AuditLog,
 } from '@/features/admin/operations/types/operations';
+import { LyriumSelect } from '@/components/ui';
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 const inputCls =
   'text-[13px] border border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-[var(--bg-input)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-sky)] dark:focus:border-[var(--brand-green)] w-full';
-const selectCls =
-  'text-[13px] border border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-sky)] dark:focus:border-[var(--brand-green)] w-full';
 const thCls =
   'text-left text-[11px] font-medium text-[var(--text-muted)] px-3 py-2.5 border-b border-[var(--border-subtle)]';
 const tdCls = 'px-3 py-2.5 text-[13px] text-[var(--text-secondary)]';
@@ -224,29 +223,31 @@ export const ProvidersTab: React.FC<{
           className={inputCls + ' pl-8'}
         />
       </div>
-      <select
-        value={filters.type ?? ''}
-        onChange={(e) => onFilterChange({ type: e.target.value || undefined })}
-        className={selectCls + ' w-auto'}
-      >
-        <option value="">Todas las especialidades</option>
-        <option value="Economista">Economista</option>
-        <option value="Contador">Contador</option>
-        <option value="Ingeniero">Ingeniero</option>
-      </select>
-      <select
-        value={filters.status ?? ''}
-        onChange={(e) =>
-          onFilterChange({ status: e.target.value || undefined })
-        }
-        className={selectCls + ' w-auto'}
-      >
-        <option value="">Todos los estados</option>
-        <option value="Activo">Activo</option>
-        <option value="Suspendido">Suspendido</option>
-        <option value="En Pausa">En pausa</option>
-        <option value="Inactivo">Inactivo</option>
-      </select>
+      <div className="w-full sm:w-[190px]">
+        <LyriumSelect
+          value={filters.type ?? ''}
+          onChange={(v) => onFilterChange({ type: v || undefined })}
+          placeholder="Todas las especialidades"
+          options={[
+            { value: 'Economista', label: 'Economista' },
+            { value: 'Contador', label: 'Contador' },
+            { value: 'Ingeniero', label: 'Ingeniero' }
+          ]}
+        />
+      </div>
+      <div className="w-full sm:w-[170px]">
+        <LyriumSelect
+          value={filters.status ?? ''}
+          onChange={(v) => onFilterChange({ status: v || undefined })}
+          placeholder="Todos los estados"
+          options={[
+            { value: 'Activo', label: 'Activo' },
+            { value: 'Suspendido', label: 'Suspendido' },
+            { value: 'En Pausa', label: 'En pausa' },
+            { value: 'Inactivo', label: 'Inactivo' }
+          ]}
+        />
+      </div>
       <button
         onClick={onNewProvider}
         className="inline-flex items-center gap-1.5 border border-[var(--border-subtle)] rounded-lg px-3.5 py-[7px] text-[13px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"

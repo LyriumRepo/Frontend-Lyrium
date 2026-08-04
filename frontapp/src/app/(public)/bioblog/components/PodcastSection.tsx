@@ -56,7 +56,7 @@ export default function PodcastSection() {
                     published_at: p.published_at ?? null,
                 })));
             })
-            .catch(console.error)
+            .catch(() => {})
             .finally(() => setLoading(false));
     }, []);
 

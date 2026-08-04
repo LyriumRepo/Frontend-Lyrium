@@ -10,6 +10,7 @@ import ConversationList from '@/components/shared/chat/ConversationList';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import BaseModal from '@/components/ui/BaseModal';
+import { LyriumSelect } from '@/components/ui';
 import type { Message as BubbleMessage } from '@/components/shared/chat/MessageBubble';
 import type { Conversation } from '@/components/shared/chat/ConversationList';
 import type { TicketStatus, TicketCategory, CustomerTicket } from './types';
@@ -90,22 +91,19 @@ function NewTicketForm({
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
                 <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                        Categoría
-                    </label>
-                    <select
+                    <LyriumSelect
+                        label="Categoría"
                         value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                        required
-                    >
-                        <option value="informacion">Solicitud de Información</option>
-                        <option value="positivo">Comentario Positivo</option>
-                        <option value="negativo">Comentario Negativo</option>
-                        <option value="tecnico">Soporte Técnico</option>
-                        <option value="payments">Pagos y Facturación</option>
-                        <option value="critico">Soporte Crítico</option>
-                    </select>
+                        onChange={setCategory}
+                        options={[
+                            { value: 'informacion', label: 'Solicitud de Información' },
+                            { value: 'positivo', label: 'Comentario Positivo' },
+                            { value: 'negativo', label: 'Comentario Negativo' },
+                            { value: 'tecnico', label: 'Soporte Técnico' },
+                            { value: 'payments', label: 'Pagos y Facturación' },
+                            { value: 'critico', label: 'Soporte Crítico' }
+                        ]}
+                    />
                 </div>
 
                 <div>
@@ -328,19 +326,19 @@ export function SupportPageClient() {
                                 className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                             />
                         ) : (
-                            <select
+                            <LyriumSelect
                                 value={filterValue}
-                                onChange={(e) => setFilterValue(e.target.value)}
-                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                            >
-                                <option value="">Todas las categorías</option>
-                                <option value="positivo">Comentario Positivo</option>
-                                <option value="negativo">Comentario Negativo</option>
-                                <option value="informacion">Solicitud de Información</option>
-                                <option value="tecnico">Soporte Técnico</option>
-                                <option value="payments">Pagos y Facturación</option>
-                                <option value="critico">Soporte Crítico</option>
-                            </select>
+                                onChange={setFilterValue}
+                                placeholder="Todas las categorías"
+                                options={[
+                                    { value: 'positivo', label: 'Comentario Positivo' },
+                                    { value: 'negativo', label: 'Comentario Negativo' },
+                                    { value: 'informacion', label: 'Solicitud de Información' },
+                                    { value: 'tecnico', label: 'Soporte Técnico' },
+                                    { value: 'payments', label: 'Pagos y Facturación' },
+                                    { value: 'critico', label: 'Soporte Crítico' }
+                                ]}
+                            />
                         )}
                     </div>
                 )}

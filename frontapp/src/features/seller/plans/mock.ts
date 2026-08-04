@@ -49,8 +49,8 @@ export const mockPlans: Record<string, Plan> = {
     standard: {
         id: 'standard',
         name: 'CRECE',
-        price: 7.99,
-        priceAnnual: 95.88,
+        price: 40,
+        priceAnnual: 480,
         period: '/mes',
         periodAnnual: '/año',
         currency: 'S/',

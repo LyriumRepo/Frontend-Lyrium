@@ -10,6 +10,7 @@ import {
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 import type { BookingResponse } from '@/shared/lib/api/bookingRepository';
 import { BookingTimeline } from '@/shared/components/booking/BookingTimeline';
+import { LyriumSelect } from '@/components/ui';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending: { label: 'Pendiente', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
@@ -272,15 +273,15 @@ export default function SellerReservasPage() {
       )}
 
       {/* Filters */}
-      <div className="bg-[var(--bg-card)] p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)] animate-fadeIn">
+      <div className="bg-[var(--bg-card)] p-4 sm:p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-[var(--border-subtle)] animate-fadeIn">
 
         {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
-              <Calendar className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <h3 className="text-xl font-black text-[var(--text-primary)]">
+            <h3 className="text-lg font-bold md:text-xl md:font-black text-[var(--text-primary)]">
               Filtros de Reservas
             </h3>
           </div>
@@ -311,17 +312,18 @@ export default function SellerReservasPage() {
         {/* Estado — grid 1 columna */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Estado</label>
-            <select
+            <LyriumSelect
+              label="Estado"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="appearance-none w-full p-3 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--icons-green)]/20 cursor-pointer outline-none"
-            >
-              <option value="all">Todos los estados</option>
-              {Object.entries(STATUS_LABELS).map(([key, { label }]) => (
-                <option key={key} value={key}>{label}</option>
-              ))}
-            </select>
+              onChange={(v) => setStatusFilter(v)}
+              options={[
+                { value: 'all', label: 'Todos los estados' },
+                ...Object.entries(STATUS_LABELS).map(([key, { label }]) => ({
+                  value: key,
+                  label
+                }))
+              ]}
+            />
           </div>
         </div>
       </div>
@@ -509,7 +511,7 @@ export default function SellerReservasPage() {
                     <button onClick={() => openDetail(booking)}
                       className="px-2 py-1.5 rounded-xl bg-sky-50 dark:bg-[var(--brand-green)] text-sky-600 dark:text-white hover:bg-sky-100 dark:hover:bg-[var(--brand-green-hover)] border border-sky-200 dark:border-[var(--border-subtle)] transition-colors flex items-center gap-1">
                       <Eye className="w-3.5 h-3.5" />
-                      <span className="text-[9px] font-black uppercase tracking-wide">Ver</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wide">Ver</span>
                     </button>
                     {booking.status === 'pending' && (
                       <button onClick={() => handleConfirm(booking.id)} disabled={completingId === booking.id}

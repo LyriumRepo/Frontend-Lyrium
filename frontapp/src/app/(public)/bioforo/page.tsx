@@ -102,8 +102,8 @@ export default function BioForoPage() {
       ]);
       setForums(Array.isArray(forumsData) ? forumsData : []);
       setTopics(Array.isArray(topicsData) ? topicsData : []);
-    } catch (error) {
-      console.error('Error loading forum data:', error);
+    } catch {
+      // Backend no disponible: se ignora, el estado ya queda vacío por los defaults iniciales.
     } finally {
       setLoading(false);
     }

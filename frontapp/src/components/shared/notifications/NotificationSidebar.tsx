@@ -10,18 +10,22 @@ import { apiClient } from '@/lib/api/apiClient';
 import { isAllowedForRole } from '@/shared/lib/notifications/roleNotificationTypes';
 import { resolveNotificationRoute } from '@/shared/lib/notifications/resolveNotificationRoute';
 
+// Icono según el tipo de notificación (valor informativo), pero el color siempre
+// sigue la paleta de marca (celeste en modo día, esmeralda en modo noche) — nada
+// de rojo/naranja/ámbar, para no romper la unificación visual del resto de la app.
 function getLevelUI(level: ProactiveNotification['level']) {
+    const iconClass = 'w-4 h-4 text-sky-600 dark:text-emerald-400 flex-shrink-0';
     switch (level) {
         case 'CRITICAL':
-            return { dot: 'bg-red-500', icon: <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />, text: 'text-red-500' };
+            return { icon: <AlertTriangle className={iconClass} /> };
         case 'SECURITY':
-            return { dot: 'bg-orange-500', icon: <ShieldAlert className="w-4 h-4 text-orange-500 flex-shrink-0" />, text: 'text-orange-500' };
+            return { icon: <ShieldAlert className={iconClass} /> };
         case 'WARNING':
-            return { dot: 'bg-amber-500', icon: <Activity className="w-4 h-4 text-amber-500 flex-shrink-0" />, text: 'text-amber-500' };
+            return { icon: <Activity className={iconClass} /> };
         case 'INFO':
-            return { dot: 'bg-sky-500 dark:bg-emerald-500', icon: <Info className="w-4 h-4 text-sky-500 dark:text-emerald-400 flex-shrink-0" />, text: 'text-sky-600 dark:text-emerald-400' };
+            return { icon: <Info className={iconClass} /> };
         default:
-            return { dot: 'bg-[var(--text-secondary)]', icon: <Activity className="w-4 h-4 text-[var(--text-secondary)] flex-shrink-0" />, text: 'text-[var(--text-secondary)]' };
+            return { icon: <Activity className={iconClass} /> };
     }
 }
 
@@ -76,38 +80,46 @@ export default function NotificationSidebar() {
             <aside className="fixed top-0 right-0 h-full w-[380px] max-w-[calc(100vw-2rem)] z-[61] bg-[var(--bg-card)] border-l border-[var(--border-subtle)] shadow-2xl flex flex-col animate-slideInRight">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] flex-shrink-0">
+                <div className="relative flex items-center justify-between px-5 py-4 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 flex-shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center">
-                            <Bell className="w-4 h-4 text-sky-500 dark:text-emerald-400" />
+                        <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                            <Bell className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xs font-black uppercase tracking-widest text-[var(--text-primary)]">
+                            <h2 className="text-xs font-black uppercase tracking-widest text-white">
                                 Notificaciones
                             </h2>
-                            <p className="text-[10px] font-bold text-[var(--text-secondary)] mt-0.5">
-                                {filteredUnreadCount > 0 ? `${filteredUnreadCount} sin leer` : 'Todo al día'}
+                            <p className="text-[10px] font-bold text-white/75 mt-0.5">
+                                {filteredUnreadCount > 0 ? 'Tienes novedades pendientes' : 'Todo al día'}
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                         {filteredUnreadCount > 0 && (
-                            <button
-                                onClick={markAllAsRead}
-                                className="text-[10px] font-black uppercase text-sky-600 dark:text-emerald-400 hover:bg-[var(--bg-muted)] px-2 py-1 rounded-lg transition-all"
-                            >
-                                Marcar todo leído
-                            </button>
+                            <span className="bg-white text-sky-600 dark:text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded-full">
+                                {filteredUnreadCount > 9 ? '9+' : filteredUnreadCount}
+                            </span>
                         )}
                         <button
                             onClick={closeNotificationSidebar}
-                            className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors"
+                            className="p-1.5 rounded-lg text-white/85 hover:text-white hover:bg-white/15 transition-colors"
                             aria-label="Cerrar"
                         >
                             <X className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
+
+                {filteredUnreadCount > 0 && (
+                    <div className="flex justify-end px-5 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] flex-shrink-0">
+                        <button
+                            onClick={markAllAsRead}
+                            className="text-[10px] font-black uppercase text-sky-600 dark:text-emerald-400 hover:bg-[var(--bg-muted)] px-2 py-1 rounded-lg transition-all"
+                        >
+                            Marcar todo leído
+                        </button>
+                    </div>
+                )}
 
                 {/* List */}
                 <div className="flex-1 overflow-y-auto green-scrollbar">
@@ -123,26 +135,25 @@ export default function NotificationSidebar() {
                         </div>
                     ) : (
                         <>
-                        <ul className="divide-y divide-[var(--border-subtle)]">
+                        <ul className="flex flex-col gap-2 p-3">
                             {filtered.map((n) => {
                                 const ui = getLevelUI(n.level);
                                 return (
                                     <li
                                         key={n.id}
-                                        className={`flex gap-3 px-5 py-4 transition-colors hover:bg-[var(--bg-secondary)] ${!n.read ? 'bg-[var(--bg-secondary)]/40' : ''} ${n.action ? 'cursor-pointer' : ''}`}
+                                        className={`flex gap-3 px-3.5 py-3 rounded-r-xl border-l-[3px] transition-colors ${
+                                            !n.read
+                                                ? 'border-sky-500 dark:border-emerald-500 bg-sky-500/5 dark:bg-emerald-500/10 hover:bg-sky-500/10 dark:hover:bg-emerald-500/15'
+                                                : 'border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]'
+                                        } ${n.action ? 'cursor-pointer' : ''}`}
                                         onClick={() => n.action && handleClick(n)}
                                     >
-                                        {/* Level dot */}
-                                        <div className="flex-shrink-0 pt-1.5">
-                                            <span className={`block w-2 h-2 rounded-full ${!n.read ? ui.dot : 'bg-[var(--border-subtle)]'}`} />
-                                        </div>
-
                                         {/* Icon + content */}
                                         <div className="flex gap-3 flex-1 min-w-0">
                                             <div className="mt-0.5">{ui.icon}</div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-start justify-between gap-2">
-                                                    <p className={`text-xs font-black uppercase tracking-wide leading-tight ${!n.read ? ui.text : 'text-[var(--text-secondary)]'}`}>
+                                                    <p className={`text-xs font-black uppercase tracking-wide leading-tight ${!n.read ? 'text-sky-600 dark:text-emerald-400' : 'text-[var(--text-secondary)]'}`}>
                                                         {n.title}
                                                     </p>
                                                     {!n.read && (

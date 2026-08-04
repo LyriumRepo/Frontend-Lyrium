@@ -138,7 +138,7 @@ export default function PublicHeader() {
                                 </div>
                                 <Link
                                     href={dashboardUrl}
-                                    className="flex items-center gap-1.5 p-1 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] active:scale-95 transition-all text-sky-600 dark:text-[var(--color-success)]"
+                                    className="hidden sm:flex items-center gap-1.5 p-1 min-[360px]:p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[var(--bg-muted)] active:scale-95 transition-all text-sky-600 dark:text-[var(--color-success)]"
                                 >
                                     <Icon name="LayoutDashboard" className="text-base min-[360px]:text-[18px]" />
                                     <span className="hidden sm:block whitespace-nowrap text-xs lg:text-[13px]">Mi Panel</span>

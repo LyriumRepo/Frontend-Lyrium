@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
+import { LyriumSelect } from '@/components/ui';
 import {
   Service,
   Specialist,
@@ -813,6 +814,9 @@ export default function ServiceConfigModal({
                         <SvgEye />
                       </button>
                     </div>
+                    <p className="text-[8px] text-[var(--text-muted)] leading-tight">
+                      Mín. 800×800 px · fondo blanco · JPG, PNG o WebP
+                    </p>
 
                     {errors.imagen && (
                       <p className="text-[10px] text-rose-500 font-semibold">{errors.imagen}</p>
@@ -1207,21 +1211,19 @@ export default function ServiceConfigModal({
 
                   {/* L1 */}
                   <div className="space-y-1">
-                    <select
+                    <LyriumSelect
                       value={form.categoriaL1}
-                      onChange={(e) => {
-                        const l1 = e.target.value;
-                        set('categoriaL1', l1);
+                      onChange={(v) => {
+                        set('categoriaL1', v);
                         set('categoriaL2', '');
                         set('categoriaL3', '');
                       }}
-                      className={inputCls(!!errors.categoriaL1)}
-                    >
-                      <option value="" disabled>1. Categoría principal...</option>
-                      {CATEGORY_TREE.map((c) => (
-                        <option key={c.label} value={c.label}>{c.label}</option>
-                      ))}
-                    </select>
+                      placeholder="1. Categoría principal..."
+                      options={CATEGORY_TREE.map((c) => ({
+                        value: c.label,
+                        label: c.label
+                      }))}
+                    />
                     {errors.categoriaL1 && (
                       <p className="text-[10px] text-rose-500 font-semibold">{errors.categoriaL1}</p>
                     )}
@@ -1232,19 +1234,18 @@ export default function ServiceConfigModal({
                     const l1Node = CATEGORY_TREE.find((c) => c.label === form.categoriaL1);
                     return l1Node ? (
                       <div className="space-y-1 pl-3 border-l-2 border-sky-500/20 dark:border-[#8FC3A1]/20">
-                        <select
+                        <LyriumSelect
                           value={form.categoriaL2}
-                          onChange={(e) => {
-                            set('categoriaL2', e.target.value);
+                          onChange={(v) => {
+                            set('categoriaL2', v);
                             set('categoriaL3', '');
                           }}
-                          className={inputCls(!!errors.categoriaL2)}
-                        >
-                          <option value="" disabled>2. Subcategoría...</option>
-                          {l1Node.children.map((c) => (
-                            <option key={c.label} value={c.label}>{c.label}</option>
-                          ))}
-                        </select>
+                          placeholder="2. Subcategoría..."
+                          options={l1Node.children.map((c) => ({
+                            value: c.label,
+                            label: c.label
+                          }))}
+                        />
                         {errors.categoriaL2 && (
                           <p className="text-[10px] text-rose-500 font-semibold">{errors.categoriaL2}</p>
                         )}
@@ -1258,16 +1259,15 @@ export default function ServiceConfigModal({
                     const l2Node = l1Node?.children.find((c) => c.label === form.categoriaL2);
                     return l2Node ? (
                       <div className="pl-6 border-l-2 border-sky-500/10 dark:border-[#8FC3A1]/10">
-                        <select
+                        <LyriumSelect
                           value={form.categoriaL3}
-                          onChange={(e) => set('categoriaL3', e.target.value)}
-                          className={inputCls(false)}
-                        >
-                          <option value="">3. Especialización (opcional)...</option>
-                          {l2Node.children.map((c) => (
-                            <option key={c} value={c}>{c}</option>
-                          ))}
-                        </select>
+                          onChange={(v) => set('categoriaL3', v)}
+                          placeholder="3. Especialización (opcional)..."
+                          options={l2Node.children.map((c) => ({
+                            value: c,
+                            label: c
+                          }))}
+                        />
                       </div>
                     ) : null;
                   })()}

@@ -37,12 +37,12 @@ export default function FinancialBreakdownCard({ data }: FinancialBreakdownCardP
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {items.map((item) => (
-                    <div key={item.label} className="bg-[var(--bg-secondary)] p-5 rounded-2xl space-y-2">
-                        <div className="flex items-center gap-2" style={{ color: item.color }}>
-                            <Icon name={item.icon} className="w-4 h-4" />
+                    <div key={item.label} className="bg-[var(--bg-secondary)] p-5 rounded-2xl flex flex-col gap-2">
+                        <div className="flex items-start gap-2 min-h-[28px] leading-tight" style={{ color: item.color }}>
+                            <Icon name={item.icon} className="w-4 h-4 mt-0.5 shrink-0" />
                             <span className="text-[9px] font-black uppercase tracking-widest">{item.label}</span>
                         </div>
-                        <p className="text-xl font-black text-[var(--text-primary)] tracking-tighter">
+                        <p className="text-xl font-black text-[var(--text-primary)] tracking-tighter mt-auto">
                             {formatCurrency(item.value)}
                         </p>
                     </div>

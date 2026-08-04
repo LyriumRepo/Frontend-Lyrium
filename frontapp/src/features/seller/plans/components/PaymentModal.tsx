@@ -17,25 +17,33 @@ export default function PaymentModal({ open, plan, plansData, selectedPresetId, 
 
   const isTrial      = selectedPresetId === 'trial';
   const trialBlocked = trialUsedPlans.includes(plan);
+  // "Por Vida" solo existe para Crece (plan propio crece-lifetime en el backend) —
+  // se filtra para cualquier otro plan aunque durationPresets lo liste globalmente.
+  const isCreceP     = plan === 'standard' || plan === 'crece';
+  const availablePresets = durationPresets.filter(p => p.id !== 'lifetime' || isCreceP);
   const effectivePreset = (trialBlocked && selectedPresetId === 'trial') ? '1m' : selectedPresetId;
+  const presetObj    = availablePresets.find(p => p.id === effectivePreset);
+  const isLifetime   = presetObj?.isLifetime === true;
 
   const totalMonths = (() => {
-    if (effectivePreset === 'trial')  return 1;
-    if (effectivePreset === 'custom') return customMonths;
-    return durationPresets.find(p => p.id === effectivePreset)?.months ?? 1;
+    if (effectivePreset === 'trial')    return 1;
+    if (effectivePreset === 'custom')   return customMonths;
+    if (isLifetime)                     return null;
+    return presetObj?.months ?? 1;
   })();
 
   const durationLabel = (() => {
     if (effectivePreset === 'trial') return 'Prueba gratuita (1 mes)';
-    const m = totalMonths;
+    if (isLifetime) return 'Por vida (pago único)';
+    const m = totalMonths ?? 1;
     if (m >= 12 && m % 12 === 0) { const y = m / 12; return y === 1 ? '1 año (12 meses)' : `${y} años (${m} meses)`; }
     return m === 1 ? '1 mes' : `${m} meses`;
   })();
 
-  const discount    = isTrial ? 0 : getDiscountForMonths(totalMonths);
-  const baseTotal   = isTrial ? 0 : data.price * totalMonths;
-  const discountAmt = baseTotal * (discount / 100);
-  const finalTotal  = baseTotal - discountAmt;
+  const discount    = (isTrial || isLifetime) ? 0 : (presetObj?.discountPercent ?? getDiscountForMonths(totalMonths ?? 1));
+  const baseTotal   = isTrial ? 0 : isLifetime ? (presetObj?.lifetimePrice ?? 0) : data.price * (totalMonths ?? 1);
+  const discountAmt = isLifetime ? 0 : baseTotal * (discount / 100);
+  const finalTotal  = isLifetime ? (presetObj?.lifetimePrice ?? 0) : baseTotal - discountAmt;
   const cur         = data.currency ?? 'S/';
 
   const iconHtml = getPlanIconSvg(plan, 28, plansData).replace('stroke="currentColor"', 'stroke="white"');
@@ -62,10 +70,9 @@ export default function PaymentModal({ open, plan, plansData, selectedPresetId, 
         <div className="duration-selector">
           <h4 className="duration-label">Selecciona la duración</h4>
           <div className="duration-options preset-grid">
-            {durationPresets.map(p => {
+            {availablePresets.map(p => {
               const blocked  = p.isTrial && trialBlocked;
               const isActive = p.id === effectivePreset && !blocked;
-              const discount = p.isTrial ? 0 : getDiscountForMonths(p.months ?? 1);
               return (
                 <button key={p.id}
                   className={`preset-btn${isActive ? ' active' : ''}${blocked ? ' preset-trial-used' : ''}`}
@@ -76,8 +83,8 @@ export default function PaymentModal({ open, plan, plansData, selectedPresetId, 
                   <span className="preset-label">{p.label}</span>
                   {p.isTrial && !blocked && <span className="preset-tag preset-free">Gratis</span>}
                   {p.isTrial && blocked && <span className="preset-tag preset-used">Ya usado</span>}
-                  {!p.isTrial && p.id !== 'custom' && discount > 0 && <span className="preset-tag preset-discount">-{discount}%</span>}
-                  {p.id === 'custom' && <span className="preset-tag preset-custom">Meses</span>}
+                  {p.isLifetime && <span className="preset-tag preset-lifetime">Pago único</span>}
+                  {!p.isTrial && !p.isLifetime && (p.discountPercent ?? 0) > 0 && <span className="preset-tag preset-discount">-{p.discountPercent}%</span>}
                 </button>
               );
             })}
@@ -85,23 +92,13 @@ export default function PaymentModal({ open, plan, plansData, selectedPresetId, 
 
           {effectivePreset === 'trial'
             ? <div className="offer-tag" style={{ display:'block' }}>✨ Prueba gratuita por 1 mes sin compromiso</div>
-            : discount > 0
-              ? <div className="offer-tag" style={{ display:'block' }}>🎉 ¡{discount}% de descuento por {durationLabel}!</div>
-              : null
+            : isLifetime
+              ? <div className="offer-tag" style={{ display:'block' }}>💎 Acceso de por vida — pago único, sin renovaciones</div>
+              : discount > 0
+                ? <div className="offer-tag" style={{ display:'block' }}>🎉 ¡{discount}% de descuento por {durationLabel}!</div>
+                : null
           }
         </div>
-
-        {effectivePreset === 'custom' && (
-          <div className="custom-qty-section" style={{ display:'block' }}>
-            <div className="custom-qty-header"><span className="custom-qty-title">Elige la cantidad de meses</span></div>
-            <div className="custom-qty-row">
-              <button className="qty-btn" onClick={() => onChangeCustomQty(-1)}>−</button>
-              <input type="number" className="qty-input" value={customMonths} min={4} max={48} readOnly />
-              <button className="qty-btn" onClick={() => onChangeCustomQty(1)}>+</button>
-            </div>
-            <div className="custom-qty-range"><span>4 meses</span><span>48 meses</span></div>
-          </div>
-        )}
 
         <div className="price-summary">
           <div className="summary-row"><span>Plan</span><span>{data.name}</span></div>
@@ -111,7 +108,7 @@ export default function PaymentModal({ open, plan, plansData, selectedPresetId, 
           {discountAmt > 0 && <div className="summary-row discount-row"><span>Descuento</span><span>-{formatPrice(discountAmt, cur)} ({discount}%)</span></div>}
           <div className="summary-divider" />
           <div className="summary-row total-row"><span>Total a pagar</span><span>{formatPrice(finalTotal, cur)}</span></div>
-          {!isTrial && totalMonths > 1 && <div className="summary-row per-month-row"><span>Equivale a</span><span>{formatPrice(finalTotal / totalMonths, cur)}/mes</span></div>}
+          {!isTrial && !isLifetime && (totalMonths ?? 1) > 1 && <div className="summary-row per-month-row"><span>Equivale a</span><span>{formatPrice(finalTotal / (totalMonths ?? 1), cur)}/mes</span></div>}
         </div>
 
         <div id="step1Buttons">

@@ -25,11 +25,11 @@ import {
   Check,
   CalendarDays,
   LogIn,
-  ShoppingCart,
   Star,
   Stethoscope,
   ChevronDown,
   Bell,
+  ArrowRight,
 } from 'lucide-react';
 import type {
   Service,
@@ -42,6 +42,8 @@ import {
 } from '@/shared/lib/api/serviRepository';
 import { useIzipay } from '@/features/public/checkout/hooks/useIzipay';
 import { useAuth } from '@/shared/lib/context/AuthContext';
+import { useCheckoutGuard } from '@/shared/hooks/useCheckoutGuard';
+import AuthRequiredModal from '@/shared/components/AuthRequiredModal';
 import { useCarritoStore } from '@/store/carritoStore';
 import { LARAVEL_API_URL } from '@/shared/lib/config/flags';
 import TopMedalBadge from '@/components/ui/TopMedalBadge';
@@ -485,6 +487,7 @@ function BookingModal({
   const incrementServiceHoldCount = useCarritoStore((s) => s.incrementServiceHoldCount);
   const setLastAddedService = useCarritoStore((s) => s.setLastAddedService);
   const openCartPopup = useCarritoStore((s) => s.openPopup);
+  const { goToCheckout, showAuthModal, setShowAuthModal } = useCheckoutGuard();
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -918,7 +921,10 @@ function BookingModal({
       <button
         onClick={async () => {
           const ok = await handleAddToCart();
-          if (ok) close();
+          if (ok) {
+            close();
+            await goToCheckout();
+          }
         }}
         disabled={!selectedSlot || isAddingToCart || (service.is_home_service && !addressValid)}
         className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
@@ -932,9 +938,9 @@ function BookingModal({
         {isAddingToCart ? (
           <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
-          <ShoppingCart className="w-4 h-4" />
+          <ArrowRight className="w-4 h-4" />
         )}
-        {isAddingToCart ? 'Agregando…' : 'Añadir al carrito'}
+        {isAddingToCart ? 'Reservando…' : 'Ir a pagar'}
       </button>
     </div>
   );
@@ -1102,72 +1108,85 @@ function BookingModal({
     </div>
   );
 
-  const stepOrder = ['specialist', 'datetime', 'payment'];
-  const currentIdx = stepOrder.indexOf(
-    step === 'confirming' || step === 'confirmed' ? 'payment' : step,
-  );
+  // Indicador visible del modal: solo 2 pasos (Especialista → Fecha y hora).
+  // El paso `payment` sigue existiendo internamente (fallback de reintento de
+  // pago desde el propio modal), pero ya no se cuenta en el stepper porque el
+  // flujo normal navega a /checkout tras crear el hold.
+  const stepOrder = ['specialist', 'datetime'];
+  const currentIdx = step === 'specialist' ? 0 : 1;
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-      onClick={close}
-      onKeyDown={(e) => { if (e.key === 'Escape') close(); }}
-      role="dialog"
-      aria-modal="true"
-      tabIndex={-1}
-    >
+    <>
       <div
-        className="bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => { if (e.key === 'Escape') e.stopPropagation(); }}
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        onClick={close}
+        onKeyDown={(e) => { if (e.key === 'Escape') close(); }}
         role="dialog"
         aria-modal="true"
         tabIndex={-1}
       >
-        <div className="shrink-0 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-white font-bold flex items-center gap-2">
-              <Calendar className="w-4 h-4" /> Adquirir cita
-            </h2>
-            <button
-              onClick={close}
-              className="text-white/80 hover:text-white transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          {step !== 'confirmed' && step !== 'confirming' && (
-            <div className="flex items-center gap-1.5 mt-3">
-              {stepOrder.map((s, i) => {
-                const done = i < currentIdx;
-                const active = i === currentIdx;
-                return (
-                  <div key={s} className="flex items-center gap-1.5 flex-1">
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${done ? 'bg-white text-sky-500' : active ? 'bg-white/90 text-sky-500' : 'bg-sky-300/30 text-white/60'}`}
-                    >
-                      {done ? <Check className="w-3.5 h-3.5" /> : i + 1}
-                    </div>
-                    {i < 2 && (
-                      <div
-                        className={`h-0.5 flex-1 transition-all ${done ? 'bg-white' : 'bg-sky-300/30'}`}
-                      />
-                    )}
-                  </div>
-                );
-              })}
+        <div
+          className="bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => { if (e.key === 'Escape') e.stopPropagation(); }}
+          role="dialog"
+          aria-modal="true"
+          tabIndex={-1}
+        >
+          <div className="shrink-0 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-emerald-700 dark:to-teal-600 p-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-white font-bold flex items-center gap-2">
+                <Calendar className="w-4 h-4" /> Adquirir cita
+              </h2>
+              <button
+                onClick={close}
+                className="text-white/80 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-          )}
-        </div>
-        <div className="flex-1 overflow-y-auto green-scrollbar p-5">
-          {step === 'specialist' && specialistStep()}
-          {step === 'datetime' && dateTimeStep()}
-          {step === 'payment' && paymentStep()}
-          {step === 'confirming' && confirmingStep()}
-          {step === 'confirmed' && confirmedStep()}
+            {step !== 'confirmed' && step !== 'confirming' && step !== 'payment' && (
+              <div className="flex items-center justify-center mt-4 max-w-[180px] mx-auto">
+                {stepOrder.map((s, i) => {
+                  const done = i < currentIdx;
+                  const active = i === currentIdx;
+                  return (
+                    <div
+                      key={s}
+                      className={`flex items-center ${i < stepOrder.length - 1 ? 'flex-1' : 'flex-none'}`}
+                    >
+                      <div
+                        className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${done ? 'bg-white text-sky-500' : active ? 'bg-white/90 text-sky-500 scale-110' : 'bg-sky-300/30 text-white/60'}`}
+                      >
+                        {done ? <Check className="w-3.5 h-3.5" /> : i + 1}
+                      </div>
+                      {i < stepOrder.length - 1 && (
+                        <div className="flex-1 h-1 mx-2 rounded-full bg-sky-300/30 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full bg-white transition-all duration-500 ease-out ${done ? 'w-full' : 'w-0'}`}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          <div className="flex-1 overflow-y-auto green-scrollbar p-5">
+            {step === 'specialist' && specialistStep()}
+            {step === 'datetime' && dateTimeStep()}
+            {step === 'payment' && paymentStep()}
+            {step === 'confirming' && confirmingStep()}
+            {step === 'confirmed' && confirmedStep()}
+          </div>
         </div>
       </div>
-    </div>
+      <AuthRequiredModal
+        open={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
+    </>
   );
 }
 
@@ -1745,35 +1764,32 @@ export function ServiceDetailPageClient({ service }: Props) {
 
   return (
     <main className="min-h-screen bg-[#F8FAFC] dark:bg-[var(--bg-primary)]">
-      {/* Breadcrumb */}
-      <div className="bg-white dark:bg-[var(--bg-card)] border-b border-gray-200 dark:border-[var(--border-subtle)]">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-2 text-sm">
+      <div className="max-w-7xl mx-auto px-4 pt-6 lg:pt-8">
+        {/* Breadcrumb */}
+        <nav
+          aria-label="Ruta de navegación"
+          className="flex items-center gap-1.5 text-sm font-medium mb-5"
+        >
           <Link
             href="/"
-            className="text-gray-400 hover:text-cyan-600 dark:text-white transition-colors"
+            className="text-gray-400 dark:text-[var(--text-muted)] hover:text-cyan-600 dark:hover:text-white transition-colors"
           >
             Inicio
           </Link>
-          <span className="text-gray-300 dark:text-[var(--text-secondary)]">
-            /
-          </span>
+          <ChevronRight className="w-3.5 h-3.5 text-gray-300 dark:text-[var(--text-muted)] shrink-0" />
           <button
             type="button"
             onClick={() => router.back()}
-            className="text-cyan-600 dark:text-white hover:underline"
+            className="text-gray-400 dark:text-[var(--text-muted)] hover:text-cyan-600 dark:hover:text-white transition-colors"
           >
             Servicios
           </button>
-          <span className="text-gray-300 dark:text-[var(--text-secondary)]">
-            /
-          </span>
-          <span className="font-semibold text-gray-700 dark:text-[var(--text-primary)] truncate max-w-[200px]">
+          <ChevronRight className="w-3.5 h-3.5 text-gray-300 dark:text-[var(--text-muted)] shrink-0" />
+          <span className="font-semibold text-gray-700 dark:text-[var(--text-primary)] truncate max-w-[240px]">
             {service.name}
           </span>
-        </div>
-      </div>
+        </nav>
 
-      <div className="max-w-7xl mx-auto px-4 py-6 lg:py-8">
         <div className="grid lg:grid-cols-[65fr_35fr] gap-8">
           {/* ── LEFT COLUMN ─────────────────────────────────────────────── */}
           <div className="space-y-6 min-w-0">
@@ -1832,7 +1848,7 @@ export function ServiceDetailPageClient({ service }: Props) {
                       </span>
                     )}
                   </div>
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-[var(--text-primary)]">
+                  <h1 className="text-2xl lg:text-4xl font-bold text-gray-900 dark:text-[var(--text-primary)] tracking-tight">
                     {service.name}
                   </h1>
                   <p className="text-sm text-gray-500 dark:text-[var(--text-muted)] mt-0.5">
@@ -1979,31 +1995,37 @@ export function ServiceDetailPageClient({ service }: Props) {
           </div>
 
           {/* ── RIGHT COLUMN ─────────────────────────────────────────────── */}
-          <div className="lg:sticky lg:top-8 lg:self-start">
+          <div className="lg:sticky lg:top-8 lg:self-start space-y-6">
             <div className="bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] shadow-lg overflow-hidden">
               <div className="p-6 pb-4">
-                <p className="text-xs text-gray-400 mb-1">Precio desde</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Precio desde
+                </p>
                 {service.discount_percentage &&
                 service.discount_percentage > 0 ? (
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-cyan-600 dark:text-white">
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <span className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-[var(--text-primary)]">
                       S/{' '}
                       {(
                         service.price *
                         (1 - service.discount_percentage / 100)
                       ).toFixed(2)}
                     </span>
-                    <span className="text-lg text-gray-400 line-through">
+                    <span className="text-lg line-through font-semibold text-gray-400">
                       S/ {Number(service.price).toFixed(2)}
+                    </span>
+                    <span className="text-sm font-bold px-2 py-0.5 rounded-md bg-rose-500 text-white">
+                      -{service.discount_percentage}%
                     </span>
                   </div>
                 ) : (
-                  <span className="text-3xl font-black text-cyan-600 dark:text-white">
+                  <span className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-[var(--text-primary)]">
                     S/ {Number(service.price).toFixed(2)}
                   </span>
                 )}
               </div>
-              <div className="px-6 pb-4">
+
+              <div className="px-6 pb-5">
                 <button
                   onClick={() => setBookingOpen(true)}
                   className="w-full py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
@@ -2011,7 +2033,59 @@ export function ServiceDetailPageClient({ service }: Props) {
                   <Calendar className="w-4 h-4" /> Adquirir cita
                 </button>
               </div>
+
               <div className="mx-6 h-px bg-gray-100 dark:bg-[var(--bg-muted)]" />
+
+              {/* Medios de pago aceptados — mismo patrón que el detalle de producto */}
+              <div className="px-6 py-5">
+                <p className="text-[10px] font-bold tracking-[.1em] uppercase text-cyan-600 dark:text-white mb-3 text-center">
+                  Medios de pago aceptados
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  {[
+                    { Icon: CreditCard, label: 'Tarjeta' },
+                    { Icon: Smartphone, label: 'Yape / Plin' },
+                    { Icon: Building2, label: 'Transferencia' },
+                  ].map(({ Icon, label }) => (
+                    <div
+                      key={label}
+                      className="flex items-center gap-1.5 rounded-lg px-3 py-2 bg-cyan-50/60 dark:bg-[var(--bg-secondary)] border border-cyan-100 dark:border-[var(--border-subtle)]"
+                    >
+                      <Icon className="w-4 h-4 text-cyan-600 dark:text-white" />
+                      <span className="text-[11px] font-semibold text-gray-600 dark:text-[var(--text-secondary)]">
+                        {label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mx-6 h-px bg-gray-100 dark:bg-[var(--bg-muted)]" />
+
+              {/* Garantías del servicio */}
+              <div className="grid grid-cols-1 gap-2 px-6 py-5">
+                {[
+                  { icon: ShieldCheck, text: 'Pago 100% seguro (Izipay / BCP)' },
+                  { icon: CalendarDays, text: 'Reprogramación según política de cancelación' },
+                  { icon: Bell, text: 'Recordatorio de tu cita por correo' },
+                ].map(({ icon: Icon, text }) => (
+                  <div
+                    key={text}
+                    className="flex items-center gap-2.5 text-left p-3 rounded-xl border border-cyan-100 dark:border-cyan-900/30 bg-cyan-50/50 dark:bg-[var(--bg-secondary)]"
+                  >
+                    <Icon className="w-4 h-4 text-cyan-600 dark:text-white shrink-0" />
+                    <span className="text-xs font-semibold text-gray-600 dark:text-[var(--text-secondary)]">
+                      {text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mx-6 h-px bg-gray-100 dark:bg-[var(--bg-muted)]" />
+
+              {/* Especialistas disponibles — mismo estilo de tarjeta que el paso
+                  "Selecciona un especialista" del modal de reserva, para que no
+                  haya dos estilos distintos de lista de especialistas en la página. */}
               <div className="p-6">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-bold text-gray-900 dark:text-[var(--text-primary)] text-sm">
@@ -2026,14 +2100,14 @@ export function ServiceDetailPageClient({ service }: Props) {
                     ? service.specialists
                     : service.specialists.slice(0, 4)
                   ).map((sp) => {
-                    const { today } = getSpecialistAvailability(sp);
+                    const { today, tomorrow } = getSpecialistAvailability(sp);
                     return (
                       <button
                         key={sp.id}
                         onClick={() => setProfileSpecialist(sp)}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-[var(--border-default)] hover:border-cyan-400/30 hover:bg-cyan-500/5 transition-all group"
+                        className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-[var(--border-default)] hover:border-sky-200 dark:hover:border-sky-700 hover:bg-sky-50/50 dark:hover:bg-sky-950/20 transition-all group"
                       >
-                        <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/50 dark:to-blue-900/50 flex items-center justify-center overflow-hidden shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/50 dark:to-blue-900/50 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-white dark:ring-[var(--bg-card)]">
                           {sp.foto ? (
                             <img
                               src={sp.foto}
@@ -2041,21 +2115,35 @@ export function ServiceDetailPageClient({ service }: Props) {
                               className="object-cover w-full h-full"
                             />
                           ) : (
-                            <User className="w-4 h-4 text-sky-400" />
+                            <User className="w-5 h-5 text-sky-400" />
                           )}
-                          <span
-                            className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-[var(--bg-card)] ${today ? 'bg-emerald-400' : 'bg-amber-400'}`}
-                          />
                         </div>
                         <div className="flex-1 text-left min-w-0">
-                          <p className="text-sm font-semibold text-gray-800 dark:text-[var(--text-primary)] truncate">
-                            {sp.nombre_completo}
-                          </p>
-                          <p className="text-xs text-gray-400 truncate">
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`w-2 h-2 rounded-full shrink-0 ${today ? 'bg-emerald-400' : 'bg-amber-400'}`}
+                            />
+                            <p className="font-bold text-sm text-gray-900 dark:text-[var(--text-primary)] truncate">
+                              {sp.nombre_completo}
+                            </p>
+                          </div>
+                          <p className="text-xs text-gray-500 dark:text-[var(--text-muted)] truncate">
                             {sp.especialidad}
                           </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span
+                              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${today ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-gray-50 text-gray-400 dark:bg-[var(--bg-muted)] dark:text-[var(--text-muted)]'}`}
+                            >
+                              {today ? '✓ Hoy' : 'Hoy —'}
+                            </span>
+                            <span
+                              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${tomorrow ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-gray-50 text-gray-400 dark:bg-[var(--bg-muted)] dark:text-[var(--text-muted)]'}`}
+                            >
+                              {tomorrow ? '✓ Mañana' : 'Mañana —'}
+                            </span>
+                          </div>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-gray-300 dark:text-[var(--text-muted)] group-hover:text-cyan-600 dark:text-white transition-colors shrink-0" />
+                        <ChevronRight className="w-5 h-5 text-gray-300 dark:text-[var(--text-muted)] group-hover:text-sky-400 transition-colors shrink-0" />
                       </button>
                     );
                   })}

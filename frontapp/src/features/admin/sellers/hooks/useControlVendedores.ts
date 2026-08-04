@@ -109,7 +109,6 @@ export const useControlVendedores = () => {
     queryKey: ['admin', 'services', currentTab],
     queryFn: () =>
       adminSellerRepository.getServices({
-        status: currentTab === 'servicios' ? 'pending_review' : undefined,
         per_page: 50,
       }),
     enabled: currentTab === 'servicios',
@@ -176,7 +175,6 @@ export const useControlVendedores = () => {
   const mappedServices = useMemo(() => {
     const statusMap: Record<string, string> = {
       pending_review: 'PENDING',
-      approved: 'APPROVED',
       rejected: 'REJECTED',
       active: 'APPROVED',
       inactive: 'REJECTED',
@@ -192,7 +190,7 @@ export const useControlVendedores = () => {
       date: s.created_at
         ? new Date(s.created_at).toLocaleDateString('es-PE')
         : '',
-      imageUrl: undefined,
+      imageUrl: s.image ?? undefined,
       rejection_reason: s.rejection_reason,
     }));
   }, [servicesData]);

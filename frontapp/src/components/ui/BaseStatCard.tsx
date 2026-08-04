@@ -88,7 +88,7 @@ export default function BaseStatCard({
   return (
     <Tag
       onClick={onClick}
-      className={`bg-[var(--bg-card)] p-6 rounded-2xl border ${theme.border} shadow-lg dark:shadow-none transition-all duration-300 hover:shadow-xl hover:shadow-[var(--border-subtle)]/20 hover:-translate-y-0.5 group relative overflow-hidden ${
+      className={`bg-[var(--bg-card)] p-4 sm:p-6 rounded-2xl border ${theme.border} shadow-lg dark:shadow-none transition-all duration-300 hover:shadow-xl hover:shadow-[var(--border-subtle)]/20 hover:-translate-y-0.5 group relative overflow-hidden min-w-0 ${
         onClick ? 'cursor-pointer active:scale-[0.98] text-left w-full' : ''
       } ${className}`}
     >
@@ -96,13 +96,13 @@ export default function BaseStatCard({
         className={`absolute top-0 right-0 w-40 h-40 ${theme.bg} rounded-full -mr-20 -mt-20 blur-3xl transition-all duration-500 group-hover:scale-150`}
       ></div>
 
-      <div className="relative z-10">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="relative z-10 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 mb-2.5 sm:mb-4">
           {icon && (
             <div
-              className={`w-10 h-10 ${theme.iconBg} text-white dark:text-white/90 rounded-xl flex items-center justify-center shadow-md ${theme.shadow} transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}
+              className={`w-8 h-8 sm:w-10 sm:h-10 ${theme.iconBg} text-white dark:text-white/90 rounded-xl flex items-center justify-center shadow-md ${theme.shadow} transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg shrink-0`}
             >
-              <Icon name={icon} className="w-5 h-5 stroke-[2.5px]" />
+              <Icon name={icon} className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5px]" />
             </div>
           )}
 
@@ -123,13 +123,13 @@ export default function BaseStatCard({
           )}
         </div>
 
-        <div className="space-y-1.5">
-          <div className="flex items-baseline gap-1.5">
-            <h3 className="text-3xl font-black text-[var(--text-primary)] tracking-tight leading-none tabular-nums">
+        <div className="space-y-1 sm:space-y-1.5 min-w-0">
+          <div className="flex items-baseline gap-1.5 min-w-0">
+            <h3 className="text-xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight leading-none tabular-nums truncate">
               {value}
             </h3>
             {suffix && (
-              <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-tight">
+              <span className="text-[10px] sm:text-xs font-black text-[var(--text-secondary)] uppercase tracking-tight shrink-0">
                 {suffix}
               </span>
             )}
@@ -137,7 +137,7 @@ export default function BaseStatCard({
 
           <div>
             <p
-              className={`text-[11px] font-bold ${theme.text} uppercase tracking-wider`}
+              className={`text-[9px] sm:text-[11px] font-bold ${theme.text} uppercase tracking-wider leading-tight`}
             >
               {label}
             </p>

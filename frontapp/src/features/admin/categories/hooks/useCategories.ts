@@ -64,7 +64,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 
 async function fetchCategories(): Promise<Category[]> {
   const headers = await getAuthHeaders();
-  const res = await fetch(`${LARAVEL_API_URL}/categories?tree=1&per_page=100`, {
+  const res = await fetch(`${LARAVEL_API_URL}/categories?tree=1&per_page=400`, {
     headers,
   });
   if (!res.ok) return [];
@@ -97,7 +97,7 @@ async function apiUpdateCategory(
   data: {
     name?: string;
     description?: string;
-    parent?: number;
+    parent?: number | null;
     type?: string;
     sort_order?: number;
   },
@@ -171,6 +171,26 @@ function buildTree(categories: Category[]): CategoryNode[] {
     return { ...cat, children, level };
   }
   return categories.map((c) => mapNode(c, 0));
+}
+
+// flattenTree vacía `children` en cada nodo (ver arriba), así que para saber
+// los hijos/descendientes reales de una categoría hay que buscarla en el
+// árbol anidado original, no en la lista aplanada.
+function findNodeInTree(nodes: Category[], id: number): Category | null {
+  for (const node of nodes) {
+    if (node.id === id) return node;
+    const found = findNodeInTree(node.children ?? [], id);
+    if (found) return found;
+  }
+  return null;
+}
+
+function collectDescendantIds(node: Category): number[] {
+  const ids: number[] = [];
+  for (const child of node.children ?? []) {
+    ids.push(child.id, ...collectDescendantIds(child));
+  }
+  return ids;
 }
 
 // ─── Hook Personalizado ───────────────────────────────────────────────────────
@@ -262,6 +282,29 @@ export const useCategories = () => {
     return flatCategories.filter((c) => c.level < 2);
   }, [flatCategories]);
 
+  // Para el formulario de edición: excluye la categoría seleccionada y todos
+  // sus descendientes, así no se puede elegir como padre a un hijo/nieto
+  // propio (evita ciclos que cuelgan buildTree en recursión infinita).
+  const editableParentOptions = useMemo(() => {
+    if (!selectedCategoryId) return parentOptions;
+    const node = findNodeInTree(categories, selectedCategoryId);
+    if (!node) return parentOptions;
+    const excludedIds = new Set<number>([
+      selectedCategoryId,
+      ...collectDescendantIds(node),
+    ]);
+    return parentOptions.filter((p) => !excludedIds.has(p.id));
+  }, [parentOptions, categories, selectedCategoryId]);
+
+  // Hijos directos reales de la categoría seleccionada (selectedCategory.children
+  // siempre es [] porque viene de flatCategories/flattenTree). Se usa para
+  // advertir antes de borrar una categoría con subcategorías.
+  const selectedCategoryChildrenCount = useMemo(() => {
+    if (!selectedCategoryId) return 0;
+    const node = findNodeInTree(categories, selectedCategoryId);
+    return node?.children?.length ?? 0;
+  }, [categories, selectedCategoryId]);
+
   const addCategory = useCallback(
     (data: {
       name: string;
@@ -307,6 +350,8 @@ export const useCategories = () => {
     selectedCategoryId,
     setSelectedCategoryId,
     parentOptions,
+    editableParentOptions,
+    selectedCategoryChildrenCount,
     refresh: refetch,
     addCategory,
     editCategory,

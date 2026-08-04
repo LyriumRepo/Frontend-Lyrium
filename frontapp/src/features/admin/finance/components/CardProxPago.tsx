@@ -71,7 +71,7 @@ export default function CardProxPago({ data, formatCurrency }: CardProxPagoProps
                 <div className="space-y-8">
                     <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 dark:bg-gradient-to-br dark:from-emerald-950/50 dark:to-teal-950/50 dark:border dark:border-emerald-800/30 p-6 rounded-[2rem] text-center">
                         <p className="text-sm font-black text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-widest mb-1">Recaudado</p>
-                        <p className="text-5xl font-black text-emerald-800 dark:text-emerald-200">{formatCurrency(recaudado)}</p>
+                        <p className="text-2xl sm:text-5xl font-black text-emerald-800 dark:text-emerald-200">{formatCurrency(recaudado)}</p>
                     </div>
                     <div className="space-y-4">
                         <div className="flex justify-between text-sm font-bold text-[var(--text-secondary)]">

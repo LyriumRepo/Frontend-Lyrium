@@ -9,6 +9,7 @@ import MessageInput from '@/components/shared/chat/MessageInput';
 import ConversationList from '@/components/shared/chat/ConversationList';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
+import { LyriumSelect } from '@/components/ui';
 import { ChatCategory } from '@/features/seller/chat/types';
 import type { Message as BubbleMessage } from '@/components/shared/chat/MessageBubble';
 import type { Conversation } from '@/components/shared/chat/ConversationList';
@@ -48,48 +49,40 @@ function NewChatForm({
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto green-scrollbar p-6 space-y-4">
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Tu Tienda</label>
-                    <select
+                    <LyriumSelect
                         value={storeId}
-                        onChange={(e) => setStoreId(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                        required
-                    >
-                        {stores.length === 0 && <option value="">Sin tiendas</option>}
-                        {stores.map(s => (
-                            <option key={s.id} value={s.id}>{s.name}</option>
-                        ))}
-                    </select>
+                        onChange={setStoreId}
+                        placeholder={stores.length === 0 ? 'Sin tiendas' : 'Seleccionar...'}
+                        disabled={stores.length === 0}
+                        options={stores.map(s => ({ value: String(s.id), label: s.name }))}
+                    />
                 </div>
 
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Cliente</label>
-                    <select
+                    <LyriumSelect
                         value={customerId}
-                        onChange={(e) => setCustomerId(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                        required
-                    >
-                        {customers.length === 0 && <option value="">Sin clientes</option>}
-                        {customers.map(c => (
-                            <option key={c.id} value={c.id}>{c.name} — {c.email}</option>
-                        ))}
-                    </select>
+                        onChange={setCustomerId}
+                        searchable
+                        placeholder={customers.length === 0 ? 'Sin clientes' : 'Seleccionar...'}
+                        disabled={customers.length === 0}
+                        options={customers.map(c => ({ value: String(c.id), label: `${c.name} — ${c.email}` }))}
+                    />
                 </div>
 
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Categoría</label>
-                    <select
+                    <LyriumSelect
                         value={category}
-                        onChange={(e) => setCategory(e.target.value as ChatCategory)}
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                        required
-                    >
-                        <option value="informacion">Solicitud de Información</option>
-                        <option value="positivo">Comentario Positivo</option>
-                        <option value="negativo">Comentario Negativo</option>
-                        <option value="logistica">Logística </option>
-                        <option value="facturacion">Soporte de Facturación </option>
-                    </select>
+                        onChange={(v) => setCategory(v as ChatCategory)}
+                        options={[
+                            { value: 'informacion', label: 'Solicitud de Información' },
+                            { value: 'positivo', label: 'Comentario Positivo' },
+                            { value: 'negativo', label: 'Comentario Negativo' },
+                            { value: 'logistica', label: 'Logística' },
+                            { value: 'facturacion', label: 'Soporte de Facturación' }
+                        ]}
+                    />
                 </div>
 
                 <div>
@@ -269,18 +262,18 @@ export function ChatPageClient() {
                                 className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                             />
                         ) : (
-                            <select
+                            <LyriumSelect
                                 value={filterValue}
-                                onChange={(e) => setFilterValue(e.target.value)}
-                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                            >
-                                <option value="">Todas las categorías</option>
-                                <option value="informacion">Solicitud de Información</option>
-                                <option value="positivo">Comentario Positivo</option>
-                                <option value="negativo">Comentario Negativo</option>
-                                <option value="logistica">Logística </option>
-                                <option value="facturacion">Soporte de Facturación</option>
-                            </select>
+                                onChange={setFilterValue}
+                                placeholder="Todas las categorías"
+                                options={[
+                                    { value: 'informacion', label: 'Solicitud de Información' },
+                                    { value: 'positivo', label: 'Comentario Positivo' },
+                                    { value: 'negativo', label: 'Comentario Negativo' },
+                                    { value: 'logistica', label: 'Logística' },
+                                    { value: 'facturacion', label: 'Soporte de Facturación' }
+                                ]}
+                            />
                         )}
                     </div>
                 )}
@@ -357,7 +350,7 @@ export function ChatPageClient() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col h-[calc(100svh-120px)] md:h-[calc(100vh-140px)] animate-fadeIn">
+            <div className="flex flex-col flex-1 min-h-0 animate-fadeIn p-4 md:p-8">
                 <ModuleHeader
                     title="Chat con Clientes"
                     subtitle="Comunicación directa con tus clientes"
@@ -371,7 +364,11 @@ export function ChatPageClient() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100svh-120px)] md:h-[calc(100vh-140px)] animate-fadeIn">
+        // BaseLayout ya no aplica padding a <main> en esta ruta (immersive helpdesk),
+        // así que el padding vive acá — mismo p-4 md:p-8 que /seller/help hereda de <main>.
+        // flex-1 min-h-0 (en vez de un h-[calc(...)] fijo) deja que el padre resuelva la
+        // altura, igual que hace /admin/helpdesk (la otra ruta immersive).
+        <div className="flex flex-col flex-1 min-h-0 animate-fadeIn p-4 md:p-8">
             <ModuleHeader
                 title="Chat con Clientes"
                 subtitle="Comunicación directa con tus clientes"
@@ -380,7 +377,7 @@ export function ChatPageClient() {
 
             <div className="flex-1 min-h-0">
                 {showNewChatForm ? (
-                    <div className="h-full flex items-center justify-center px-4 md:px-8">
+                    <div className="h-full flex items-center justify-center">
                         <div className="w-full max-w-xl">
                             <NewChatForm
                                 stores={stores}

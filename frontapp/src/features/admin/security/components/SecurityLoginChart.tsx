@@ -4,9 +4,9 @@ import React, { useState, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Maximize2, X } from 'lucide-react';
+import { Maximize2 } from 'lucide-react';
 import { ChartDataPoint } from '@/shared/lib/api/adminSecurityRepository';
+import BaseModal from '@/components/ui/BaseModal';
 
 interface Props {
   data: ChartDataPoint[];
@@ -112,78 +112,42 @@ export function SecurityLoginChart({ data, loading }: Props) {
         )}
       </div>
 
-      <AnimatePresence>
-        {modalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            onClick={() => setModalOpen(false)}
-            onKeyDown={(e) => { if (e.key === 'Escape') setModalOpen(false); }}
-            role="dialog"
-            aria-modal="true"
-            tabIndex={-1}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="bg-[var(--bg-card)] rounded-3xl border border-[var(--border-subtle)] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
-                <div>
-                  <h3 className="text-base font-black text-[var(--text-primary)] uppercase tracking-tight">
-                    Intentos de Login (30 días)
-                  </h3>
-                  <p className="text-[11px] text-[var(--text-secondary)] font-semibold">
-                    Exitosos vs Fallidos por día — vista ampliada
-                  </p>
-                </div>
-                <button
-                  onClick={() => setModalOpen(false)}
-                  className="p-2 rounded-xl hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="p-6">
-                <ResponsiveContainer width="100%" height={450}>
-                  <BarChart data={data} barGap={4}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
-                      tickFormatter={(v: string) => {
-                        const [y, m, d] = v.split('-');
-                        return `${parseInt(d)}/${parseInt(m)}`;
-                      }}
-                    />
-                    <YAxis tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
-                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-                    <Legend
-                      wrapperStyle={{ fontSize: '12px', fontWeight: 700, paddingTop: '8px' }}
-                    />
-                    <Bar dataKey="success" name="Exitosos" fill="#34d399" radius={[6, 6, 0, 0]} activeBar={{ fill: '#2bae7a', filter: 'url(#bar-shadow)' }} isAnimationActive={true} animationDuration={400} />
-                    <Bar dataKey="failed" name="Fallidos" fill="#14b8a6" radius={[6, 6, 0, 0]} activeBar={{ fill: '#0e9484', filter: 'url(#bar-shadow)' }} isAnimationActive={true} animationDuration={400} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="px-6 py-3 border-t border-[var(--border-subtle)] flex items-center gap-3 text-[10px] text-[var(--text-muted)]">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded bg-[#34d399]" /> Exitosos
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded bg-[#14b8a6]" /> Fallidos
-                </span>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <BaseModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Intentos de Login (30 días)"
+        subtitle="Exitosos vs Fallidos por día — vista ampliada"
+        size="5xl"
+      >
+        <ResponsiveContainer width="100%" height={450}>
+          <BarChart data={data} barGap={4}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
+            <XAxis
+              dataKey="date"
+              tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
+              tickFormatter={(v: string) => {
+                const [y, m, d] = v.split('-');
+                return `${parseInt(d)}/${parseInt(m)}`;
+              }}
+            />
+            <YAxis tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+            <Legend
+              wrapperStyle={{ fontSize: '12px', fontWeight: 700, paddingTop: '8px' }}
+            />
+            <Bar dataKey="success" name="Exitosos" fill="#34d399" radius={[6, 6, 0, 0]} activeBar={{ fill: '#2bae7a', filter: 'url(#bar-shadow)' }} isAnimationActive={true} animationDuration={400} />
+            <Bar dataKey="failed" name="Fallidos" fill="#14b8a6" radius={[6, 6, 0, 0]} activeBar={{ fill: '#0e9484', filter: 'url(#bar-shadow)' }} isAnimationActive={true} animationDuration={400} />
+          </BarChart>
+        </ResponsiveContainer>
+        <div className="pt-3 mt-3 border-t border-[var(--border-subtle)] flex items-center gap-3 text-[10px] text-[var(--text-muted)]">
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded bg-[#34d399]" /> Exitosos
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded bg-[#14b8a6]" /> Fallidos
+          </span>
+        </div>
+      </BaseModal>
     </>
   );
 }

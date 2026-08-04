@@ -56,9 +56,14 @@ export function StorePageClient(_props: StorePageClientProps) {
     const { showToast } = useToast();
 
     const handleSave = () => {
-        saveAction(() => {
-            showToast('Cambios guardados exitosamente', 'success');
-        });
+        saveAction(
+            () => {
+                showToast('Cambios guardados exitosamente', 'success');
+            },
+            (message) => {
+                showToast(message || 'Hubo un error al guardar los cambios. Intenta nuevamente.', 'error');
+            }
+        );
     };
 
     if (loading) {
@@ -91,6 +96,8 @@ export function StorePageClient(_props: StorePageClientProps) {
             isLoading={saving}
             leftIcon="Save"
             size="lg"
+            fullWidth
+            className="sm:w-auto"
         >
             {saving ? 'Guardando...' : 'Guardar Cambios'}
         </BaseButton>
@@ -103,12 +110,20 @@ export function StorePageClient(_props: StorePageClientProps) {
                 subtitle="Gestión integral de identidad, sucursales y experiencia visual"
             />
 
-            <div className="flex justify-center sm:justify-end">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mx-auto md:mx-0 md:ml-auto sm:justify-end">
                 {saveButton}
             </div>
 
             <div className="animate-fadeIn">
-                <BranchManagement branches={branches} setBranches={updateBranches} />
+                <BranchManagement
+                    branches={branches}
+                    setBranches={(newBranches) => updateBranches(newBranches, {
+                        onError: (message) => showToast(
+                            message || 'No se pudo guardar el cambio en sucursales. Verifica que departamento, provincia y distrito estén completos.',
+                            'error'
+                        ),
+                    })}
+                />
                 <StoreIdentity config={config!} updateConfig={handleUpdateConfig} categories={categories} />
                 <ContactSocial config={config!} updateConfig={handleUpdateConfig} />
                 <Policies

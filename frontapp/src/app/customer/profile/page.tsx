@@ -10,6 +10,7 @@ import { userRepository } from '@/shared/lib/api/factory';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import WelcomeGuide from '@/features/customer/onboarding/WelcomeGuide';
 import ProfileCompletionGuide from '@/features/customer/onboarding/ProfileCompletionGuide';
+import { LyriumSelect } from '@/components/ui';
 
 const CONFETTI_COLORS = [
   '#2A5A4D', '#64c695', '#9cb04e',
@@ -500,13 +501,15 @@ export default function CustomerProfilePage() {
         )}
       </div>
 
-      <div className="flex justify-center md:justify-end">
+      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mx-auto md:mx-0 md:ml-auto sm:justify-end">
         <BaseButton
           onClick={() => isEditMode ? handleSave() : setIsEditMode(true)}
           isLoading={saving}
           variant="action"
           leftIcon={isEditMode ? "Check" : "Pencil"}
-          size="md"
+          size="lg"
+          fullWidth
+          className="sm:w-auto"
         >
           {isEditMode ? "Guardar Cambios" : "Editar Información"}
         </BaseButton>
@@ -514,23 +517,23 @@ export default function CustomerProfilePage() {
 
       <form className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         <div className="md:col-span-8 bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-          <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 flex items-center gap-5 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-4 sm:p-6 md:p-8 flex items-center gap-3 sm:gap-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
-              <Icon name="User" className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner flex-shrink-0">
+              <Icon name="User" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-2xl font-black tracking-tighter leading-none text-white">
+              <h3 className="text-base sm:text-xl md:text-2xl font-black tracking-tighter leading-none text-white">
                 Información Personal
               </h3>
-              <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">
+              <p className="text-[9px] sm:text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">
                 Datos del Usuario
               </p>
             </div>
           </div>
 
-          <div className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="p-4 sm:p-6 md:p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
               <div className="space-y-1">
                 <label htmlFor="nombres" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
                   Nombres <span className="text-red-500" aria-hidden="true">*</span>
@@ -689,36 +692,19 @@ export default function CustomerProfilePage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="tipo_documento" className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-                  Tipo de Documento <span className="text-red-500" aria-hidden="true">*</span>
-                  <span className="sr-only"> (obligatorio)</span>
-                </label>
-                <select
-                  id="tipo_documento"
-                  name="tipo_documento"
+                <LyriumSelect
+                  label={<>Tipo de Documento <span className="text-red-500" aria-hidden="true">*</span></>}
                   value={formData.tipo_documento}
-                  onChange={handleTipoDocumentoChange}
+                  onChange={(v) => handleTipoDocumentoChange({ target: { value: v } } as React.ChangeEvent<HTMLSelectElement>)}
                   disabled={!isEditMode}
-                  aria-required="true"
-                  aria-invalid={!!errors.tipo_documento}
-                  aria-describedby={errors.tipo_documento ? 'tipo_documento-error' : undefined}
-                  className={`w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] p-3 border-2 rounded-xl outline-none transition-all duration-300 bg-white dark:bg-[var(--bg-secondary)] ${
-                    errors.tipo_documento
-                      ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30'
-                      : 'border-gray-200 dark:border-[var(--border-subtle)] focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 dark:focus:ring-[var(--icons-green)]'
-                  }`}
-                >
-                  <option value="DNI">DNI</option>
-                  <option value="CE">Carnet de extranjería</option>
-                  <option value="PASAPORTE">Pasaporte</option>
-                  <option value="RUC">RUC</option>
-                </select>
-                {errors.tipo_documento && (
-                  <p id="tipo_documento-error" role="alert" className="flex items-center gap-1 text-xs text-red-500 font-semibold ml-1">
-                    <Icon name="AlertCircle" className="w-3.5 h-3.5 flex-shrink-0" />
-                    {errors.tipo_documento}
-                  </p>
-                )}
+                  error={errors.tipo_documento}
+                  options={[
+                    { value: 'DNI', label: 'DNI' },
+                    { value: 'CE', label: 'Carnet de extranjería' },
+                    { value: 'PASAPORTE', label: 'Pasaporte' },
+                    { value: 'RUC', label: 'RUC' }
+                  ]}
+                />
               </div>
 
               <div className="space-y-1">
@@ -758,22 +744,22 @@ export default function CustomerProfilePage() {
 
         <div className="md:col-span-4 space-y-8 self-stretch">
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-xl border border-slate-100 dark:border-[var(--border-subtle)] overflow-hidden">
-            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-8 flex items-center gap-5 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-500 to-sky-300 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] p-4 sm:p-6 md:p-8 flex items-center gap-3 sm:gap-5 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
-                <Icon name="Camera" className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner flex-shrink-0">
+                <Icon name="Camera" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-xl font-black tracking-tighter leading-none text-white">
+                <h3 className="text-base sm:text-lg md:text-xl font-black tracking-tighter leading-none text-white">
                   Foto de Perfil
                 </h3>
-                <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">
+                <p className="text-[9px] sm:text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1">
                   Opcional
                 </p>
               </div>
             </div>
 
-            <div className="p-8 flex flex-col items-center">
+            <div className="p-4 sm:p-6 md:p-8 flex flex-col items-center">
               <div className="relative group mb-6">
                 <div id="foto" className="w-40 h-40 rounded-3xl overflow-hidden border-4 border-sky-100 shadow-xl group-hover:scale-105 transition-all duration-500">
                   {avatarPreview || formData.foto ? (

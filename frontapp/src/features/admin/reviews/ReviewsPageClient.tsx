@@ -7,6 +7,7 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import Pagination from '@/components/ui/Pagination';
 import { BaseSkeleton } from '@/components/ui/BaseSkeleton';
+import { LyriumSelect } from '@/components/ui';
 import {
   Star,
   ShieldAlert,
@@ -984,33 +985,34 @@ function MedalsTab() {
     );
   };
 
-  const selectCls =
-    'px-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-[var(--icons-green)]/10 transition-all outline-none appearance-none cursor-pointer';
-
   return (
     <div className="space-y-4">
       {/* Filtros */}
       <div className="flex items-center gap-3 flex-wrap">
-        <select
-          value={filterEntity}
-          onChange={(e) => { setFilterEntity(e.target.value); setPage(1); }}
-          className={selectCls}
-        >
-          <option value="">Todas las entidades</option>
-          <option value="store">Tiendas</option>
-          <option value="product">Productos</option>
-          <option value="service">Servicios</option>
-        </select>
-        <select
-          value={filterStatus}
-          onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-          className={selectCls}
-        >
-          <option value="">Todos los estados</option>
-          <option value="pending">Pendientes</option>
-          <option value="approved">Activas</option>
-          <option value="suspended">Suspendidas</option>
-        </select>
+        <div className="w-full sm:w-[200px]">
+          <LyriumSelect
+            value={filterEntity}
+            onChange={(v) => { setFilterEntity(v); setPage(1); }}
+            placeholder="Todas las entidades"
+            options={[
+              { value: 'store', label: 'Tiendas' },
+              { value: 'product', label: 'Productos' },
+              { value: 'service', label: 'Servicios' }
+            ]}
+          />
+        </div>
+        <div className="w-full sm:w-[200px]">
+          <LyriumSelect
+            value={filterStatus}
+            onChange={(v) => { setFilterStatus(v); setPage(1); }}
+            placeholder="Todos los estados"
+            options={[
+              { value: 'pending', label: 'Pendientes' },
+              { value: 'approved', label: 'Activas' },
+              { value: 'suspended', label: 'Suspendidas' }
+            ]}
+          />
+        </div>
         <span className="text-xs font-bold text-[var(--text-muted)] ml-auto">{meta.total} medalla(s)</span>
       </div>
 
@@ -1143,7 +1145,7 @@ export function ReviewsPageClient() {
         </div>
 
         {/* Tab content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {activeTab === 'tiendas' && <TopStoresTab />}
           {activeTab === 'productos' && <TopProductsTab />}
           {activeTab === 'servicios' && <TopServicesTab />}

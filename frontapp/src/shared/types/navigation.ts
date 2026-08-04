@@ -7,6 +7,8 @@ export interface NavItem {
     badge?: string | number;
     children?: NavItem[];
     color?: string;
+    requiredCapability?: string;
+    locked?: boolean;
 }
 
 export interface NavSection {

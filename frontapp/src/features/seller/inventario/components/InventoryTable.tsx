@@ -6,13 +6,14 @@ import Icon from '@/components/ui/Icon';
 import { InventoryItem } from '../types';
 import { getStockStatus } from '../hooks/useInventory';
 import { StockBadge } from './StockBadge';
+import { ProductStatusBadge } from '@/features/seller/catalog/components/ProductCard';
 
 interface Props {
     items: InventoryItem[];
     onUpdateStock: (id: string, stock: number) => void;
 }
 
-const HEADERS = ['SKU', 'Producto', 'Categoría', 'Stock', 'Disponible', 'Estado', 'Editar Stock'];
+const HEADERS = ['SKU', 'Producto', 'Categoría', 'Stock', 'Disponible', 'Estado Stock', 'Aprobación', 'Editar Stock'];
 
 interface MobileInventoryCardProps {
     item: InventoryItem;
@@ -51,13 +52,26 @@ function MobileInventoryCard({
             {/* ── Fila colapsada — siempre visible ── */}
             <button
                 onClick={() => setExpanded((v) => !v)}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors active:bg-[var(--bg-secondary)]/60"
+                className="w-full flex flex-col gap-1.5 px-4 py-3 text-left transition-colors active:bg-[var(--bg-secondary)]/60"
             >
-                <span className="flex-shrink-0 font-mono text-[10px] font-bold text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-2 py-1 rounded-lg border border-[var(--border-subtle)]">
-                    {item.sku}
-                </span>
+                {/* SKU + badges + chevron */}
+                <div className="flex items-center justify-between gap-2">
+                    <span className="flex-shrink-0 font-mono text-[10px] font-bold text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-2 py-1 rounded-lg border border-[var(--border-subtle)] truncate">
+                        {item.sku}
+                    </span>
 
-                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                        <StockBadge status={status} />
+                        <ProductStatusBadge status={item.approvalStatus} />
+                        <Icon
+                            name={expanded ? 'ChevronUp' : 'ChevronDown'}
+                            className="w-4 h-4 flex-shrink-0 text-[var(--text-secondary)] transition-transform"
+                        />
+                    </div>
+                </div>
+
+                {/* Nombre + disponible */}
+                <div>
                     <p className="text-sm font-black text-[var(--text-primary)] truncate leading-tight">
                         {item.name}
                     </p>
@@ -65,15 +79,6 @@ function MobileInventoryCard({
                         Disponible: <span className="font-mono">{available}</span>
                     </p>
                 </div>
-
-                <span className="flex-shrink-0">
-                    <StockBadge status={status} />
-                </span>
-
-                <Icon
-                    name={expanded ? 'ChevronUp' : 'ChevronDown'}
-                    className="w-4 h-4 flex-shrink-0 text-[var(--text-secondary)] transition-transform"
-                />
             </button>
 
             {/* ── Panel expandido ── */}
@@ -168,7 +173,7 @@ export function InventoryTable({ items, onUpdateStock }: Props) {
             </div>
 
             {/* ══ DESKTOP: tabla completa (hidden sm:block) ══════════════════ */}
-            <div className="hidden sm:block rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
+            <div className="hidden sm:block rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-x-auto">
                 <table className="w-full border-separate border-spacing-0">
                     <thead>
                         <tr className="bg-[var(--bg-secondary)] border-b border-[var(--border-subtle)]">
@@ -257,6 +262,11 @@ export function InventoryTable({ items, onUpdateStock }: Props) {
                                     {/* Status */}
                                     <td className="px-4 py-3">
                                         <StockBadge status={status} />
+                                    </td>
+
+                                    {/* Approval status */}
+                                    <td className="px-4 py-3">
+                                        <ProductStatusBadge status={item.approvalStatus} />
                                     </td>
 
                                     {/* Edit action */}

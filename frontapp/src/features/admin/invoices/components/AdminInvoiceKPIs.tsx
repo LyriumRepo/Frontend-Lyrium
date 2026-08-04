@@ -59,7 +59,7 @@ export default function AdminInvoiceKPIsDisplay({ kpis }: Props) {
 
     return (
         <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {items.map((item) => (
                     <BaseStatCard
                         key={item.label}
@@ -83,7 +83,7 @@ export default function AdminInvoiceKPIsDisplay({ kpis }: Props) {
                 >
                     <div className="space-y-6">
                         <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 dark:bg-gradient-to-br dark:from-emerald-950/50 dark:to-teal-950/50 dark:border dark:border-emerald-800/30 p-6 rounded-[2rem] text-center">
-                            <p className="text-5xl font-black text-emerald-800 dark:text-emerald-200">{detail.value}</p>
+                            <p className="text-2xl sm:text-5xl font-black text-emerald-800 dark:text-emerald-200">{detail.value}</p>
                             <p className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-widest mt-2">{detail.label}</p>
                         </div>
                         <div className="p-4 rounded-2xl bg-[var(--bg-secondary)]">

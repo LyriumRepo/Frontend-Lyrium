@@ -5,6 +5,9 @@ import { createPortal } from 'react-dom';
 import Icon from '@/components/ui/Icon';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
 import { getAuthHeaders } from '@/shared/lib/api/token-store';
+import InvoiceOrderItemsSection from '@/shared/components/invoices/InvoiceOrderItemsSection';
+import InvoiceStoreCommissionsSection from '@/shared/components/invoices/InvoiceStoreCommissionsSection';
+import { toPercent } from '@/shared/components/invoices/types';
 import type { AdminInvoiceRow } from '../hooks/useAdminInvoices';
 
 interface Props {
@@ -73,6 +76,11 @@ export default function AdminInvoiceDrawer({ invoice, isOpen, onClose }: Props) 
     const unitPrice = (item: { total: number; cantidad?: number }) =>
         item.cantidad && item.cantidad > 0 ? item.total / item.cantidad : 0;
 
+    const orderItems = invoice.order?.items ?? [];
+    const storeCommissions = invoice.store_commissions ?? [];
+    // La card única de "Comisión" queda cubierta por el desglose por tienda
+    const hasStoreCommissions = storeCommissions.length > 0 || orderItems.length > 0;
+
     return createPortal(
         <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6">
             <div
@@ -113,7 +121,7 @@ export default function AdminInvoiceDrawer({ invoice, isOpen, onClose }: Props) 
                 </div>
 
                 {/* Scrollable body */}
-                <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-5 green-scrollbar">
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-6 space-y-5 green-scrollbar">
 
                     {/* Store chip */}
                     {invoice.stores.length > 0 && (
@@ -170,24 +178,42 @@ export default function AdminInvoiceDrawer({ invoice, isOpen, onClose }: Props) 
                         </div>
                     )}
 
+                    {/* Ítems de la orden original */}
+                    <InvoiceOrderItemsSection items={orderItems} />
+
+                    {/* Comisiones por tienda */}
+                    <InvoiceStoreCommissionsSection
+                        commissions={storeCommissions}
+                        items={orderItems}
+                        fallbackRate={invoice.commission_rate}
+                    />
+
                     {/* Commission card */}
-                    {(invoice.commission_rate != null || invoice.commission_amount != null) && (
+                    {!hasStoreCommissions && (invoice.commission_rate != null || invoice.commission_amount != null) && (
                         <div className="space-y-2">
                             <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
                                 <Icon name="DollarSign" className="w-4 h-4" /> Comisión
                             </h3>
                             <div className="bg-[var(--bg-secondary)] rounded-2xl p-4 border border-[var(--border-subtle)] space-y-3">
-                                <div className="grid grid-cols-3 gap-3">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                     <div>
                                         <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Tasa</p>
                                         <p className="text-sm font-bold text-[var(--text-primary)]">
-                                            {invoice.commission_rate != null ? `${(invoice.commission_rate * 100).toFixed(1)}%` : '—'}
+                                            {invoice.commission_rate != null ? `${toPercent(invoice.commission_rate).toFixed(1)}%` : '—'}
                                         </p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Comisión</p>
                                         <p className="text-sm font-bold text-[var(--text-primary)]">
                                             {invoice.commission_amount != null ? formatCurrency(invoice.commission_amount) : '—'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">IGV</p>
+                                        <p className="text-sm font-bold text-[var(--text-primary)]">
+                                            {invoice.commission_amount != null
+                                                ? formatCurrency(Math.round(((invoice.commission_amount / 1.18) * 0.18) * 100) / 100)
+                                                : '—'}
                                         </p>
                                     </div>
                                     <div>

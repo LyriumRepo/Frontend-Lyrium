@@ -1,3 +1,5 @@
+import type { InvoiceOrderSummary, InvoiceStoreCommission } from '@/shared/components/invoices/types';
+
 export type VoucherStatus = 'DRAFT' | 'SENT_WAIT_CDR' | 'ACCEPTED' | 'OBSERVED' | 'REJECTED';
 export type VoucherType = 'FACTURA' | 'BOLETA' | 'NOTA_CREDITO';
 
@@ -42,6 +44,10 @@ export interface Voucher {
     updated_at?: string;
     items?: { product_name?: string; service_name?: string; quantity: number; line_total: number }[];
     order_type?: 'Producto' | 'Servicio' | 'Producto y Servicio' | null;
+    /** Pedido original con sus ítems y tiendas (InvoiceResource → `order`) */
+    order?: InvoiceOrderSummary | null;
+    /** Comisiones agrupadas por tienda (InvoiceResource → `storeCommissions`) */
+    store_commissions?: InvoiceStoreCommission[] | null;
 }
 
 export interface InvoiceKPIs {

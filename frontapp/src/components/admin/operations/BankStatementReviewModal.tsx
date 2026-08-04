@@ -6,6 +6,7 @@ import type {
   BatchStoreLine,
 } from '@/features/admin/operations/types/scan';
 import type { Supplier } from '@/features/admin/operations/types/operations';
+import { LyriumSelect } from '@/components/ui';
 
 function formatAmount(n: number | null): string {
   if (n === null) return '—';
@@ -193,18 +194,14 @@ export function BankStatementReviewModal({
         <label className="text-[13px] text-[var(--text-secondary)] shrink-0">
           Proveedor:
         </label>
-        <select
-          className="text-[13px] border border-[var(--border-subtle)] rounded-lg px-3 py-[7px] bg-[var(--bg-card)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-secondary)] flex-1"
-          value={supplierId}
-          onChange={(e) => setSupplierId(Number(e.target.value))}
-        >
-          <option value={0}>Selecciona un proveedor</option>
-          {suppliers.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.nombre}
-            </option>
-          ))}
-        </select>
+        <LyriumSelect
+          className="flex-1"
+          value={supplierId ? String(supplierId) : ''}
+          onChange={(v) => setSupplierId(Number(v))}
+          placeholder="Selecciona un proveedor"
+          searchable
+          options={suppliers.map((s) => ({ value: String(s.id), label: s.nombre }))}
+        />
       </div>
 
       <div className="max-h-[360px] overflow-y-auto green-scrollbar border border-[var(--border-subtle)] rounded-xl">

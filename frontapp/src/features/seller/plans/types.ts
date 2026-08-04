@@ -97,8 +97,15 @@ export interface Request {
 export interface DurationPreset {
   id: string;
   label: string;
-  months: number;
+  /** null solo para el preset 'lifetime' (pago único, no se factura por mes) */
+  months: number | null;
   isTrial: boolean;
+  /** "Meses gratis" equivalentes al descuento — solo informativo en UI, no se usa para calcular el total */
+  discountMonths?: number;
+  /** % real aplicado sobre precio_mensual x meses para obtener el total a cobrar */
+  discountPercent?: number;
+  isLifetime?: boolean;
+  lifetimePrice?: number;
 }
 
 export interface PaymentSummary {

@@ -28,7 +28,7 @@ export default function ModuleHeader({
             style={{ minHeight: height }}
         >
             {/* ── Lado Izquierdo ── */}
-            <div className="lateral-gradient-mask dark:!bg-[var(--bg-card)] pl-4 sm:pl-8 pr-8 sm:pr-16 md:pr-24 py-4 sm:py-7 flex flex-col justify-center w-fit max-w-[70%] min-w-0 z-10 transition-all duration-500">
+            <div className="lateral-gradient-mask dark:!bg-[var(--bg-card)] pl-4 sm:pl-8 pr-8 sm:pr-16 md:pr-24 py-4 sm:py-7 flex flex-col justify-center w-fit max-w-[85%] min-w-0 z-10 transition-all duration-500">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     {icon && (
                         <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] group-hover:bg-[var(--celeste-500)]/10 group-hover:text-[var(--celeste-500)] transition-all duration-500">

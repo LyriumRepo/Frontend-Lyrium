@@ -2,6 +2,7 @@ import React from 'react';
 import { FAQArticle, AuditEntry, ActionType } from '@/lib/types/admin/helpdesk';
 import { scrollbarClass, glassCardClass } from './HelpDeskShared';
 import BaseButton from '@/components/ui/BaseButton';
+import { LyriumSelect } from '@/components/ui';
 import { Search, PlusCircle, ShieldCheck, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 // --- FAQ VIEW ---
@@ -109,19 +110,18 @@ export const AuditTable: React.FC<AuditTableProps> = ({ entries, filters, onFilt
                         />
                     </div>
                     <div>
-                        <label htmlFor="helpdesk-type" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1 mb-2 block font-industrial">Tipo de Acción</label>
-                        <select
-                            id="helpdesk-type"
+                        <LyriumSelect
+                            label="Tipo de Acción"
                             value={filters.type}
-                            onChange={(e) => onFilterChange({ type: e.target.value as ActionType | '' })}
-                            className="w-full px-4 py-3 bg-[var(--bg-input)] border-none rounded-xl text-xs font-bold font-industrial"
-                        >
-                            <option value="">Todas</option>
-                            <option value="Escalamiento">Escalamiento</option>
-                            <option value="Cierre">Cierre</option>
-                            <option value="Respuesta">Respuesta</option>
-                            <option value="Asignación">Asignación</option>
-                        </select>
+                            onChange={(v) => onFilterChange({ type: v as ActionType | '' })}
+                            placeholder="Todas"
+                            options={[
+                                { value: 'Escalamiento', label: 'Escalamiento' },
+                                { value: 'Cierre', label: 'Cierre' },
+                                { value: 'Respuesta', label: 'Respuesta' },
+                                { value: 'Asignación', label: 'Asignación' }
+                            ]}
+                        />
                     </div>
                 </div>
             </div>

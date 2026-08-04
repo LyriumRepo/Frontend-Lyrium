@@ -83,13 +83,13 @@ export default function CheckoutStepBar() {
             return (
               <div
                 key={step.id}
-                className={`flex items-center ${idx < visibleSteps.length - 1 ? 'flex-1' : ''}`}
+                className={`flex items-start ${idx < visibleSteps.length - 1 ? 'flex-1' : ''}`}
                 aria-current={isActive ? 'step' : undefined}
                 aria-label={`Paso ${step.id} de ${visibleSteps.length}: ${step.label}${isCompleted ? ' (completado)' : isActive ? ' (paso actual)' : ''}`}
               >
                 {/* Step column */}
                 <div
-                  className="flex flex-col items-center justify-center gap-2 relative z-10"
+                  className="flex flex-col items-center justify-center gap-3 sm:gap-4 relative z-10"
                   style={
                     {
                       '--step-accent': color.accent,
@@ -147,8 +147,10 @@ export default function CheckoutStepBar() {
 
                 {/* Connector (placed after the step column) */}
                 {idx < visibleSteps.length - 1 && (
-                  <div className="flex-1 h-3 flex items-start px-1 sm:px-2 relative z-0 -mt-4 sm:-mt-10">
-                    {/* Negative margin to align with circle vertical center */}
+                  <div className="flex-1 h-3 flex items-start px-1 sm:px-2 relative z-0 mt-3 sm:mt-[22px]">
+                    {/* margin-top = mitad del círculo (w-9/sm:w-14) menos mitad del conector (h-3) —
+                        alinea el conector con el centro exacto del círculo sin depender de la
+                        altura del ícono de abajo. */}
                     <div className="w-full h-1.5 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-full overflow-hidden transition-all duration-500">
                       <div
                         className="h-full rounded-full transition-all duration-700"

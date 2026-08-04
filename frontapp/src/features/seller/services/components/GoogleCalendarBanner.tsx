@@ -18,6 +18,7 @@ import {
   X,
   Sparkles,
   RefreshCw,
+  Lock,
 } from 'lucide-react';
 import {
   getGoogleCalendarStatus,
@@ -25,10 +26,14 @@ import {
   disconnectGoogleCalendar,
 } from '@/shared/lib/api/googleCalendarRepository';
 import { CalendarStatus } from '../types';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import PlanUpgradeMessage from '@/features/seller/store/components/PlanUpgradeMessage';
 
 type Feedback = { type: 'success' | 'error'; msg: string } | null;
 
 export default function GoogleCalendarBanner() {
+  const { can, capabilitiesLoading } = usePlanCapabilities();
+  const hasAccess = can('can_google_calendar');
   const [status, setStatus] = useState<CalendarStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
@@ -126,7 +131,18 @@ export default function GoogleCalendarBanner() {
     }
   };
 
-  if (loading) return null;
+  if (capabilitiesLoading || loading) return null;
+
+  if (!hasAccess) {
+    return (
+      <div className="relative flex items-center justify-center bg-[var(--bg-secondary)]/40 rounded-2xl px-6 py-5">
+        <div className="max-w-md px-4">
+          <Lock className="w-6 h-6 text-[var(--plan-lock-accent)] mx-auto mb-3" />
+          <PlanUpgradeMessage message="La sincronización con Google Calendar está disponible desde el plan Crece." />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 max-w-full">

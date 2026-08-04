@@ -92,7 +92,14 @@ export default function SmartSidebar({
     useEffect(() => {
         setIsMounted(true);
         const stored = localStorage.getItem(storageKey);
-        if (stored) setIsExpanded(JSON.parse(stored));
+        if (stored !== null) {
+            setIsExpanded(JSON.parse(stored));
+        } else {
+            // Sin preferencia guardada: colapsado en tablet (deja más espacio
+            // al contenido), expandido en desktop — igual que el comportamiento
+            // original antes de habilitar el toggle en md.
+            setIsExpanded(window.innerWidth >= 1024);
+        }
     }, [storageKey]);
 
     const toggleSidebar = () => {
@@ -122,7 +129,7 @@ export default function SmartSidebar({
     };
 
     // Renderizado optimizado para evitar saltos de hidratación
-    if (!isMounted) return <aside className="hidden md:block md:w-16 lg:w-72 h-[100dvh] border-r border-[var(--border-subtle)] bg-[var(--bg-sidebar)]" />;
+    if (!isMounted) return <aside className="hidden md:block md:w-72 h-[100dvh] border-r border-[var(--border-subtle)] bg-[var(--bg-sidebar)]" />;
 
     return (
         <>
@@ -130,12 +137,12 @@ export default function SmartSidebar({
                 className={`
                     fixed inset-y-0 left-0 z-[60] bg-[var(--bg-sidebar)] border-r ${colors.border} flex flex-col transition-all duration-500 ease-in-out
                     md:sticky md:top-0 md:z-40 lg:sticky lg:top-0 lg:z-40 h-[100dvh] font-industrial
-                    ${isExpanded ? 'lg:w-72' : 'lg:w-20'}
-                    ${isMobileOpen ? 'translate-x-0 w-72 md:w-16' : '-translate-x-full md:translate-x-0 md:w-16 lg:translate-x-0 w-72 lg:w-auto'}
+                    ${isExpanded ? 'md:w-72' : 'md:w-20'}
+                    ${isMobileOpen ? 'translate-x-0 w-72' : '-translate-x-full md:translate-x-0 w-72 md:w-auto'}
                 `}
             >
                 {/* 1. PERFIL DE USUARIO */}
-                <div className={`p-4 border-b ${colors.border} bg-[var(--bg-sidebar)]/95 backdrop-blur flex items-center transition-all duration-500 md:justify-center md:px-2 ${(isExpanded || isMobileOpen) ? 'lg:justify-start lg:px-4' : 'justify-center px-2'}`}>
+                <div className={`p-4 border-b ${colors.border} bg-[var(--bg-sidebar)]/95 backdrop-blur flex items-center transition-all duration-500 ${(isExpanded || isMobileOpen) ? 'justify-start px-4' : 'justify-center px-2'}`}>
                     <div className="flex items-center space-x-3 w-full">
                         <div className="relative flex-shrink-0">
                             {user?.avatar ? (
@@ -155,7 +162,7 @@ export default function SmartSidebar({
                         </div>
 
                         {(isExpanded || isMobileOpen) && (
-                            <div className="flex flex-col min-w-0 animate-fadeIn md:hidden lg:flex">
+                            <div className="flex flex-col min-w-0 animate-fadeIn">
                                 <p className="font-black text-xs text-[var(--text-primary)] leading-tight truncate uppercase tracking-tighter">
                                     {user?.name || "Marketplace User"}
                                 </p>
@@ -170,11 +177,11 @@ export default function SmartSidebar({
                 {/* 2. HEADER DE CONTROL */}
                 <div className="flex items-center justify-between p-4 px-6 border-b border-[var(--border-subtle)] bg-[var(--bg-sidebar)]/20">
                     {(isExpanded || isMobileOpen) && (
-                        <h2 className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] animate-fadeIn md:hidden lg:block">
+                        <h2 className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] animate-fadeIn block">
                             {sectionTitle}
                         </h2>
                     )}
-                    <button onClick={toggleSidebar} className={`hidden lg:flex p-2 hover:bg-[var(--bg-hover)] ${colors.accent} rounded-xl transition-all duration-300 ${!isExpanded ? 'mx-auto' : ''}`}>
+                    <button onClick={toggleSidebar} className={`hidden md:flex p-2 hover:bg-[var(--bg-hover)] ${colors.accent} rounded-xl transition-all duration-300 ${!isExpanded ? 'mx-auto' : ''}`}>
                         <Icon name="ChevronLeft" className={`transition-transform duration-500 ${!isExpanded ? 'rotate-180' : ''} w-4 h-4`} />
                     </button>
                     {/* Close button for mobile inside sidebar */}
@@ -191,7 +198,7 @@ export default function SmartSidebar({
                         {(Array.isArray(navigation) && typeof navigation[0] === 'object' && 'items' in navigation[0] ? (navigation as any[]) : [{ items: navigation }]).map((section, sidx) => (
                             <div key={sidx} className="space-y-1.5">
                                 {(isExpanded || isMobileOpen) && (
-                                    <div className="flex items-center gap-2 mb-4 px-2 md:hidden lg:flex">
+                                    <div className="flex items-center gap-2 mb-4 px-2">
                                         <span className={`w-1.5 h-1.5 ${colors.badge} rounded-full`}></span>
                                         <h3 className={`text-[9px] font-black text-[var(--brand-green)] uppercase tracking-[0.2em] truncate`}>
                                             {section.title || 'Navegación'}
@@ -202,28 +209,35 @@ export default function SmartSidebar({
                                 {section.items.map((module: NavItem) => {
                                     const active     = isActive(module.href);
                                     const badgeCount = (module.id ? badges[module.id] : 0) ?? 0;
+                                    const locked     = !!module.locked;
                                     return (
                                         <Link
                                             key={module.href}
                                             href={module.href}
                                             data-tour={module.id ? `nav-${module.id}` : undefined}
-                                            title={!isExpanded && !isMobileOpen ? module.label : undefined}
+                                            title={locked ? `${module.label} (disponible en planes superiores)` : (!isExpanded && !isMobileOpen ? module.label : undefined)}
                                             onClick={() => setFlashingHref(module.href)}
                                             className={`
                                                 relative group block transition-all duration-500 overflow-hidden rounded-2xl mb-2
                                                 ${active ? colors.bgActive : colors.hover}
+                                                ${locked ? 'opacity-50 hover:opacity-80' : ''}
                                             `}
                                         >
-                                            <div className={`grid grid-cols-1 ${(isExpanded || isMobileOpen) ? 'lg:grid-cols-[80%_20%]' : ''} items-center h-14 relative z-10 transition-all duration-500`}>
+                                            <div className={`grid grid-cols-1 ${(isExpanded || isMobileOpen) ? 'md:grid-cols-[80%_20%]' : ''} items-center h-14 relative z-10 transition-all duration-500`}>
                                                 <div className={`flex items-center h-full transition-all duration-500 ${active ? 'bg-[var(--bg-sidebar)] rounded-r-[80px] shadow-[10px_0_15px_-5px_rgba(0,0,0,0.05)]' : 'bg-transparent'}`}>
-                                                    <div className={`flex items-center justify-center transition-all duration-500 ${isMobileOpen ? 'w-14' : 'w-full'} md:w-full ${(isExpanded || isMobileOpen) ? 'lg:w-14' : 'lg:w-20'}`}>
+                                                    <div className={`flex items-center justify-center transition-all duration-500 ${isMobileOpen ? 'w-14' : 'w-full'} ${(isExpanded || isMobileOpen) ? 'md:w-14' : 'md:w-20'}`}>
                                                         <div className={`
                                                             relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500
                                                             lg:group-hover:animate-[sidebarIconDraw_0.4s_ease-out_forwards] lg:group-active:animate-[sidebarIconBounce_0.3s_ease-out]
                                                             ${active ? `${colors.bgIcon} ${colors.textActive} shadow-inner lg:animate-[sidebarIconGlow_2s_ease-in-out_infinite]` : `bg-[var(--bg-muted)] text-[var(--text-secondary)] group-hover:text-[var(--brand-green)] group-hover:bg-[var(--bg-sidebar)]`}
                                                         `}>
                                                             <Icon name={module.icon || 'Package'} className="w-5 h-5" />
-                                                            {badgeCount > 0 && (
+                                                            {locked && (
+                                                                <span className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] rounded-full bg-[var(--bg-sidebar)] border border-[var(--border-subtle)] flex items-center justify-center shadow-sm overflow-hidden">
+                                                                    <img src="/img/LyriumEspecial.png" alt="Bloqueado" className="w-3 h-3 object-contain" />
+                                                                </span>
+                                                            )}
+                                                            {!locked && badgeCount > 0 && (
                                                                 <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-[var(--brand-green)] text-white text-[8px] font-black leading-none">
                                                                     {badgeCount > 99 ? '99+' : badgeCount}
                                                                 </span>
@@ -235,15 +249,20 @@ export default function SmartSidebar({
                                                         <span
                                                             title={active ? module.label : ""}
                                                             onAnimationEnd={() => setFlashingHref((prev) => (prev === module.href ? null : prev))}
-                                                            className={`text-[13px] font-black whitespace-nowrap transition-all duration-300 md:hidden lg:inline ${flashingHref === module.href ? 'animate-[sidebarTextFlash_0.4s_ease-out]' : ''} ${active
+                                                            className={`text-[13px] font-black whitespace-nowrap transition-all duration-300 inline-flex items-center gap-1.5 ${flashingHref === module.href ? 'animate-[sidebarTextFlash_0.4s_ease-out]' : ''} ${active
                                                         ? 'max-w-[140px] overflow-hidden text-ellipsis text-[var(--text-primary)]'
                                                         : 'flex-shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]' }`} > {module.label}
+                                                        {locked && (
+                                                            <span className="px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest bg-[var(--plan-lock-accent)]/15 text-[var(--plan-lock-accent)]">
+                                                                Pro
+                                                            </span>
+                                                        )}
                                                     </span>
                                                     )}
                                                 </div>
                                                 {/* Punto parpadeante — desktop (columna 2 del grid) */}
                                                 {active && (isExpanded || isMobileOpen) && (
-                                                    <div className="hidden lg:flex justify-center items-center">
+                                                    <div className="hidden md:flex justify-center items-center">
                                                         <div className="w-1.5 h-1.5 bg-[var(--bg-sidebar)] dark:bg-[var(--text-primary)] rounded-full animate-ping" />
                                                     </div>
                                                 )}
@@ -264,7 +283,7 @@ export default function SmartSidebar({
 
                 {/* 4. FOOTER */}
                 {(isExpanded || isMobileOpen) && (
-                    <div className="mt-auto px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-sidebar)]/30 animate-fadeIn md:hidden lg:flex flex-col">
+                    <div className="mt-auto px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-sidebar)]/30 animate-fadeIn flex flex-col">
                         <div className="flex items-center justify-between opacity-60">
                             <span className={`flex items-center gap-1.5 text-[10px] font-black ${colors.accent}`}>
                                 <Icon name="Zap" className="w-3 h-3" />

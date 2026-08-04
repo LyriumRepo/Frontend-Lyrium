@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import * as api from '@/features/admin/planes/api/planesAdminApi';
+import { getPaymentHistory } from '@/features/seller/plans/lib/api';
 import type {
   PlanFromApi,
   ButtonColors,
@@ -402,40 +403,35 @@ export function useAdmin() {
     async (filter: PaymentFilter) => {
       update({ paymentFilter: filter });
       try {
-        const res = await api.fetchPagos({
-          estado: filter === 'all' ? undefined : filter,
-          per_page: 100,
-        });
+        const result = await getPaymentHistory(filter);
 
-        const vendedorPagos: VendedorPago[] = (res.data ?? []).map(
-          (p: api.PagoFromApi) => ({
-            usuario_id: String(p.store_id),
-            username: p.store_name || p.seller_name || '—',
-            email: p.seller_email,
-            correo: p.seller_email,
-            plan_actual: p.plan?.slug ?? '',
-            total_monto: Number(p.amount) || 0,
-            pagos_exitosos: p.payment_status === 'paid' ? 1 : 0,
-            transacciones: [
-              {
-                id: p.id,
-                estado: p.payment_status,
-                monto: Number(p.amount) || 0,
-                meses: p.months ?? 1,
-                fecha: p.created_at,
-                procesadoEn: p.procesado_en,
-                metodoPago:
-                  p.payment_method === 'izipay' ? 'Izipay' : p.payment_method,
-                planId: p.plan?.slug ?? '',
-                planNombre: p.plan?.name ?? '',
-                planColor: p.plan?.color ?? '',
-              },
-            ],
-            historial: [],
-          }),
-        );
+        const vendedorPagos: VendedorPago[] = (
+          result.vendedores ?? []
+        ).map((v: any) => ({
+          usuario_id: v.usuario_id ?? '',
+          username: v.username ?? '—',
+          email: v.email ?? '',
+          correo: v.correo ?? '',
+          plan_actual: v.plan_actual ?? '',
+          total_monto: Number(v.total_monto) || 0,
+          pagos_exitosos: v.pagos_exitosos ?? 0,
+          transacciones: (v.transacciones ?? []).map((t: any) => ({
+            id: t.id,
+            estado: t.estado,
+            monto: Number(t.monto) || 0,
+            meses: t.meses ?? 1,
+            fecha: t.fecha,
+            procesadoEn: t.procesadoEn,
+            metodoPago:
+              t.metodoPago === 'IZIPAY' ? 'Izipay' : t.metodoPago,
+            planId: t.planId ?? '',
+            planNombre: t.planNombre ?? '',
+            planColor: t.planColor ?? '',
+          })),
+          historial: [],
+        }));
 
-        const totals: PaymentTotals = res.totales ?? {
+        const totals: PaymentTotals = result.totales ?? {
           total_monto: 0,
           pagos_exitosos: 0,
           pagos_fallidos: 0,

@@ -46,7 +46,7 @@ export default function NewsletterSection() {
           <p className="font-semibold text-2xl md:text-3xl">¡Gracias por suscribirte!</p>
         </div>
       ) : (
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-9 items-center">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-9 items-center">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold mb-3">
               ¡SUSCRÍBETE Y RECIBE LAS MEJORES OFERTAS!
@@ -57,19 +57,19 @@ export default function NewsletterSection() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Escribe tu correo aquí"
-                className="flex-1 px-6 py-4 rounded-full bg-white text-gray-800 placeholder:text-gray-400 text-base border border-teal-200 dark:border-[var(--border-subtle)] focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="flex-1 min-w-0 px-6 py-4 rounded-full bg-white text-gray-800 placeholder:text-gray-400 text-base border border-teal-200 dark:border-[var(--border-subtle)] focus:outline-none focus:ring-2 focus:ring-teal-500"
                 required
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="px-9 py-4 rounded-full bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-base font-semibold shadow-md transition-colors disabled:opacity-50 dark:border-[var(--border-subtle)]"
+                className="px-9 py-4 rounded-full bg-sky-500 hover:bg-sky-600 dark:bg-[var(--brand-green)] dark:hover:bg-[var(--brand-green-hover)] text-base font-semibold shadow-md transition-colors disabled:opacity-50 dark:border-[var(--border-subtle)] shrink-0 whitespace-nowrap"
               >
                 {loading ? 'Suscribiendo...' : 'Suscribirme'}
               </button>

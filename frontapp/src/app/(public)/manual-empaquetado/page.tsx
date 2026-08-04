@@ -141,6 +141,14 @@ export default function ManualEmpaquetadoPage() {
               .terms-content td {
                 color: #000 !important;
               }
+              @media (max-width: 640px) {
+                .terms-content strong {
+                  font-weight: 600 !important;
+                }
+                .terms-content h4 {
+                  font-size: 0.875rem !important;
+                }
+              }
             `}</style>
 
             {/* HEADER SECTION */}
@@ -157,7 +165,7 @@ export default function ManualEmpaquetadoPage() {
                         <Package className="w-5 h-5 sm:w-7 sm:h-7 md:w-9 md:h-9 shrink-0 animate-float" /> Manual de Empaquetado
                     </h1>
                 </div>
-                <p className="text-gray-500 dark:text-[var(--text-primary)] max-w-3xl mx-auto text-lg">
+                <p className="text-gray-500 dark:text-[var(--text-primary)] max-w-3xl mx-auto text-sm sm:text-lg">
                     Guía paso a paso para el equipo de empaque — Lyrium Biomarketplace.
                 </p>
 
@@ -215,7 +223,7 @@ export default function ManualEmpaquetadoPage() {
 
                     <div className="p-8 md:p-12 space-y-12">
                         <div className="text-center space-y-2">
-                            <h2 className="text-2xl font-black text-[#333333] uppercase tracking-tighter transition-all duration-500">MANUAL DE EMPAQUETADO — SALUD EN CADA PEDIDO</h2>
+                            <h2 className="text-lg sm:text-2xl font-bold sm:font-black text-[#333333] uppercase tracking-tight sm:tracking-tighter transition-all duration-500">MANUAL DE EMPAQUETADO — SALUD EN CADA PEDIDO</h2>
                             <div className="text-sky-500 dark:text-[var(--brand-green)] font-bold text-sm tracking-widest">- LYRIUM BIOMARKETPLACE -</div>
                         </div>
 
@@ -227,11 +235,11 @@ export default function ManualEmpaquetadoPage() {
                                     ref={el => { sectionRefs.current[section.id] = el }}
                                     className="space-y-6 pt-10 border-t border-dashed border-gray-100 first:border-0 first:pt-0 group/section"
                                 >
-                                    <h3 className="text-2xl md:text-2xl font-bold text-[#333333] tracking-tight group-hover/section:text-sky-600 dark:group-hover/section:text-[var(--brand-green)] transition-colors">
+                                    <h3 className="text-base sm:text-2xl font-bold text-[#333333] tracking-tight group-hover/section:text-sky-600 dark:group-hover/section:text-[var(--brand-green)] transition-colors">
                                         {section.title}
                                     </h3>
                                     <div
-                                        className="text-justify text-gray-600 text-[16px] leading-relaxed terms-content"
+                                        className="text-justify text-gray-600 text-sm sm:text-[16px] leading-relaxed terms-content"
                                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(section.content) }}
                                     />
                                 </div>

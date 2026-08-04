@@ -10,6 +10,7 @@ import Pagination from '@/components/ui/Pagination';
 import type { Column } from '@/components/ui/DataTable';
 import { useBlockedIps } from '@/features/admin/security/hooks/useBlockedIps';
 import type { BlockedIpItem, BlockedIpStatus } from '@/shared/lib/api/ipRepository';
+import { LyriumSelect } from '@/components/ui';
 
 const IP_STATUS_MAPPINGS = [
   { status: 'blocked', label: 'Bloqueado', class: 'bg-red-50 text-red-600 border-red-100', icon: 'ShieldOff' },
@@ -39,6 +40,7 @@ export function IpsPageClient() {
   } = useBlockedIps();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createStatus, setCreateStatus] = useState<BlockedIpStatus>('blocked');
   const [showActionModal, setShowActionModal] = useState<{
     type: 'block' | 'unblock' | 'whitelist' | 'delete';
     ip: BlockedIpItem;
@@ -153,10 +155,11 @@ export function IpsPageClient() {
     await createIp({
       ip_address: data.get('ip_address') as string,
       reason: data.get('reason') as string,
-      status: (data.get('status') as BlockedIpStatus) || 'blocked',
+      status: createStatus,
       expires_at: (data.get('expires_at') as string) || null,
     });
     form.reset();
+    setCreateStatus('blocked');
     setShowCreateModal(false);
   };
 
@@ -222,17 +225,19 @@ export function IpsPageClient() {
                 className="w-full pl-9 pr-4 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl text-xs font-medium text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
               />
             </div>
-            <select
-              value={filters.status ?? ''}
-              onChange={(e) => setFilter('status', e.target.value || undefined)}
-              className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl text-xs font-medium text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-            >
-              <option value="">Todos los estados</option>
-              <option value="blocked">Bloqueado</option>
-              <option value="whitelisted">Lista Blanca</option>
-              <option value="flagged">Sospechosa</option>
-              <option value="unblocked">Desbloqueado</option>
-            </select>
+            <div className="w-full sm:w-[190px]">
+              <LyriumSelect
+                value={filters.status ?? ''}
+                onChange={(v) => setFilter('status', v || undefined)}
+                placeholder="Todos los estados"
+                options={[
+                  { value: 'blocked', label: 'Bloqueado' },
+                  { value: 'whitelisted', label: 'Lista Blanca' },
+                  { value: 'flagged', label: 'Sospechosa' },
+                  { value: 'unblocked', label: 'Desbloqueado' }
+                ]}
+              />
+            </div>
           </div>
         </div>
 
@@ -293,15 +298,15 @@ export function IpsPageClient() {
               <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">
                 Estado
               </label>
-              <select
-                name="status"
-                defaultValue="blocked"
-                className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-sm font-medium text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-              >
-                <option value="blocked">Bloqueado</option>
-                <option value="flagged">Sospechosa</option>
-                <option value="whitelisted">Lista Blanca</option>
-              </select>
+              <LyriumSelect
+                value={createStatus}
+                onChange={(v) => setCreateStatus(v as BlockedIpStatus)}
+                options={[
+                  { value: 'blocked', label: 'Bloqueado' },
+                  { value: 'flagged', label: 'Sospechosa' },
+                  { value: 'whitelisted', label: 'Lista Blanca' }
+                ]}
+              />
             </div>
             <div>
               <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">

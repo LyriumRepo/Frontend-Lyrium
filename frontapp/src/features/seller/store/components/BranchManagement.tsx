@@ -48,12 +48,22 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
     };
 
     const handleDelete = async (id: string) => {
+        const target = branches.find(b => b.id === id);
+        const remaining = branches.filter(b => b.id !== id);
+        const willPromote = !!target?.isPrincipal && remaining.length > 0;
+
         const confirmed = await confirm(
             'Eliminar sucursal',
-            '¿Estás seguro de eliminar esta sucursal estratégica?'
+            willPromote
+                ? `Se eliminará la sucursal principal. "${remaining[0].name}" pasará a ser la principal.`
+                : '¿Estás seguro de eliminar esta sucursal estratégica?'
         );
         if (confirmed) {
-            setBranches(branches.filter(b => b.id !== id));
+            setBranches(
+                willPromote
+                    ? remaining.map((b, i) => (i === 0 ? { ...b, isPrincipal: true } : b))
+                    : remaining
+            );
         }
     };
 
@@ -66,8 +76,8 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
                         <Store className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                        <h3 className="text-xl sm:text-2xl font-black tracking-tighter leading-none">Sucursales</h3>
-                        <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-90">
+                        <h3 className="text-base sm:text-xl md:text-2xl font-bold md:font-black tracking-tight sm:tracking-tighter leading-none">Sucursales</h3>
+                        <p className="hidden sm:block text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-90">
                             Gestión de tus locales físicos y puntos de venta
                         </p>
                     </div>
@@ -77,7 +87,7 @@ export default function BranchManagement({ branches, setBranches }: BranchManage
                     disabled={atLimit}
                     className={`relative z-10 flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl backdrop-blur-md font-black text-xs border uppercase tracking-widest transition-all shadow-lg shadow-black/5 ${
                         atLimit
-                            ? 'bg-[var(--lima-500)]/10 border-[var(--lima-500)]/20 text-[var(--lima-500)] cursor-not-allowed'
+                            ? 'bg-[var(--plan-lock-accent)]/10 border-[var(--plan-lock-accent)]/20 text-[var(--plan-lock-accent)] cursor-not-allowed'
                             : 'bg-[var(--bg-card)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--bg-card)] hover:text-sky-500 dark:hover:text-[var(--icons-green)]'
                     }`}
                 >

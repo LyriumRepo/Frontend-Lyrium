@@ -33,34 +33,44 @@
   flex: 1;
 }
 
-/* ─── Light mode: hover = subtle gray + shadow lift ─── */
+/* ─── Light mode: hover = paleta institucional celeste ─── */
 .simple-keyboard.hg-theme-lyrium .hg-button:hover {
-  background: #e8ecf0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  background: var(--celeste-100);
+  box-shadow: 0 2px 8px rgba(105, 190, 235, 0.3);
 }
 
 /* ─── Light mode: active = sky-blue press ─── */
 .simple-keyboard.hg-theme-lyrium .hg-button:active,
 .simple-keyboard.hg-theme-lyrium .hg-button.hg-activeButton {
-  background: #0ea5e9 !important;
-  color: #fff !important;
+  background: #b3e5fc !important;
+  color: #0c4a6e !important;
   transform: scale(0.94);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 10px rgba(14, 165, 233, 0.4);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 10px rgba(105, 190, 235, 0.4);
 }
 
-/* ─── Dark mode: hover = slightly shaded green ─── */
+/* ─── Dark mode: hover = verde institucional ─── */
 .dark .simple-keyboard.hg-theme-lyrium .hg-button:hover {
-  background: #152820;
-  box-shadow: 0 2px 8px rgba(42, 90, 77, 0.3);
+  background: rgba(42, 90, 77, 0.35);
+  box-shadow: 0 2px 12px rgba(42, 90, 77, 0.4);
 }
 
-/* ─── Dark mode: active = lighter green press (clearly visible) ─── */
+/* ─── Dark mode: active = verde institucional press ─── */
 .dark .simple-keyboard.hg-theme-lyrium .hg-button:active,
 .dark .simple-keyboard.hg-theme-lyrium .hg-button.hg-activeButton {
-  background: #3a7a65 !important;
+  background: rgba(42, 90, 77, 0.6) !important;
   color: #e0f0e8 !important;
   transform: scale(0.94);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3), 0 0 10px rgba(58, 122, 101, 0.4);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3), 0 0 12px rgba(42, 90, 77, 0.5);
+}
+
+/* ─── Focus-visible (navegación por teclado) ─── */
+.simple-keyboard.hg-theme-lyrium .hg-button:focus-visible {
+  outline: 2px solid var(--brand-sky);
+  outline-offset: 2px;
+}
+
+.dark .simple-keyboard.hg-theme-lyrium .hg-button:focus-visible {
+  outline-color: var(--brand-green);
 }
 
 /* ─── Function keys (Shift, Bksp, Hide) ─── */
@@ -72,18 +82,37 @@
   flex: 0 0 auto;
 }
 
+.simple-keyboard.hg-theme-lyrium .hg-button.hg-functionBtn:hover {
+  background: var(--celeste-100);
+  box-shadow: 0 2px 8px rgba(105, 190, 235, 0.3);
+}
+
 .simple-keyboard.hg-theme-lyrium .hg-button.hg-functionBtn:active {
-  background: var(--brand-sky) !important;
-  color: #fff !important;
+  background: #b3e5fc !important;
+  color: #0c4a6e !important;
+  transform: scale(0.94);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 10px rgba(105, 190, 235, 0.4);
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button.hg-functionBtn:focus-visible {
+  outline: 2px solid var(--brand-sky);
+  outline-offset: 2px;
 }
 
 .dark .simple-keyboard.hg-theme-lyrium .hg-button.hg-functionBtn:hover {
-  background: #152820;
+  background: rgba(42, 90, 77, 0.35);
+  box-shadow: 0 2px 12px rgba(42, 90, 77, 0.4);
 }
 
 .dark .simple-keyboard.hg-theme-lyrium .hg-button.hg-functionBtn:active {
-  background: #3a7a65 !important;
+  background: rgba(42, 90, 77, 0.6) !important;
   color: #e0f0e8 !important;
+  transform: scale(0.94);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3), 0 0 12px rgba(42, 90, 77, 0.5);
+}
+
+.dark .simple-keyboard.hg-theme-lyrium .hg-button.hg-functionBtn:focus-visible {
+  outline-color: var(--brand-green);
 }
 
 /* ─── Accent vowel keys ─── */
@@ -115,22 +144,36 @@
 }
 
 .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:hover {
-  background: var(--bg-muted);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  background: var(--celeste-100);
+  box-shadow: 0 2px 8px rgba(105, 190, 235, 0.3);
 }
 
 .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:active {
-  background: var(--brand-sky) !important;
+  background: #b3e5fc !important;
+  color: #0c4a6e !important;
   transform: scale(0.9);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 10px rgba(105, 190, 235, 0.4);
+}
+
+.simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:focus-visible {
+  outline: 2px solid var(--brand-sky);
+  outline-offset: 2px;
 }
 
 .dark .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:hover {
-  background: #152820;
-  box-shadow: 0 1px 4px rgba(42, 90, 77, 0.2);
+  background: rgba(42, 90, 77, 0.35);
+  box-shadow: 0 2px 12px rgba(42, 90, 77, 0.4);
 }
 
 .dark .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:active {
-  background: #3a7a65 !important;
+  background: rgba(42, 90, 77, 0.6) !important;
+  color: #e0f0e8 !important;
+  transform: scale(0.9);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3), 0 0 12px rgba(42, 90, 77, 0.5);
+}
+
+.dark .simple-keyboard.hg-theme-lyrium .hg-button[data-skbtnuid="{hide}"]:focus-visible {
+  outline-color: var(--brand-green);
 }
 
 /* ─── Space bar ─── */

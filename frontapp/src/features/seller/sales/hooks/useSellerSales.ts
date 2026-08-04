@@ -19,6 +19,23 @@ function computeSellerOrder(order: Order): Order {
     const hasIsOwn = order.items.some((i) => i.isOwn === true || i.isOwn === false);
     if (!hasIsOwn) return order;
 
+    const isMultiStore = order.items.some((i) => !i.isOwn);
+
+    // Resumen por tienda — se calcula ANTES de filtrar a solo los items propios,
+    // porque necesita ver el estado de las otras tiendas del pedido (el resto de
+    // la UI del vendedor solo debe ver sus propios items, por eso se filtra después).
+    const storesSummary = isMultiStore
+        ? Object.values(
+            order.items.reduce((acc, i) => {
+                if (!acc[i.storeId]) {
+                    acc[i.storeId] = { storeId: i.storeId, storeName: i.storeName || `Tienda #${i.storeId}`, isOwn: i.isOwn, confirmed: true };
+                }
+                if (i.status === 'pending_seller') acc[i.storeId].confirmed = false;
+                return acc;
+            }, {} as Record<number, { storeId: number; storeName: string; isOwn: boolean; confirmed: boolean }>),
+        )
+        : undefined;
+
     const ownItems = order.items.filter((i) => i.isOwn);
     const productCurrentStep = ownItems.length > 0
         ? Math.max(...ownItems.map((i) => PRODUCT_STATUS_STEP_MAP[i.status] ?? 0), 0) || 1
@@ -26,15 +43,18 @@ function computeSellerOrder(order: Order): Order {
     const sellerSubtotal = ownItems.reduce((sum, i) => sum + i.lineTotal, 0);
     const sellerShipping = ownItems.reduce((sum, i) => sum + (i.shippingCost ?? 0), 0);
     const sellerTotal = sellerSubtotal + sellerShipping;
-    const isMultiStore = order.items.some((i) => !i.isOwn);
-    return { ...order, items: ownItems, productCurrentStep, sellerSubtotal, sellerShipping, sellerTotal, isMultiStore };
+
+    const needsMyAction = ownItems.some((i) => i.status === 'pending_seller');
+    const waitingOnOtherStore = isMultiStore && !needsMyAction && ownItems.length > 0;
+
+    return { ...order, items: ownItems, productCurrentStep, sellerSubtotal, sellerShipping, sellerTotal, isMultiStore, storesSummary, needsMyAction, waitingOnOtherStore };
 }
 
 function computeKPIs(orders: Order[]): SalesKPI[] {
     const total = orders.length;
     const totalRevenue = orders.reduce((sum, o) => sum + (o.sellerSubtotal ?? o.total), 0);
 
-    const pending = orders.filter(o => o.estado === 'pending_seller').length;
+    const pending = orders.filter(o => o.estado === 'pending_seller' && !o.waitingOnOtherStore).length;
     const confirmed = orders.filter(o => o.estado === 'confirmed').length;
     const processing = orders.filter(o => o.estado === 'processing').length;
     const shipped = orders.filter(o => o.estado === 'shipped').length;

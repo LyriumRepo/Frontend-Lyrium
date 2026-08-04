@@ -380,7 +380,7 @@ export function useSellerStore() {
 
             if (branches && currentStoreId) {
                 const branchesPayload = branches.map(b => ({
-                    id: b.id !== 'new' ? parseInt(b.id) : undefined,
+                    id: /^\d+$/.test(b.id) ? parseInt(b.id, 10) : undefined,
                     name: b.name,
                     address: b.address,
                     department: b.department,
@@ -391,9 +391,6 @@ export function useSellerStore() {
                     is_principal: b.isPrincipal,
                     maps_url: b.mapsUrl,
                 }));
-                console.log(
-    JSON.stringify(branchesPayload, null, 2)
-);
                 await sellerApi.updateBranches(currentStoreId!, branchesPayload);
             }
 
@@ -429,21 +426,28 @@ export function useSellerStore() {
         });
     };
 
-    const handleSave = (callback?: () => void) => {
+    const handleSave = (onSaved?: () => void, onSaveError?: (message?: string) => void) => {
         const cachedData = queryClient.getQueryData(['seller', 'store', user?.id]) as any;
         const currentStoreId = cachedData?.storeId || storeId;
-        
+        const currentBranches: Branch[] = cachedData?.branches || data?.branches || [];
+
         const updates = pendingUpdates.current;
         const layoutUpdate = pendingLayoutUpdate.current;
+        let hadError = false;
+        let errorMessage: string | undefined;
 
         const finalize = (layoutSaved: boolean) => {
             if (!layoutSaved && layoutUpdate) {
                 console.warn('[useSellerStore] Layout change was not saved');
             }
-            if (callback) callback();
+            if (hadError) {
+                if (onSaveError) onSaveError(errorMessage);
+            } else if (onSaved) {
+                onSaved();
+            }
         };
 
-        const saveLayout = (afterStore?: boolean) => {
+        const saveLayout = () => {
             if (layoutUpdate && currentStoreId) {
                 updateVisualMutation.mutate({ layout: layoutUpdate }, {
                     onSuccess: () => {
@@ -453,6 +457,8 @@ export function useSellerStore() {
                     onError: (err) => {
                         console.error('[useSellerStore] Layout save failed:', err);
                         pendingLayoutUpdate.current = null;
+                        hadError = true;
+                        errorMessage = errorMessage || (err as Error)?.message;
                         finalize(false);
                     }
                 });
@@ -464,20 +470,22 @@ export function useSellerStore() {
             }
         };
 
-        if (Object.keys(updates).length > 0) {
-            updateStoreMutation.mutate({ 
-                updates, 
-                branches: undefined,
-                storeIdOverride: currentStoreId 
+        if (Object.keys(updates).length > 0 || currentBranches.length > 0) {
+            updateStoreMutation.mutate({
+                updates,
+                branches: currentBranches.length > 0 ? currentBranches : undefined,
+                storeIdOverride: currentStoreId
             }, {
                 onSuccess: () => {
                     pendingUpdates.current = {};
-                    saveLayout(true);
+                    saveLayout();
                 },
                 onError: (err) => {
-                    console.error('[useSellerStore] Store save failed:', err);
+                    console.error('[useSellerStore] Store/branches save failed:', err);
                     pendingUpdates.current = {};
-                    saveLayout(true);
+                    hadError = true;
+                    errorMessage = (err as Error)?.message;
+                    saveLayout();
                 }
             });
         } else {
@@ -496,7 +504,14 @@ export function useSellerStore() {
         storeId,
         handleUpdateConfig,
         handleSave,
-        updateBranches: (branches: Branch[]) => updateStoreMutation.mutate({ updates: {}, branches }),
+        updateBranches: (branches: Branch[], callbacks?: { onSuccess?: () => void; onError?: (message?: string) => void }) =>
+            updateStoreMutation.mutate({ updates: {}, branches }, {
+                onSuccess: () => callbacks?.onSuccess?.(),
+                onError: (err) => {
+                    console.error('[useSellerStore] Branch save failed:', err);
+                    callbacks?.onError?.((err as Error)?.message);
+                },
+            }),
         uploadPolicy: (type: 'shipping' | 'return' | 'privacy', file: File) => 
             uploadPolicyMutation.mutateAsync({ type, file }),
         deletePolicy: (type: 'shipping' | 'return' | 'privacy') => 

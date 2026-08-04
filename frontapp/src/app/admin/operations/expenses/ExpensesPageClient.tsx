@@ -11,6 +11,7 @@ import type {
 import BaseModal from '@/components/ui/BaseModal';
 import Pagination from '@/components/ui/Pagination';
 import { BankStatementReviewModal } from '@/components/admin/operations/BankStatementReviewModal';
+import { LyriumSelect } from '@/components/ui';
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
@@ -347,16 +348,18 @@ export function ExpensesPageClient() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select
-          className={selectCls}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="">Todos los estados</option>
-          <option value="Pagado">Pagado</option>
-          <option value="Pendiente">Pendiente</option>
-          <option value="Anulado">Anulado</option>
-        </select>
+        <div className="w-full sm:w-[180px]">
+          <LyriumSelect
+            value={statusFilter}
+            onChange={setStatusFilter}
+            placeholder="Todos los estados"
+            options={[
+              { value: 'Pagado', label: 'Pagado' },
+              { value: 'Pendiente', label: 'Pendiente' },
+              { value: 'Anulado', label: 'Anulado' }
+            ]}
+          />
+        </div>
         <input
           type="date"
           className={`${selectCls} w-full sm:w-[140px]`}
@@ -383,26 +386,26 @@ export function ExpensesPageClient() {
             Nuevo comprobante
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-            <select
-              className={selectCls + ' w-full'}
-              value={form.supplier_id}
-              onChange={(e) => setForm((f) => ({ ...f, supplier_id: Number(e.target.value) }))}
-            >
-              <option value={0}>Selecciona proveedor</option>
-              {suppliers.map((s) => (
-                <option key={s.id} value={s.id}>{s.nombre}</option>
-              ))}
-            </select>
+            <LyriumSelect
+              value={form.supplier_id ? String(form.supplier_id) : ''}
+              onChange={(v) => setForm((f) => ({ ...f, supplier_id: Number(v) }))}
+              placeholder="Selecciona proveedor"
+              options={suppliers.map((s) => ({ value: String(s.id), label: s.nombre }))}
+            />
             <input placeholder="Concepto" className={inputCls} value={form.concept} onChange={(e) => setForm((f) => ({ ...f, concept: e.target.value }))} />
             <input type="number" placeholder="Monto (S/)" className={inputCls} value={form.amount || ''} onChange={(e) => setForm((f) => ({ ...f, amount: Number(e.target.value) }))} />
             <input type="date" className={inputCls} value={form.issued_at} onChange={(e) => setForm((f) => ({ ...f, issued_at: e.target.value }))} />
-            <select className={selectCls + ' w-full'} value={form.voucher_type} onChange={(e) => setForm((f) => ({ ...f, voucher_type: e.target.value }))}>
-              <option value="">Tipo de comprobante</option>
-              <option value="Honorarios">Recibo por honorarios</option>
-              <option value="Factura">Factura</option>
-              <option value="Boleta">Boleta</option>
-              <option value="Servicio">Servicio</option>
-            </select>
+            <LyriumSelect
+              value={form.voucher_type}
+              onChange={(v) => setForm((f) => ({ ...f, voucher_type: v }))}
+              placeholder="Tipo de comprobante"
+              options={[
+                { value: 'Honorarios', label: 'Recibo por honorarios' },
+                { value: 'Factura', label: 'Factura' },
+                { value: 'Boleta', label: 'Boleta' },
+                { value: 'Servicio', label: 'Servicio' }
+              ]}
+            />
             <input placeholder="Número de comprobante" className={inputCls} value={form.voucher_number} onChange={(e) => setForm((f) => ({ ...f, voucher_number: e.target.value }))} />
           </div>
           <div className="flex gap-2 justify-end">

@@ -256,6 +256,14 @@ export class LaravelProductRepository implements IProductRepository {
         return this.toProduct(res);
     }
 
+    async toggleProductVisibility(id: string, visible: boolean): Promise<Product> {
+        const res = await this.request<any>(`/products/${id}/visibility`, {
+            method: 'PUT',
+            body: JSON.stringify({ visible }),
+        });
+        return this.toProduct(res);
+    }
+
     async uploadProductImage(productId: string, file: File): Promise<{ url: string }> {
         const token = await this.getToken();
         const baseUrl = this.getBaseUrl();

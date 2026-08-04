@@ -20,7 +20,7 @@ export default function CheckoutHeader() {
     return (
         <div className="max-w-6xl mx-auto px-4 pt-4 pb-2 animate-fade-in">
             <div className={[
-                'py-3 px-8 rounded-2xl relative overflow-hidden shadow-xl transition-all duration-700',
+                'py-2 px-4 sm:py-3 sm:px-8 rounded-2xl relative overflow-hidden shadow-xl transition-all duration-700',
                 isSuccess
                     ? 'bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-400 shadow-emerald-100 dark:shadow-emerald-900/20'
                     : 'bg-gradient-to-r from-teal-500 via-sky-500 to-sky-400 dark:from-emerald-700 dark:via-emerald-600 dark:to-emerald-500 shadow-teal-100 dark:shadow-emerald-900/20'
@@ -28,15 +28,15 @@ export default function CheckoutHeader() {
                 {/* Decorative blur */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />
 
-                <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 text-white text-center md:text-left">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner shrink-0 scale-110 md:scale-100">
-                        <Icon className="w-6 h-6 text-white transition-all duration-500" />
+                <div className="relative z-10 flex flex-row items-center justify-center sm:justify-start gap-3 sm:gap-4 md:gap-6 text-white text-left">
+                    <div className="w-9 h-9 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner shrink-0">
+                        <Icon className="w-4 h-4 sm:w-6 sm:h-6 text-white transition-all duration-500" />
                     </div>
-                    <div className="flex flex-col items-center md:items-start">
-                        <h3 className="text-xl md:text-2xl font-black tracking-tighter leading-none transition-all duration-500">
+                    <div className="flex flex-col items-start min-w-0">
+                        <h3 className="text-sm sm:text-lg md:text-2xl font-black tracking-tighter leading-none transition-all duration-500">
                             {title}
                         </h3>
-                        <p className="text-[10px] md:text-xs font-bold text-white/80 uppercase tracking-[0.2em] mt-1 transition-all duration-500">
+                        <p className="text-[8px] sm:text-[10px] md:text-xs font-bold text-white/80 uppercase tracking-[0.15em] sm:tracking-[0.2em] mt-1 transition-all duration-500">
                             {desc}
                         </p>
                     </div>

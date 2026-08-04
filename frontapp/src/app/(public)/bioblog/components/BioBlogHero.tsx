@@ -21,7 +21,7 @@ function BioBlogHeroInner() {
     const activeCategorySlug = searchParams.get('category') || 'todos';
 
     useEffect(() => {
-        blogApi.getCategories().then(setCategories).catch(console.error);
+        blogApi.getCategories().then(setCategories).catch(() => {});
     }, []);
 
     const handleSearch = (e: React.FormEvent) => {

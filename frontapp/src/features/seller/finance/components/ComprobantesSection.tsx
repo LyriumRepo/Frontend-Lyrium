@@ -35,7 +35,7 @@ const statusLabels: Record<string, string> = {
 
 export default function ComprobantesSection({ invoices }: ComprobantesSectionProps) {
     return (
-        <div className="bg-[var(--bg-card)] p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-lg">
+        <div className="bg-[var(--bg-card)] p-4 sm:p-6 md:p-8 rounded-[2.5rem] border border-[var(--border-subtle)] shadow-lg">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg text-white" style={{ backgroundColor: 'var(--turquesa-500)', boxShadow: '0 10px 15px -3px color-mix(in srgb, var(--turquesa-500) 30%, transparent)' }}>
@@ -69,7 +69,7 @@ export default function ComprobantesSection({ invoices }: ComprobantesSectionPro
                         return (
                             <div
                                 key={inv.id}
-                                className="flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-2xl hover:bg-[var(--bg-secondary)]/80 transition-all"
+                                className="flex flex-col items-start sm:flex-row sm:items-center sm:justify-between p-4 bg-[var(--bg-secondary)] rounded-2xl hover:bg-[var(--bg-secondary)]/80 transition-all"
                             >
                                 <div className="flex items-center gap-4 min-w-0">
                                     <div className="w-10 h-10 bg-[var(--bg-card)] rounded-xl flex items-center justify-center text-[var(--text-secondary)] border border-[var(--border-subtle)]">
@@ -84,7 +84,7 @@ export default function ComprobantesSection({ invoices }: ComprobantesSectionPro
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4 flex-shrink-0">
+                                <div className="flex items-center gap-4 flex-shrink-0 mt-2 w-full justify-between sm:mt-0 sm:w-auto sm:justify-end">
                                     <span className="text-sm font-black text-[var(--text-primary)]">{formatCurrency(inv.total)}</span>
                                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border ${colorClass}`}>
                                         <Icon name={iconName} className="w-3 h-3" />

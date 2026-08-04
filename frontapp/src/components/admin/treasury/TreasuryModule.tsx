@@ -3,6 +3,7 @@ import { TreasuryKPI } from '@/features/admin/treasury/types';
 import { BalanceTab, CashInTab, CashOutTab } from './TreasuryTabs';
 import { TrendingUp, Clock, ArrowLeftRight, AlertCircle, Search } from 'lucide-react';
 import Skeleton from '@/components/ui/Skeleton';
+import { LyriumSelect } from '@/components/ui';
 
 const MapIcon = (iconName: string) => {
     switch (iconName) {
@@ -152,31 +153,28 @@ export const TreasuryModule: React.FC<TreasuryModuleProps> = ({ state, actions }
                         </div>
                     </div>
                     <div className="w-full md:w-60 space-y-2">
-                        <label htmlFor="treasury-status" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">Estado Lógico</label>
-                        <select
-                            id="treasury-status"
+                        <LyriumSelect
+                            label="Estado Lógico"
                             value={filters.status}
-                            onChange={(e) => actions.setFilters({ ...filters, status: e.target.value })}
-                            className="w-full p-2.5 bg-[var(--bg-input)] border-none rounded-xl text-xs font-black text-[var(--text-primary)] uppercase cursor-pointer tracking-widest"
-                        >
-                            <option value="ALL">Todos los Estados</option>
-                            {activeTab === 'cashin' ? (
-                                <>
-                                    <option value="PENDING_VALIDATION">En Revisión (Bank)</option>
-                                    <option value="VALIDATED">Validados (Ok)</option>
-                                    <option value="REJECTED">Rechazados</option>
-                                    <option value="EXPIRED">Expirados (Timeout)</option>
-                                </>
-                            ) : (
-                                <>
-                                    <option value="SCHEDULED">Programado a Batch</option>
-                                    <option value="PROCESSING">Procesando</option>
-                                    <option value="PAID">Dinero Acreditado</option>
-                                    <option value="DISPUTED">Disputa (Retenido)</option>
-                                    <option value="FAILED">Error Bancario</option>
-                                </>
-                            )}
-                        </select>
+                            onChange={(v) => actions.setFilters({ ...filters, status: v })}
+                            options={[
+                                { value: 'ALL', label: 'Todos los Estados' },
+                                ...(activeTab === 'cashin'
+                                    ? [
+                                        { value: 'PENDING_VALIDATION', label: 'En Revisión (Bank)' },
+                                        { value: 'VALIDATED', label: 'Validados (Ok)' },
+                                        { value: 'REJECTED', label: 'Rechazados' },
+                                        { value: 'EXPIRED', label: 'Expirados (Timeout)' }
+                                    ]
+                                    : [
+                                        { value: 'SCHEDULED', label: 'Programado a Batch' },
+                                        { value: 'PROCESSING', label: 'Procesando' },
+                                        { value: 'PAID', label: 'Dinero Acreditado' },
+                                        { value: 'DISPUTED', label: 'Disputa (Retenido)' },
+                                        { value: 'FAILED', label: 'Error Bancario' }
+                                    ])
+                            ]}
+                        />
                     </div>
                 </div>
             )}

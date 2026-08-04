@@ -63,8 +63,8 @@ export default function StoreAwards({ config }: StoreAwardsProps) {
                         <Icon name="Medal" className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                        <h3 className="text-xl sm:text-2xl font-black tracking-tighter leading-none">Estatus de Socio Lyrium</h3>
-                        <p className="text-[10px] font-bold text-blue-100 uppercase tracking-[0.2em] mt-1 opacity-80">
+                        <h3 className="text-base sm:text-xl md:text-2xl font-bold md:font-black tracking-tight sm:tracking-tighter leading-none">Estatus de Socio Lyrium</h3>
+                        <p className="hidden sm:block text-[10px] font-bold text-blue-100 uppercase tracking-[0.2em] mt-1 opacity-80">
                             Credenciales Oficiales de la Plataforma
                         </p>
                     </div>

@@ -194,7 +194,7 @@ export function FinancePageClient() {
           <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
             <Icon name="CalendarDays" className="w-6 h-6 text-white" />
           </div>
-          <h3 className="text-xl font-black text-[var(--text-primary)]">
+          <h3 className="text-base sm:text-xl font-black text-[var(--text-primary)]">
             Periodo de Análisis
           </h3>
         </div>
@@ -606,7 +606,7 @@ export function FinancePageClient() {
                     />
                   ))}
                 </div>
-                <p className="text-xl font-black text-center" style={{ color: companyColors.turquesa }}>{data.csat.data[0] > 0 ? `${data.csat.data[0]}%` : 'N/A'}</p>
+                <p className="text-base sm:text-xl font-black text-center" style={{ color: companyColors.turquesa }}>{data.csat.data[0] > 0 ? `${data.csat.data[0]}%` : 'N/A'}</p>
                 <p className="text-xs text-[var(--text-secondary)] mt-1 font-bold uppercase tracking-widest text-center">Calificaciones positivas</p>
                 {(() => {
                   const badge = getKpiLevel('csat', data.csat.data[0] ?? 0);

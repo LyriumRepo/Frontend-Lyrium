@@ -46,7 +46,7 @@ export function TrackingStepper({
     <div className="space-y-4 animate-card-entrance">
       <div className="relative flex justify-between items-start pt-2 pb-6">
         <div
-          className="absolute top-[20px] sm:top-[28px] h-[3px] bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-full z-0"
+          className="absolute top-[20px] sm:top-[28px] max-[400px]:top-[16px] h-[3px] bg-gray-100 dark:bg-[var(--bg-secondary)] rounded-full z-0"
           style={{ left: lineInset, right: lineInset }}
         >
           <div
@@ -67,12 +67,12 @@ export function TrackingStepper({
           return (
             <div
               key={step.key}
-              className="flex flex-col items-center relative z-10 gap-1 sm:gap-2"
+              className="flex flex-col items-center relative z-10 gap-1 sm:gap-2 max-[400px]:gap-0.5"
               style={{ width: `${100 / totalSteps}%` }}
             >
               <div className="relative">
                 <div
-                  className={`w-10 h-10 sm:w-14 sm:h-14 rounded-full border-2 sm:border-[3px] overflow-hidden transition-all duration-700 flex-shrink-0 flex items-center justify-center bg-white dark:bg-[var(--bg-card)]
+                  className={`w-10 h-10 sm:w-14 sm:h-14 max-[400px]:w-8 max-[400px]:h-8 rounded-full border-2 sm:border-[3px] overflow-hidden transition-all duration-700 flex-shrink-0 flex items-center justify-center bg-white dark:bg-[var(--bg-card)]
                     ${isCompleted
                       ? `${color.border} shadow-lg ${color.shadow}`
                       : isActive
@@ -89,10 +89,10 @@ export function TrackingStepper({
 
                 {isCompleted && (
                   <div
-                    className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-[var(--bg-card)]"
+                    className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 max-[400px]:w-3 max-[400px]:h-3 rounded-full flex items-center justify-center border-2 border-white dark:border-[var(--bg-card)]"
                     style={{ backgroundColor: color.dot }}
                   >
-                    <svg className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <svg className="w-2 h-2 sm:w-2.5 sm:h-2.5 max-[400px]:w-1.5 max-[400px]:h-1.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
@@ -103,7 +103,7 @@ export function TrackingStepper({
                 )}
               </div>
 
-              <p className={`text-center text-[9px] sm:text-[10px] font-black uppercase tracking-wider leading-tight px-0.5 break-words transition-all duration-700
+              <p className={`hidden sm:block text-center text-[10px] font-black uppercase tracking-wider leading-tight px-0.5 break-words transition-all duration-700
                 ${isActive
                   ? 'text-sky-600 dark:text-[var(--icons-green)]'
                   : isCompleted
@@ -116,6 +116,12 @@ export function TrackingStepper({
           );
         })}
       </div>
+
+      {/* Mobile: un solo texto centrado con el paso actual, en vez de una
+          etiqueta por ícono (evita el apretujamiento de 5 labels en 375px) */}
+      <p className="sm:hidden text-center text-xs font-black uppercase tracking-wider text-sky-600 dark:text-[var(--icons-green)] -mt-2">
+        {steps[activeIndex]?.label}
+      </p>
     </div>
   );
 }

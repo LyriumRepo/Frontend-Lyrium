@@ -401,17 +401,20 @@ export function usePlanes() {
       currentPlan, userId, userName, customMonths,
     } = stateRef.current;
     if (!selectedPaymentPlan) return null;
-    const isTrial = selectedPresetId === 'trial';
+    const isTrial    = selectedPresetId === 'trial';
+    const isLifetime = selectedPresetId === 'lifetime';
     const data = plansData[selectedPaymentPlan ?? ''];
     const planId = selectedPaymentPlan ?? '';
 
     let totalMonths: number;
     if (selectedPresetId === 'trial')       totalMonths = 1;
+    else if (isLifetime)                    totalMonths = 1; // ignorado por el backend para planes is_lifetime
     else if (selectedPresetId === 'custom') totalMonths = customMonths;
     else totalMonths = durationPresets.find(p => p.id === selectedPresetId)?.months ?? 1;
 
     let durationLabel: string;
     if (selectedPresetId === 'trial') durationLabel = 'Prueba gratuita (1 mes)';
+    else if (isLifetime) durationLabel = 'Por vida (pago único)';
     else if (totalMonths >= 12 && totalMonths % 12 === 0) { const y = totalMonths / 12; durationLabel = y === 1 ? '1 año (12 meses)' : `${y} años (${totalMonths} meses)`; }
     else durationLabel = totalMonths === 1 ? '1 mes' : `${totalMonths} meses`;
 
@@ -423,8 +426,15 @@ export function usePlanes() {
     }
 
     try {
-      const planEntry = plansData[selectedPaymentPlan ?? ''];
-      const numericPlanId = planEntry?.numericId ?? slugToNumericIdMap[selectedPaymentPlan ?? ''];
+      // El plan "Por Vida" es un Plan propio en el backend (slug crece-lifetime,
+      // is_lifetime=true) — no una duración del plan que se está viendo. Se excluye
+      // de la grilla de tarjetas (buildPlanOrder) pero sigue viniendo en /plans,
+      // así que su numericId ya está disponible en plansData/slugToNumericIdMap.
+      const lifetimeSlug = `${plansData[selectedPaymentPlan ?? '']?.slug ?? selectedPaymentPlan}-lifetime`;
+      const planEntry = isLifetime ? plansData[lifetimeSlug] : plansData[selectedPaymentPlan ?? ''];
+      const numericPlanId = isLifetime
+        ? (planEntry?.numericId ?? slugToNumericIdMap[lifetimeSlug])
+        : (planEntry?.numericId ?? slugToNumericIdMap[selectedPaymentPlan ?? '']);
 
       // Mapa de claves default → slugs del backend (para cuando /plans no cargó a tiempo)
       const defaultKeyToSlug: Record<string, string> = {
@@ -432,10 +442,12 @@ export function usePlanes() {
         standard: 'crece',
         premium: 'especial',
       };
-      const planSlug = planEntry?.slug
-        ?? (selectedPaymentPlan ? defaultKeyToSlug[selectedPaymentPlan] : undefined)
-        ?? selectedPaymentPlan
-        ?? undefined;
+      const planSlug = isLifetime
+        ? (planEntry?.slug ?? lifetimeSlug)
+        : (planEntry?.slug
+          ?? (selectedPaymentPlan ? defaultKeyToSlug[selectedPaymentPlan] : undefined)
+          ?? selectedPaymentPlan
+          ?? undefined);
 
       if (!numericPlanId && !planSlug) {
         showNotification('No se pudo identificar el plan. Recarga la página e intenta de nuevo.', '#ef4444');

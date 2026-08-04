@@ -7,7 +7,6 @@ import { useTheme } from 'next-themes';
 import { companyColors } from '../colors';
 import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
 import PlanUpgradeMessage from '@/features/seller/store/components/PlanUpgradeMessage';
-import Icon from '@/components/ui/Icon';
 
 Chart.register(ZoomPlugin);
 
@@ -305,10 +304,23 @@ export default function FinanceChart({
 
     if (!canViewCharts) {
         return (
-            <div style={{ height }} className="relative flex items-center justify-center bg-[var(--bg-secondary)]/40 rounded-2xl">
-                <div className="max-w-xs px-4">
-                    <Icon name="Lock" className="w-6 h-6 text-[var(--lima-500)] mx-auto mb-3" />
-                    <PlanUpgradeMessage message="Los gráficos financieros avanzados están disponibles desde el plan Crece. Actualiza tu plan para visualizarlos." />
+            <div style={{ height }} className="relative rounded-2xl overflow-hidden">
+                <div className="absolute inset-0 blur-sm pointer-events-none select-none p-4 flex items-end gap-2">
+                    {[40, 65, 50, 80, 55, 90, 60, 75, 45, 70].map((h, i) => (
+                        <div
+                            key={i}
+                            className="flex-1 rounded-t-md bg-gradient-to-t from-[var(--brand-sky)]/50 dark:from-[var(--brand-teal)]/50 to-[var(--brand-sky)]/10 dark:to-[var(--brand-teal)]/10"
+                            style={{ height: `${h}%` }}
+                        />
+                    ))}
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-secondary)]/40">
+                    <div className="max-w-xs px-4 text-center">
+                        <div className="w-12 h-12 mx-auto mb-3">
+                            <img src="/img/LyriumEspecial.png" alt="Lyrium" className="w-full h-full object-contain" />
+                        </div>
+                        <PlanUpgradeMessage message="Los gráficos financieros avanzados están disponibles desde el plan Crece. Actualiza tu plan para visualizarlos." />
+                    </div>
                 </div>
             </div>
         );

@@ -48,11 +48,25 @@ export interface NubefactStore {
 
 export interface NubefactOrderItem {
     productName: string;
+    itemType?: 'Producto' | 'Servicio';
     quantity: number;
     unitPrice: number;
     lineTotal: number;
+    commissionAmount?: number;
+    commissionRate?: number;
     storeName: string | null;
     storeSlug: string | null;
+}
+
+export interface NubefactStoreCommission {
+    storeId: string;
+    storeName: string;
+    storeSlug?: string;
+    subtotal: number;
+    commissionRate: number;
+    commissionAmount: number;
+    commissionIgv: number;
+    commissionTotal: number;
 }
 
 export interface NubefactOrder {
@@ -87,6 +101,7 @@ export interface NubefactInvoice {
     status: string;
     items: NubefactItem[] | null;
     order: NubefactOrder | null;
+    storeCommissions?: NubefactStoreCommission[] | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -102,6 +117,13 @@ export interface NubefactKPIs {
         slug: string;
         totalVendido: number;
     }>;
+}
+
+export interface PlanInvoiceKPIs {
+    totalFacturadoMesActual: number;
+    totalFacturadoMesAnterior: number;
+    porcentajeCrecimiento: number;
+    montoPromedio: number;
 }
 
 interface PaginatedResponse<T> {
@@ -197,6 +219,10 @@ export const nubefactApi = {
             `/admin/plan-invoices?page=${page}&per_page=${perPage}`
         );
     },
+
+    planInvoiceKpis: async (): Promise<PlanInvoiceKPIs> => {
+        return apiRequest<PlanInvoiceKPIs>('/admin/plan-invoices/kpis');
+    },
 };
 
 export interface PlanInvoice {
@@ -221,4 +247,7 @@ export interface PlanInvoice {
     store_name: string | null;
     store_id: number | null;
     plan_request_id: number | null;
+    /** 'trial' | 'izipay' — viene de plan_requests.payment_method */
+    payment_method: string | null;
+    payment_status: string | null;
 }

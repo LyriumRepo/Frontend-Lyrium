@@ -6,6 +6,9 @@ import Icon from '@/components/ui/Icon';
 import { Voucher, VoucherStatus } from '@/features/seller/invoices/types';
 import { formatCurrency } from '@/shared/lib/utils/formatters';
 import { getAuthHeaders } from '@/shared/lib/api/token-store';
+import InvoiceOrderItemsSection from '@/shared/components/invoices/InvoiceOrderItemsSection';
+import InvoiceStoreCommissionsSection from '@/shared/components/invoices/InvoiceStoreCommissionsSection';
+import { toPercent } from '@/shared/components/invoices/types';
 
 interface InvoiceDrawerProps {
     voucher: Voucher | null;
@@ -102,7 +105,18 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
         new Date(date).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
 
     const fmt = (v: number | null | undefined) => (v != null ? formatCurrency(v) : '—');
-    const fmtPct = (v: number | null | undefined) => (v != null ? `${(v * 100).toFixed(1)}%` : '—');
+    // commission_rate llega como fracción (0.15) o como porcentaje entero (15)
+    // según venga del fallback de tienda o de los ítems del pedido — normalizar siempre.
+    const fmtPct = (v: number | null | undefined) => (v != null ? `${toPercent(v).toFixed(1)}%` : '—');
+    // IGV de la comisión: si el invoice no trae igv_amount, se extrae del monto de
+    // comisión (comisión × 0.18 ÷ 1.18), igual que en CommissionService/backend.
+    const fmtCommissionIgv = (amount: number | null | undefined) =>
+        amount != null ? formatCurrency(Math.round(((amount / 1.18) * 0.18) * 100) / 100) : '—';
+
+    const orderItems = voucher.order?.items ?? [];
+    const storeCommissions = voucher.store_commissions ?? [];
+    // La card única de "Comisión" queda cubierta por el desglose por tienda
+    const hasStoreCommissions = storeCommissions.length > 0 || orderItems.length > 0;
 
     return createPortal(
         <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6">
@@ -199,7 +213,18 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
                         </div>
                     )}
 
+                    {/* Ítems de la orden original */}
+                    <InvoiceOrderItemsSection items={orderItems} />
+
+                    {/* Comisiones por tienda */}
+                    <InvoiceStoreCommissionsSection
+                        commissions={storeCommissions}
+                        items={orderItems}
+                        fallbackRate={voucher.commission_rate}
+                    />
+
                     {/* Commission card */}
+                    {!hasStoreCommissions && (
                     <div className="space-y-2">
                         <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
                             <Icon name="DollarSign" className="w-4 h-4" /> Comisión
@@ -216,7 +241,9 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">IGV</p>
-                                    <p className="text-sm font-bold text-[var(--text-primary)]">{fmt(voucher.igv_amount)}</p>
+                                    <p className="text-sm font-bold text-[var(--text-primary)]">
+                                        {voucher.igv_amount != null ? fmt(voucher.igv_amount) : fmtCommissionIgv(voucher.commission_amount)}
+                                    </p>
                                 </div>
                             </div>
                             <div className="border-t border-[var(--border-subtle)] pt-3 flex items-center justify-between">
@@ -225,6 +252,7 @@ export default function InvoiceDrawer({ voucher, isOpen, onClose }: InvoiceDrawe
                             </div>
                         </div>
                     </div>
+                    )}
 
                     {/* Ver PDF button */}
                     <button

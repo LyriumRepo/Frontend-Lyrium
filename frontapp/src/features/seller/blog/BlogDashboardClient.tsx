@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpen, FileText, Headphones, Video, Clapperboard, Eye, MessageSquare } from 'lucide-react';
+import { BookOpen, FileText, Headphones, Video, Clapperboard, Eye, MessageSquare, ArrowRight } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
+import BaseStatCard from '@/components/ui/BaseStatCard';
 import { blogApi, BlogDashboard } from '@/shared/lib/api/bioblogRepository';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
 
 const BLOG_TABS = [
     { label: 'Dashboard', href: '/seller/blog', icon: BookOpen },
@@ -42,6 +44,8 @@ function BlogTabs({ current }: { current: string }) {
 }
 
 export function BlogDashboardClient() {
+    const { can, capabilitiesLoading } = usePlanCapabilities();
+    const hasAccess = can('can_bioblog');
     const [data, setData] = useState<BlogDashboard | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -51,6 +55,38 @@ export function BlogDashboardClient() {
             .catch(() => {})
             .finally(() => setLoading(false));
     }, []);
+
+    if (capabilitiesLoading) return <div className="p-20 text-center text-gray-400">Verificando acceso...</div>;
+
+    if (!hasAccess) {
+        return (
+            <div className="relative space-y-6 animate-fadeIn font-industrial pb-20">
+                <div className="blur-sm pointer-events-none select-none">
+                    <ModuleHeader title="BioBlog" subtitle="Panel de control de contenido" icon="BookOpen" />
+                    <BlogTabs current="dashboard" />
+                    <div className="grid grid-cols-4 lg:grid-cols-7 gap-4 mt-6">
+                        {[1, 2, 3, 4, 5, 6, 7].map(i => (
+                            <div key={i} className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] shadow-sm p-4 h-24" />
+                        ))}
+                    </div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center max-w-xs">
+                        <div className="w-16 h-16 mx-auto mb-4">
+                            <img src="/img/LyriumEspecial.png" alt="Lyrium" className="w-full h-full object-contain" />
+                        </div>
+                        <p className="text-sm font-bold text-[var(--text-primary)] mb-1">Contenido bloqueado</p>
+                        <p className="text-xs text-[var(--text-secondary)] mb-4">El BioBlog está disponible desde el plan CRECE. Actualiza tu plan para acceder.</p>
+                        <a href="/seller/planes"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--brand-sky)] dark:bg-[var(--brand-teal)] text-white text-xs font-black uppercase tracking-wider hover:opacity-90 transition-all">
+                            Actualizar Plan
+                            <ArrowRight className="w-4 h-4" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) return <div className="p-20 text-center text-gray-400">Cargando dashboard...</div>;
     if (!data) return <div className="p-20 text-center text-gray-400">Error al cargar</div>;
@@ -80,21 +116,24 @@ export function BlogDashboardClient() {
             <BlogTabs current="dashboard" />
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-4 lg:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
                 {[
-                    { label: 'Artículos', value: kpi.articles, icon: FileText, color: 'turquesa' },
-                    { label: 'Podcasts', value: kpi.podcasts, icon: Headphones, color: 'turquesaClaro' },
-                    { label: 'Videos', value: kpi.videos, icon: Video, color: 'verde' },
-                    { label: 'Shorts', value: kpi.shorts, icon: Clapperboard, color: 'turquesa' },
-                    { label: 'Vistas', value: kpi.total_views, icon: Eye, color: 'turquesaClaro' },
-                    { label: 'Foro Temas', value: kpi.forum_topics, icon: MessageSquare, color: 'lima' },
-                    { label: 'Foro Resp.', value: kpi.forum_replies, icon: MessageSquare, color: 'turquesa' },
+                    { label: 'Artículos', value: kpi.articles, icon: 'FileText', color: 'turquesa' },
+                    { label: 'Podcasts', value: kpi.podcasts, icon: 'Headphones', color: 'turquesaClaro' },
+                    { label: 'Videos', value: kpi.videos, icon: 'Video', color: 'verde' },
+                    { label: 'Shorts', value: kpi.shorts, icon: 'Clapperboard', color: 'turquesa' },
+                    { label: 'Vistas', value: kpi.total_views, icon: 'Eye', color: 'turquesaClaro' },
+                    { label: 'Foro Temas', value: kpi.forum_topics, icon: 'MessageSquare', color: 'lima' },
+                    { label: 'Foro Resp.', value: kpi.forum_replies, icon: 'MessageSquare', color: 'turquesa' },
                 ].map(stat => (
-                    <div key={stat.label} className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] shadow-sm p-4 text-center">
-                        <stat.icon className={`w-5 h-5 mx-auto mb-2 ${stat.color === 'verde' || stat.color === 'lima' ? 'text-[var(--color-success)]' : 'text-[var(--icons-green)]'}`} />
-                        <div className="text-2xl font-black text-[var(--text-primary)]">{stat.value}</div>
-                        <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mt-1">{stat.label}</div>
-                    </div>
+                    <BaseStatCard
+                        key={stat.label}
+                        label={stat.label}
+                        value={stat.value}
+                        icon={stat.icon}
+                        color={stat.color}
+                        className="text-center"
+                    />
                 ))}
             </div>
 
@@ -107,30 +146,52 @@ export function BlogDashboardClient() {
                 {recent.length === 0 ? (
                     <div className="p-10 text-center text-[var(--text-muted)] text-sm">Aún no hay publicaciones</div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b border-gray-50 dark:border-gray-800/50 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                    <th className="px-5 py-3 whitespace-nowrap">Tipo</th>
-                                    <th className="px-5 py-3 whitespace-nowrap">Título</th>
-                                    <th className="px-5 py-3 whitespace-nowrap">Estado</th>
-                                    <th className="px-5 py-3 whitespace-nowrap">Fecha</th>
-                                    <th className="px-5 py-3 whitespace-nowrap">Vistas</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {recent.map((item, i) => (
-                                    <tr key={`${item.type}-${item.id}`} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]/30 transition">
-                                        <td className="px-5 py-3">{typeIcon(item.type)}</td>
-                                        <td className="px-5 py-3 text-gray-700 dark:text-gray-300 font-semibold whitespace-nowrap">{item.title}</td>
-                                        <td className="px-5 py-3">{statusBadge(item.status)}</td>
-                                        <td className="px-5 py-3 text-gray-400 text-xs">{new Date(item.published_at ?? item.created_at).toLocaleDateString('es-PE')}</td>
-                                        <td className="px-5 py-3 text-gray-500">{item.views}</td>
+                    <>
+                        {/* MÓVIL */}
+                        <div className="sm:hidden p-3 space-y-2">
+                            {recent.map((item) => (
+                                <div key={`${item.type}-${item.id}`} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-4 py-3 flex items-center gap-3">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)]">
+                                        {typeIcon(item.type)}
+                                    </span>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">{item.title}</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            {statusBadge(item.status)}
+                                            <span className="text-[10px] text-gray-400">{new Date(item.published_at ?? item.created_at).toLocaleDateString('es-PE')}</span>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-bold text-gray-500 flex-shrink-0">{item.views}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* DESKTOP */}
+                        <div className="hidden sm:block overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-gray-50 dark:border-gray-800/50 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                        <th className="px-5 py-3 whitespace-nowrap">Tipo</th>
+                                        <th className="px-5 py-3 whitespace-nowrap">Título</th>
+                                        <th className="px-5 py-3 whitespace-nowrap">Estado</th>
+                                        <th className="px-5 py-3 whitespace-nowrap">Fecha</th>
+                                        <th className="px-5 py-3 whitespace-nowrap">Vistas</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {recent.map((item) => (
+                                        <tr key={`${item.type}-${item.id}`} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)]/30 transition">
+                                            <td className="px-5 py-3">{typeIcon(item.type)}</td>
+                                            <td className="px-5 py-3 text-gray-700 dark:text-gray-300 font-semibold whitespace-nowrap">{item.title}</td>
+                                            <td className="px-5 py-3">{statusBadge(item.status)}</td>
+                                            <td className="px-5 py-3 text-gray-400 text-xs">{new Date(item.published_at ?? item.created_at).toLocaleDateString('es-PE')}</td>
+                                            <td className="px-5 py-3 text-gray-500">{item.views}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
                 )}
             </div>
         </div>

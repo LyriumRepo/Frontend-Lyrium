@@ -9,6 +9,7 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { addressApi, Address } from '@/shared/lib/api/addressRepository';
 import { useGeoData } from '@/features/public/checkout/hooks/useGeoData';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
+import { LyriumSelect } from '@/components/ui';
 
 export default function CustomerAddressesPage() {
   const { isAuthenticated, loading } = useAuth();
@@ -176,12 +177,14 @@ export default function CustomerAddressesPage() {
         icon="MapPin"
       />
 
-      <div className="flex justify-center md:justify-end">
+      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mx-auto md:mx-0 md:ml-auto sm:justify-end">
         <BaseButton
           onClick={openAddModal}
           variant="action"
           leftIcon="Plus"
-          size="md"
+          size="lg"
+          fullWidth
+          className="sm:w-auto"
         >
           Agregar Dirección
         </BaseButton>
@@ -312,18 +315,17 @@ export default function CustomerAddressesPage() {
             <form onSubmit={handleSubmit} className="p-10 space-y-6 overflow-y-auto green-scrollbar flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Etiqueta de ubicación</label>
-                  <select
+                  <LyriumSelect
+                    label="Etiqueta de ubicación"
                     value={formData.etiqueta || ''}
-                    onChange={(e) => setFormData({ ...formData, etiqueta: e.target.value as 'casa' | 'trabajo' | 'otro' | undefined })}
-                    required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="casa">🏠 Casa</option>
-                    <option value="trabajo">💼 Trabajo</option>
-                    <option value="otro">📍 Otro</option>
-                  </select>
+                    onChange={(v) => setFormData({ ...formData, etiqueta: v as 'casa' | 'trabajo' | 'otro' | undefined })}
+                    options={[
+                      { value: '', label: 'Seleccionar...' },
+                      { value: 'casa', label: '🏠 Casa' },
+                      { value: 'trabajo', label: '💼 Trabajo' },
+                      { value: 'otro', label: '📍 Otro' }
+                    ]}
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Nombre Destinatario</label>
@@ -346,74 +348,74 @@ export default function CustomerAddressesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Departamento</label>
-                  <select
-                    value={formData.departamento}
-                    onChange={(e) => setFormData({ ...formData, departamento: e.target.value, provincia: '', distrito: '' })}
-                    required
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)]"
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="Amazonas">Amazonas</option>
-                    <option value="Áncash">Áncash</option>
-                    <option value="Apurímac">Apurímac</option>
-                    <option value="Arequipa">Arequipa</option>
-                    <option value="Ayacucho">Ayacucho</option>
-                    <option value="Cajamarca">Cajamarca</option>
-                    <option value="Callao">Callao</option>
-                    <option value="Cusco">Cusco</option>
-                    <option value="Huancavelica">Huancavelica</option>
-                    <option value="Huánuco">Huánuco</option>
-                    <option value="Ica">Ica</option>
-                    <option value="Junín">Junín</option>
-                    <option value="La Libertad">La Libertad</option>
-                    <option value="Lambayeque">Lambayeque</option>
-                    <option value="Lima">Lima</option>
-                    <option value="Loreto">Loreto</option>
-                    <option value="Madre de Dios">Madre de Dios</option>
-                    <option value="Moquegua">Moquegua</option>
-                    <option value="Pasco">Pasco</option>
-                    <option value="Piura">Piura</option>
-                    <option value="Puno">Puno</option>
-                    <option value="San Martín">San Martín</option>
-                    <option value="Tacna">Tacna</option>
-                    <option value="Tumbes">Tumbes</option>
-                    <option value="Ucayali">Ucayali</option>
-                  </select>
+                  <LyriumSelect
+                    label="Departamento"
+                    value={formData.departamento || ''}
+                    onChange={(v) => setFormData({ ...formData, departamento: v, provincia: '', distrito: '' })}
+                    searchable
+                    options={[
+                      { value: '', label: 'Seleccionar...' },
+                      { value: 'Amazonas', label: 'Amazonas' },
+                      { value: 'Áncash', label: 'Áncash' },
+                      { value: 'Apurímac', label: 'Apurímac' },
+                      { value: 'Arequipa', label: 'Arequipa' },
+                      { value: 'Ayacucho', label: 'Ayacucho' },
+                      { value: 'Cajamarca', label: 'Cajamarca' },
+                      { value: 'Callao', label: 'Callao' },
+                      { value: 'Cusco', label: 'Cusco' },
+                      { value: 'Huancavelica', label: 'Huancavelica' },
+                      { value: 'Huánuco', label: 'Huánuco' },
+                      { value: 'Ica', label: 'Ica' },
+                      { value: 'Junín', label: 'Junín' },
+                      { value: 'La Libertad', label: 'La Libertad' },
+                      { value: 'Lambayeque', label: 'Lambayeque' },
+                      { value: 'Lima', label: 'Lima' },
+                      { value: 'Loreto', label: 'Loreto' },
+                      { value: 'Madre de Dios', label: 'Madre de Dios' },
+                      { value: 'Moquegua', label: 'Moquegua' },
+                      { value: 'Pasco', label: 'Pasco' },
+                      { value: 'Piura', label: 'Piura' },
+                      { value: 'Puno', label: 'Puno' },
+                      { value: 'San Martín', label: 'San Martín' },
+                      { value: 'Tacna', label: 'Tacna' },
+                      { value: 'Tumbes', label: 'Tumbes' },
+                      { value: 'Ucayali', label: 'Ucayali' }
+                    ]}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Ciudad / Provincia</label>
-                  <select
-                    value={formData.provincia}
-                    onChange={(e) => setFormData({ ...formData, provincia: e.target.value, distrito: '' })}
-                    required
+                  <LyriumSelect
+                    label="Ciudad / Provincia"
+                    value={formData.provincia || ''}
+                    onChange={(v) => setFormData({ ...formData, provincia: v, distrito: '' })}
                     disabled={!formData.departamento || loadingProvincias}
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <option value="">
-                      {!formData.departamento ? 'Selecciona un departamento primero' : loadingProvincias ? 'Cargando...' : 'Seleccionar...'}
-                    </option>
-                    {provincias.map((p) => (
-                      <option key={p} value={p}>{p}</option>
-                    ))}
-                  </select>
+                    placeholder={
+                      !formData.departamento
+                        ? 'Selecciona un departamento primero'
+                        : loadingProvincias
+                          ? 'Cargando...'
+                          : 'Seleccionar...'
+                    }
+                    searchable
+                    options={provincias.map((p) => ({ value: p, label: p }))}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase">Urbanización / Distrito</label>
-                  <select
-                    value={formData.distrito}
-                    onChange={(e) => setFormData({ ...formData, distrito: e.target.value })}
-                    required
+                  <LyriumSelect
+                    label="Urbanización / Distrito"
+                    value={formData.distrito || ''}
+                    onChange={(v) => setFormData({ ...formData, distrito: v })}
                     disabled={!formData.provincia || loadingDistritos}
-                    className="w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-gray-50 dark:bg-[var(--bg-muted)] p-4 border-2 border-transparent rounded-2xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <option value="">
-                      {!formData.provincia ? 'Selecciona una provincia primero' : loadingDistritos ? 'Cargando...' : 'Seleccionar...'}
-                    </option>
-                    {distritos.map((d) => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
+                    placeholder={
+                      !formData.provincia
+                        ? 'Selecciona una provincia primero'
+                        : loadingDistritos
+                          ? 'Cargando...'
+                          : 'Seleccionar...'
+                    }
+                    searchable
+                    options={distritos.map((d) => ({ value: d, label: d }))}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

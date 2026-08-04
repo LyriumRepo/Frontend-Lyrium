@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import SmartSidebar from '@/components/layout/shared/SmartSidebar';
 import { sellerNavigation } from '@/shared/lib/constants/seller-nav';
 import { useAuth } from '@/shared/lib/context/AuthContext';
 import { useInventoryAlerts } from '@/features/seller/inventario/context/InventoryAlertsContext';
-import { useChatUnreadCount } from '@/shared/hooks/useChatUnreadCount';
+import { useNavNotificationBadges } from '@/shared/hooks/useNavNotificationBadges';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
 
 interface SellerSidebarProps {
     isMobileOpen: boolean;
@@ -15,7 +16,19 @@ interface SellerSidebarProps {
 export default function SellerSidebar({ isMobileOpen, onClose }: SellerSidebarProps) {
     const { user } = useAuth();
     const { alertCount } = useInventoryAlerts();
-    const chatUnread = useChatUnreadCount();
+    const notificationBadges = useNavNotificationBadges('seller');
+    const { can, capabilitiesLoading } = usePlanCapabilities();
+
+    const visibleNavigation = useMemo(() => {
+        if (capabilitiesLoading) return sellerNavigation;
+        return sellerNavigation.map(section => ({
+            ...section,
+            items: section.items.map(item => ({
+                ...item,
+                locked: !!item.requiredCapability && !can(item.requiredCapability),
+            })),
+        }));
+    }, [capabilitiesLoading, can]);
 
     const sellerUser = {
         name: user?.display_name || 'Mi Tienda',
@@ -24,13 +37,13 @@ export default function SellerSidebar({ isMobileOpen, onClose }: SellerSidebarPr
     };
 
     const badges: Record<string, number> = {
+        ...notificationBadges,
         ...(alertCount > 0 ? { inventario: alertCount } : {}),
-        ...(chatUnread > 0 ? { chat: chatUnread } : {}),
     };
 
     return (
         <SmartSidebar
-            navigation={sellerNavigation}
+            navigation={visibleNavigation}
             user={sellerUser}
             brandColor="sky"
             storageKey="seller_sidebar_expanded"

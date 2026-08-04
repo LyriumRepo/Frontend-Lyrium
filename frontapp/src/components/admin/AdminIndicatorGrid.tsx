@@ -32,10 +32,11 @@ const gridCols: Record<number, string> = {
 
 export default function AdminIndicatorGrid({ indicators, columns = 4, isLoading, className = '' }: Props) {
     const colsClass = gridCols[columns] || gridCols[4];
+    const mobileColsClass = columns === 1 ? 'grid-cols-1' : 'grid-cols-2';
 
     if (isLoading) {
         return (
-            <div className={`grid grid-cols-1 sm:grid-cols-2 ${colsClass} gap-6 ${className}`}>
+            <div className={`grid ${mobileColsClass} gap-3 sm:gap-6 sm:grid-cols-2 ${colsClass} ${className}`}>
                 {Array.from({ length: columns }).map((_, i) => (
                     <BaseSkeleton key={i} className="h-[130px] rounded-2xl" />
                 ))}
@@ -44,7 +45,7 @@ export default function AdminIndicatorGrid({ indicators, columns = 4, isLoading,
     }
 
     return (
-        <div className={`grid grid-cols-1 sm:grid-cols-2 ${colsClass} gap-6 ${className}`}>
+        <div className={`grid ${mobileColsClass} gap-3 sm:gap-6 sm:grid-cols-2 ${colsClass} ${className}`}>
             {indicators.map((ind) => (
                 <BaseStatCard
                     key={ind.label}

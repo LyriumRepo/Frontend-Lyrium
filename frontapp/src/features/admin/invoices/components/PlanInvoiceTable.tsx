@@ -86,20 +86,19 @@ function MobilePlanCard({ row, onViewDetail }: { row: PlanInvoiceRow; onViewDeta
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Plan</p>
-                            <p className="text-[10px] font-bold text-[var(--text-primary)]">
-                                {row.plan_name}
-                                {row.months > 0 && <span className="text-[var(--text-secondary)] ml-1">· {row.months} {row.months === 1 ? 'mes' : 'meses'}</span>}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Emisión</p>
-                            <p className="text-[10px] font-bold text-[var(--text-secondary)]">
-                                {new Date(row.emission_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
-                            </p>
-                        </div>
+                    <div className="flex items-start justify-between gap-3">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] pt-0.5 flex-shrink-0">Plan</span>
+                        <p className="text-[10px] font-bold text-[var(--text-primary)] text-right">
+                            {row.plan_name}
+                            {row.months > 0 && <span className="text-[var(--text-secondary)] ml-1">· {row.months} {row.months === 1 ? 'mes' : 'meses'}</span>}
+                        </p>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Emisión</span>
+                        <span className="text-[10px] font-bold text-[var(--text-secondary)]">
+                            {new Date(row.emission_date).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </span>
                     </div>
 
                     <div className="flex items-center justify-between">

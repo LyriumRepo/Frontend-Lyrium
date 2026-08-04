@@ -85,7 +85,8 @@ export const sellerNavigation: PanelNavigation = [
                 label: 'Capacitaciones',
                 description: 'Videos de formación para impulsar tu negocio',
                 icon: 'Video',
-                href: '/seller/training'
+                href: '/seller/training',
+                requiredCapability: 'can_training'
             },
             {
                 id: 'finanzas',
@@ -113,14 +114,16 @@ export const sellerNavigation: PanelNavigation = [
                 label: 'BioBlog',
                 description: 'Crea y gestiona contenido: artículos, podcasts, videos y shorts',
                 icon: 'BookOpen',
-                href: '/seller/blog'
+                href: '/seller/blog',
+                requiredCapability: 'can_bioblog'
             },
             {
                 id: 'bioforo',
                 label: 'BioForo',
                 description: 'Foro de discusión con tu comunidad',
                 icon: 'MessagesSquare',
-                href: '/seller/forum'
+                href: '/seller/forum',
+                requiredCapability: 'can_bioblog'
             },
             {
                 id: 'facturacion',

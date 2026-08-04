@@ -106,6 +106,9 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
     return true;
   });
 
+  const productos = filteredProducts.filter((p) => p.tipo !== 'service');
+  const servicios = filteredProducts.filter((p) => p.tipo === 'service');
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
@@ -172,7 +175,32 @@ function SearchResultsContent({ initialQuery = '', initialCategory = '' }: Searc
         {isLoading ? (
           <ProductGrid productos={[]} loading />
         ) : filteredProducts.length > 0 ? (
-          <ProductGrid productos={filteredProducts} />
+          <div className="space-y-10">
+            {productos.length > 0 && (
+              <section>
+                <div className="flex items-center gap-4 mb-6">
+                  <span className="flex-1 h-px bg-gray-200 dark:bg-[var(--border-subtle)]" />
+                  <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-gray-500 dark:text-[var(--text-placeholder)] text-center">
+                    Productos
+                  </h2>
+                  <span className="flex-1 h-px bg-gray-200 dark:bg-[var(--border-subtle)]" />
+                </div>
+                <ProductGrid productos={productos} />
+              </section>
+            )}
+            {servicios.length > 0 && (
+              <section>
+                <div className="flex items-center gap-4 mb-6">
+                  <span className="flex-1 h-px bg-gray-200 dark:bg-[var(--border-subtle)]" />
+                  <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-gray-500 dark:text-[var(--text-placeholder)] text-center">
+                    Servicios
+                  </h2>
+                  <span className="flex-1 h-px bg-gray-200 dark:bg-[var(--border-subtle)]" />
+                </div>
+                <ProductGrid productos={servicios} />
+              </section>
+            )}
+          </div>
         ) : (
           <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">

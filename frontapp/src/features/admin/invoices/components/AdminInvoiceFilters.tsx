@@ -3,7 +3,7 @@
 import React from 'react';
 import Icon from '@/components/ui/Icon';
 import BaseInputField from '@/components/ui/BaseInputField';
-import { BaseDatePicker } from '@/components/ui';
+import { BaseDatePicker, LyriumSelect } from '@/components/ui';
 
 interface AdminInvoiceFiltersProps {
     search: string;
@@ -18,8 +18,6 @@ interface AdminInvoiceFiltersProps {
     onClear: () => void;
     actions?: React.ReactNode;
 }
-
-const selectClass = 'w-full p-3 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-[10px] font-black uppercase tracking-widest text-[var(--icons-green)] focus:ring-2 focus:ring-[var(--icons-green)]/20 cursor-pointer outline-none appearance-none';
 
 export default function AdminInvoiceFilters({
     search, storeFilter, dateFrom, dateTo,
@@ -36,7 +34,7 @@ export default function AdminInvoiceFilters({
                     <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
                         <Icon name="Search" className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-xl font-black text-[var(--text-primary)]">
+                    <h3 className="text-base sm:text-xl font-black text-[var(--text-primary)]">
                         Filtros de Búsqueda
                     </h3>
                 </div>
@@ -74,13 +72,14 @@ export default function AdminInvoiceFilters({
                 </div>
                 {allStores.length > 0 && (
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Tienda</label>
-                        <select value={storeFilter} onChange={e => onStoreFilter(e.target.value)} className={selectClass}>
-                            <option value="">Todas las Tiendas</option>
-                            {allStores.map(s => (
-                                <option key={s} value={s}>{s}</option>
-                            ))}
-                        </select>
+                        <LyriumSelect
+                            label="Tienda"
+                            value={storeFilter}
+                            onChange={onStoreFilter}
+                            placeholder="Todas las Tiendas"
+                            searchable
+                            options={allStores.map(s => ({ value: s, label: s }))}
+                        />
                     </div>
                 )}
             </div>

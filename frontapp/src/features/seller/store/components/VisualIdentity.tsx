@@ -299,8 +299,8 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                         <Icon name="Palette" className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                        <h3 className="text-xl sm:text-2xl font-black tracking-tighter leading-none">Estudio de Identidad</h3>
-                        <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-80">
+                        <h3 className="text-base sm:text-xl md:text-2xl font-bold md:font-black tracking-tight sm:tracking-tighter leading-none">Estudio de Identidad</h3>
+                        <p className="hidden sm:block text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-80">
                             Gestiona tu logo, banners y galeria de fotos de tu tienda
                         </p>
                     </div>
@@ -487,7 +487,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                         tabIndex={0}
                                         className={`relative aspect-[4/1.5] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-dashed ${
                                             locked
-                                                ? 'border-[var(--lima-500)]/30 bg-[var(--lima-500)]/5 cursor-not-allowed'
+                                                ? 'border-[var(--plan-lock-accent)]/30 bg-[var(--plan-lock-accent)]/5 cursor-not-allowed'
                                                 : localValue
                                                     ? 'border-[var(--border-subtle)] bg-[var(--bg-secondary)] cursor-pointer'
                                                     : 'border-sky-500/20 dark:border-emerald-500/20 bg-sky-500/5 dark:bg-emerald-500/5 cursor-pointer'
@@ -497,8 +497,8 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                     >
                                         {locked ? (
                                             <div className="text-center px-4">
-                                                <Icon name="Lock" className="w-6 h-6 text-[var(--lima-500)] mx-auto mb-2" />
-                                                <p className="text-[9px] font-semibold text-[var(--lima-500)] uppercase tracking-widest">Disponible en planes superiores</p>
+                                                <Icon name="Lock" className="w-6 h-6 text-[var(--plan-lock-accent)] mx-auto mb-2" />
+                                                <p className="text-[9px] font-semibold text-[var(--plan-lock-accent)] uppercase tracking-widest">Disponible en planes superiores</p>
                                             </div>
                                         ) : localValue ? (
                                             <>
@@ -562,7 +562,7 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                             <button
                                 className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-semibold text-[10px] uppercase tracking-widest transition-all ${
                                     adBannerAtLimit
-                                        ? 'bg-[var(--lima-500)]/10 text-[var(--lima-500)] cursor-not-allowed'
+                                        ? 'bg-[var(--plan-lock-accent)]/10 text-[var(--plan-lock-accent)] cursor-not-allowed'
                                         : 'bg-purple-500/10 dark:bg-emerald-500/10 text-purple-500 dark:text-[var(--icons-green)] hover:bg-purple-500 dark:hover:bg-[var(--brand-green)] hover:text-white'
                                 }`}
                                 onClick={handleAdBannerClick}
@@ -597,14 +597,14 @@ export default function VisualIdentity(props: VisualIdentityProps): React.ReactE
                                     tabIndex={0}
                                     className={`aspect-[16/9] border-2 border-dashed rounded-xl sm:rounded-2xl flex flex-col items-center justify-center transition-all group ${
                                         adBannerAtLimit
-                                            ? 'border-[var(--lima-500)]/30 bg-[var(--lima-500)]/5 cursor-not-allowed'
+                                            ? 'border-[var(--plan-lock-accent)]/30 bg-[var(--plan-lock-accent)]/5 cursor-not-allowed'
                                             : 'border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-card)] cursor-pointer'
                                     }`}
                                     onClick={handleAdBannerClick}
                                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAdBannerClick(); }}
                                 >
                                     {adBannerAtLimit ? (
-                                        <Icon name="Lock" className="w-6 h-6 text-[var(--lima-500)] group-hover:text-white" />
+                                        <Icon name="Lock" className="w-6 h-6 text-[var(--plan-lock-accent)] group-hover:text-white" />
                                     ) : (
                                         <Icon name="Image" className="w-6 h-6 text-[var(--text-secondary)] group-hover:text-purple-400 dark:group-hover:text-[var(--icons-green)]" />
                                     )}

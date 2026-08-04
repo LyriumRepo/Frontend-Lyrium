@@ -24,11 +24,12 @@ export interface VendorProfileData {
     cci: string;
     bank_secondary?: BankSecondary | string;
     rrss: { instagram: string; facebook: string; tiktok: string };
+    /** GET /stores/me/profile-request solo informa la última solicitud pending o rejected (approved no se refleja aquí). */
     profileRequest?: {
         id: number;
-        status: 'pending' | 'approved' | 'rejected';
+        status: 'pending' | 'rejected';
         admin_notes?: string;
-        attempts: number;
+        attempts?: number;
         created_at: string;
     } | null;
 }

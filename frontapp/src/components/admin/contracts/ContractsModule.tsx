@@ -7,6 +7,7 @@ import Skeleton from '@/components/ui/Skeleton';
 import Pagination from '@/components/ui/Pagination';
 import AdminIndicatorGrid from '@/components/admin/AdminIndicatorGrid';
 import type { AdminIndicator } from '@/components/admin/AdminIndicatorGrid';
+import { LyriumSelect } from '@/components/ui';
 
 const PAGE_SIZE = 10;
 
@@ -102,36 +103,30 @@ export const ContratosModule: React.FC<ContratosModuleProps> = ({ state, actions
                     </div>
 
                     <div className="lg:col-span-2 space-y-2">
-                        <label htmlFor="contract-modality" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
-                            Aislar Modalidad
-                        </label>
-                        <select
-                            id="contract-modality"
+                        <LyriumSelect
+                            label="Aislar Modalidad"
                             value={filters.modality}
-                            onChange={(e) => actions.setFilters({ ...filters, modality: e.target.value })}
-                            className="w-full p-4 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-black text-[var(--text-primary)] uppercase cursor-pointer"
-                        >
-                            <option value="ALL">Todas</option>
-                            <option value="VIRTUAL">Virtual (Digital)</option>
-                            <option value="PHYSICAL">Presencial (Físico)</option>
-                        </select>
+                            onChange={(v) => actions.setFilters({ ...filters, modality: v })}
+                            options={[
+                                { value: 'ALL', label: 'Todas' },
+                                { value: 'VIRTUAL', label: 'Virtual (Digital)' },
+                                { value: 'PHYSICAL', label: 'Presencial (Físico)' }
+                            ]}
+                        />
                     </div>
 
                     <div className="lg:col-span-2 space-y-2">
-                        <label htmlFor="contract-status" className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">
-                            Estado Legal
-                        </label>
-                        <select
-                            id="contract-status"
+                        <LyriumSelect
+                            label="Estado Legal"
                             value={filters.status}
-                            onChange={(e) => actions.setFilters({ ...filters, status: e.target.value })}
-                            className="w-full p-4 bg-[var(--bg-secondary)] border-none rounded-2xl text-xs font-black text-[var(--text-primary)] uppercase cursor-pointer"
-                        >
-                            <option value="ALL">Todos los Estados</option>
-                            <option value="ACTIVE">Vigentes (Activos)</option>
-                            <option value="PENDING">En Revisión / Pendiente</option>
-                            <option value="EXPIRED">Rechazados</option>
-                        </select>
+                            onChange={(v) => actions.setFilters({ ...filters, status: v })}
+                            options={[
+                                { value: 'ALL', label: 'Todos los Estados' },
+                                { value: 'ACTIVE', label: 'Vigentes (Activos)' },
+                                { value: 'PENDING', label: 'En Revisión / Pendiente' },
+                                { value: 'EXPIRED', label: 'Rechazados' }
+                            ]}
+                        />
                     </div>
 
                     <button

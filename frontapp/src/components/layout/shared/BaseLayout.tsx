@@ -64,7 +64,7 @@ export default function BaseLayout({
             {header}
             <div className="relative mx-auto flex w-full max-w-[1920px] flex-1 min-h-0">
                 {sidebar}
-                <main className={`flex flex-col flex-1 min-h-0 overflow-x-hidden ${isImmersiveHelpdeskRoute ? 'overflow-y-hidden !p-0' : ''} ${mainClassName}`}>
+                <main className={`flex flex-col flex-1 min-h-0 overflow-x-hidden ${isImmersiveHelpdeskRoute ? 'overflow-y-clip !p-0' : ''} ${mainClassName}`}>
                     <div className={`animate-fadeIn ${isImmersiveHelpdeskRoute ? 'flex flex-col flex-1 min-h-0' : 'h-full min-h-0'}`}>
                         {children}
                     </div>

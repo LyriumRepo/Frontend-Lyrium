@@ -47,6 +47,7 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
 
     const {
         rows: planRows,
+        kpis: planKpis,
         isLoading: planLoading,
         error: planError,
         total: planTotal,
@@ -189,6 +190,8 @@ export function NubefactPageClient(_props: NubefactPageClientProps) {
                                     </div>
                                 </div>
                             )}
+
+                            <AdminInvoiceKPIsDisplay kpis={planKpis} />
 
                             <div className="flex justify-between items-center">
                                 <p className="text-sm text-[var(--text-secondary)]">

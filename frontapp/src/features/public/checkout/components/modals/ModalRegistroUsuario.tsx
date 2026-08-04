@@ -30,7 +30,7 @@ export default function ModalRegistroUsuario({ isOpen, email, onClose }: Props) 
     return (
         <>
             {/* Backdrop */}
-            <div className="fixed inset-0 bg-white/80 dark:bg-black/60 backdrop-blur-sm z-[1400] animate-fade-in" />
+            <div className="fixed inset-0 bg-[rgba(0,0,0,0.45)] dark:bg-[rgba(0,0,0,0.65)] backdrop-blur-xl z-[1400] animate-fade-in" />
 
             {/* Modal */}
             <div className="fixed inset-0 z-[1600] flex items-center justify-center p-4 animate-fade-in">
@@ -40,21 +40,21 @@ export default function ModalRegistroUsuario({ isOpen, email, onClose }: Props) 
                     aria-modal="true"
                     aria-label="Activar panel de usuario"
                     tabIndex={-1}
-                    className="bg-white dark:bg-[var(--bg-card)] w-full max-w-md shadow-2xl relative flex flex-col rounded-[2.5rem] overflow-hidden animate-modal-pop max-h-[90vh]"
+                    className="bg-white/95 dark:bg-[var(--bg-card)] backdrop-blur-xl w-full max-w-md shadow-2xl relative flex flex-col rounded-[2.5rem] overflow-hidden animate-modal-pop max-h-[90vh] border border-white/20 dark:border-[var(--border-subtle)]"
                 >
 
                     {/* Header */}
-                    <div className="relative h-32 shrink-0 flex items-center justify-center bg-gradient-to-br from-sky-400 to-blue-600 dark:from-emerald-600 dark:to-emerald-800">
+                    <div className="relative h-32 shrink-0 flex items-center justify-center bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] dark:from-emerald-700 dark:to-emerald-900">
                         <div className="relative z-20 flex flex-col items-center justify-center p-6 gap-3 text-center">
                             <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-xl animate-floating-bounce">
                                 <span className="text-4xl drop-shadow-lg">🪪</span>
                             </div>
                             <div>
-                                <h3 className="text-2xl font-black tracking-tight text-white uppercase">Panel de Usuario Lyrium</h3>
-                                <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Protección de Perfil</p>
+                                <h3 className="text-2xl font-black tracking-tight text-white">Panel de Usuario Lyrium</h3>
+                                <p className="text-sm text-white/70 font-bold mt-1.5">Protección de Perfil</p>
                             </div>
                         </div>
-                        <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 hover:scale-110 transition-all z-30 border border-white/20">
+                        <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all z-30">
                             <X className="w-5 h-5" />
                         </button>
                     </div>

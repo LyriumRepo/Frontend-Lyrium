@@ -115,7 +115,7 @@ export function InvoicesPageClient() {
             <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] rounded-2xl flex items-center justify-center shadow-lg">
               <Icon name="Search" className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-xl font-black text-gray-800 dark:text-[var(--text-primary)]">
+            <h3 className="text-xl font-bold md:font-black text-gray-800 dark:text-[var(--text-primary)]">
               Filtrar por fecha
             </h3>
           </div>

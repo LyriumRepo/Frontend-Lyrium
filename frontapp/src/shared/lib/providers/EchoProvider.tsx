@@ -32,6 +32,11 @@ export function EchoProvider({ children }: { children: React.ReactNode }) {
                         return;
                     }
 
+                    if (!localStorage.getItem('laravel_token')) {
+                        callback(new Error('Channel skipped: no active session'), null);
+                        return;
+                    }
+
                     fetch('/api/broadcasting/auth', {
                         method: 'POST',
                         credentials: 'same-origin',

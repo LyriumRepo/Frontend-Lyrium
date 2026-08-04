@@ -106,6 +106,7 @@ export function InventoryPageClient() {
                     onSearch={(v) => setFilter('search', v)}
                     onStatus={(v) => setFilter('status', v)}
                     onCategory={(v) => setFilter('category', v)}
+                    onApprovalStatus={(v) => setFilter('approvalStatus', v)}
                     actions={headerActions}
                 />
 

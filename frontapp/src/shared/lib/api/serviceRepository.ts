@@ -112,12 +112,15 @@ export interface BookServiceInput {
 }
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const authHeaders = await getAuthHeaders();
   const response = await fetch(`${LARAVEL_API_URL}${endpoint}`, {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      ...authHeaders,
+      ...(options?.headers ?? {}),
     },
-    ...options,
   });
 
   if (!response.ok) {

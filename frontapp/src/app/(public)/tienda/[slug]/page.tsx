@@ -108,7 +108,7 @@ export default function TiendaPage({ params }: StorePageProps) {
           precio: Number(p.price || 0),
           precioOferta: Number(p.price || p.regular_price || 0),
           precioAnterior: (p.regular_price && Number(p.regular_price) > Number(p.price)) ? Number(p.regular_price) : undefined,
-          imagen: p.images?.[0]?.src || '/img/no-image.png',
+          imagen: p.images?.[0]?.large ?? p.images?.[0]?.medium ?? p.images?.[0]?.src ?? '/img/no-image.png',
           stock: p.stock || 0,
           categoria: p.categories?.[0]?.name || '',
           categorias: (p.categories || []).map((c: any) => c.name),

@@ -133,7 +133,7 @@ export default function CartItemList({ onDeleteSelected }: Props) {
         {cartItems.map((item) => (
           <div
             key={item.id}
-            className={`flex gap-4 p-4 rounded-2xl border transition
+            className={`flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl border transition
               ${
                 item.selected
               ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/20'
@@ -151,7 +151,7 @@ export default function CartItemList({ onDeleteSelected }: Props) {
             </div>
 
             {/* Imagen */}
-            <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)] flex-shrink-0">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-[var(--bg-muted)] flex-shrink-0">
               {item.image ? (
                 <Image
                   src={item.image}
@@ -179,7 +179,7 @@ export default function CartItemList({ onDeleteSelected }: Props) {
                   Servicio
                 </span>
               )}
-              <p className="text-emerald-600 dark:text-emerald-400 font-bold text-base mt-1">
+              <p className="text-emerald-600 dark:text-emerald-400 font-bold text-sm sm:text-base mt-1">
                 S/ {item.price.toFixed(2)}
               </p>
             </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { ShoppingBag, Tag, ArrowRight, Loader2, Truck, Store } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import type { DeliveryMethod } from '@/store/checkoutStore';
@@ -23,6 +24,21 @@ export default function CartSummary({ onContinue }: Props) {
 
   const selectedItems = cartItems.filter((i) => i.selected);
   const isPickup = deliveryMethod === 'pickup';
+
+  // "Retiro en tienda" solo tiene sentido cuando todo el pedido pertenece a una
+  // sola tienda: la sucursal elegida es una sola para todo el pedido, así que si
+  // hay productos de varias tiendas no hay forma de garantizar que esa sucursal
+  // sirva para recoger los productos de las demás tiendas del carrito.
+  const distinctStoreIds = new Set(
+    selectedItems.filter((i) => i.id > 0).map((i) => i.storeId),
+  );
+  const isMultiStoreCart = distinctStoreIds.size > 1;
+
+  useEffect(() => {
+    if (isMultiStoreCart && deliveryMethod === 'pickup') {
+      setOrderData({ deliveryMethod: 'delivery', selectedBranchId: undefined });
+    }
+  }, [isMultiStoreCart, deliveryMethod, setOrderData]);
 
   // Cálculos del resumen
   const subtotal = selectedItems.reduce(
@@ -53,15 +69,15 @@ export default function CartSummary({ onContinue }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] p-6 lg:sticky lg:top-24 max-h-[85vh] overflow-y-auto green-scrollbar space-y-5">
+    <div className="rounded-2xl border border-gray-100 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] p-4 sm:p-6 lg:sticky lg:top-24 max-h-[85vh] overflow-y-auto green-scrollbar space-y-4 sm:space-y-5">
       {/* Título */}
-        <h2 className="font-bold text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
-          <ShoppingBag className="w-5 h-5 text-sky-500 dark:text-emerald-400" />
+        <h2 className="font-bold text-sm sm:text-base text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
+          <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-sky-500 dark:text-emerald-400" />
           Resumen
         </h2>
 
         {/* Desglose */}
-        <div className="space-y-3 text-sm">
+        <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
           <div className="flex justify-between text-gray-600 dark:text-[var(--text-secondary)]">
             <span>Total de artículos ({selectedItems.length})</span>
             <span className={discount > 0 ? 'line-through text-gray-400' : ''}>
@@ -89,9 +105,9 @@ export default function CartSummary({ onContinue }: Props) {
         <div className="border-t border-gray-100 dark:border-[var(--border-subtle)]" />
 
         {/* Total */}
-        <div className="flex justify-between font-bold text-base">
+        <div className="flex justify-between font-bold text-sm sm:text-base">
           <span className="text-gray-900 dark:text-[var(--text-primary)]">Total estimado</span>
-          <span className="text-sky-600 dark:text-emerald-400 text-lg">
+          <span className="text-sky-600 dark:text-emerald-400 text-base sm:text-lg">
             S/ {total.toFixed(2)}
           </span>
         </div>
@@ -107,29 +123,36 @@ export default function CartSummary({ onContinue }: Props) {
             Modalidad de entrega
           </p>
           <div className="flex flex-col gap-1.5">
-            {DELIVERY_OPTIONS.map(({ key, label, sub, icon: Icon }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setOrderData({ deliveryMethod: key, selectedBranchId: key === 'pickup' ? null : undefined })}
-                className={[
-                  'flex items-center gap-2.5 py-2 px-3 rounded-lg border transition-all duration-200 text-left',
-                  deliveryMethod === key
-                    ? 'border-sky-400 dark:border-emerald-500 bg-sky-50 dark:bg-emerald-950/40 shadow-sm'
-                    : 'border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-gray-300 dark:hover:border-gray-600',
-                ].join(' ')}
-              >
-                <Icon className={`w-4 h-4 flex-shrink-0 ${deliveryMethod === key ? 'text-sky-600 dark:text-emerald-400' : 'text-gray-400'}`} />
-                <div className="flex-1 min-w-0">
-                  <span className={`text-xs font-bold ${deliveryMethod === key ? 'text-sky-700 dark:text-emerald-300' : 'text-gray-700 dark:text-[var(--text-secondary)]'}`}>
-                    {label}
-                  </span>
-                  <span className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] ml-1.5">
-                    · {sub}
-                  </span>
-                </div>
-              </button>
-            ))}
+            {DELIVERY_OPTIONS.map(({ key, label, sub, icon: Icon }) => {
+              const isDisabled = key === 'pickup' && isMultiStoreCart;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={isDisabled}
+                  onClick={() => setOrderData({ deliveryMethod: key, selectedBranchId: key === 'pickup' ? null : undefined })}
+                  title={isDisabled ? 'No disponible: tu pedido incluye productos de varias tiendas' : undefined}
+                  className={[
+                    'flex items-center gap-2.5 py-2 px-3 rounded-lg border transition-all duration-200 text-left',
+                    isDisabled
+                      ? 'border-gray-200 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)]/40 opacity-60 cursor-not-allowed'
+                      : deliveryMethod === key
+                        ? 'border-sky-400 dark:border-emerald-500 bg-sky-50 dark:bg-emerald-950/40 shadow-sm'
+                        : 'border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-gray-300 dark:hover:border-gray-600',
+                  ].join(' ')}
+                >
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${isDisabled ? 'text-gray-300 dark:text-gray-600' : deliveryMethod === key ? 'text-sky-600 dark:text-emerald-400' : 'text-gray-400'}`} />
+                  <div className="flex-1 min-w-0">
+                    <span className={`text-xs font-bold ${isDisabled ? 'text-gray-400 dark:text-gray-500' : deliveryMethod === key ? 'text-sky-700 dark:text-emerald-300' : 'text-gray-700 dark:text-[var(--text-secondary)]'}`}>
+                      {label}
+                    </span>
+                    <span className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] ml-1.5">
+                      · {isDisabled ? 'No disponible con varias tiendas' : sub}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 

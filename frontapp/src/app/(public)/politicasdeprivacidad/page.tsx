@@ -88,7 +88,7 @@ export default function PrivacyPolicyPage() {
                         Políticas de privacidad
                     </h1>
                 </div>
-                <p className="text-gray-500 dark:text-[var(--text-primary)] max-w-3xl mx-auto text-lg leading-relaxed">
+                <p className="text-gray-500 dark:text-[var(--text-primary)] max-w-3xl mx-auto text-sm sm:text-lg leading-relaxed">
                     Esta Política de Privacidad explica cómo recopilamos, usamos y protegemos tu información cuando utilizas
                     <strong className="text-sky-600 dark:text-[var(--icons-green)]"> LYRIUM BIOMARKETPLACE</strong>.
                 </p>
@@ -127,7 +127,7 @@ export default function PrivacyPolicyPage() {
                     </div>
                     <div className="p-8 md:p-12 space-y-12">
                         <div className="text-center space-y-2">
-                            <h2 className="text-2xl font-black text-[#333333] uppercase tracking-tighter">Política de Privacidad y Protección de Datos</h2>
+                            <h2 className="text-lg sm:text-2xl font-bold sm:font-black text-[#333333] uppercase tracking-tight sm:tracking-tighter">Política de Privacidad y Protección de Datos</h2>
                             <div className="text-sky-500 dark:text-[var(--brand-green)] font-bold text-sm tracking-widest">- LYRIUM BIOMARKETPLACE -</div>
                         </div>
 
@@ -139,7 +139,7 @@ export default function PrivacyPolicyPage() {
                                 className="space-y-6 pt-10 border-t border-dashed border-gray-100 first:border-0 first:pt-0 group/section"
                             >
                                 <div className="flex items-center gap-4">
-                                    <h3 className="text-2xl md:text-2xl font-bold text-[#333333] tracking-tight group-hover/section:text-sky-600 dark:group-hover/section:text-[var(--brand-green)] transition-colors">
+                                    <h3 className="text-base sm:text-2xl font-bold text-[#333333] tracking-tight group-hover/section:text-sky-600 dark:group-hover/section:text-[var(--brand-green)] transition-colors">
                                         {section.title}
                                     </h3>
                                     {section.badge && (
@@ -150,7 +150,7 @@ export default function PrivacyPolicyPage() {
                                     )}
                                 </div>
 
-                                <p className="text-justify text-gray-600 text-lg leading-relaxed">
+                                <p className="text-justify text-gray-600 text-sm sm:text-lg leading-relaxed">
                                     {section.content}
                                 </p>
 

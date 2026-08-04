@@ -1,15 +1,21 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Video, Plus, Edit, Trash2, Globe, Clock, User, Send, CheckCircle, Save, Info, FileText, BookOpen, Headphones, Clapperboard, X } from 'lucide-react';
+import { Video, Plus, Globe, Clock, User, Save, Info, FileText, BookOpen, Headphones, Clapperboard, X, ArrowRight } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import Pagination from '@/components/ui/Pagination';
+import { LyriumSelect } from '@/components/ui';
 import { blogApi, BlogVideo } from '@/shared/lib/api/bioblogRepository';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import { BlogContentMobileCard } from './components/BlogContentMobileCard';
+import { ContentStatusActions } from './components/ContentStatusActions';
 
 export function BlogVideosClient() {
+    const { can, capabilitiesLoading } = usePlanCapabilities();
+    const hasAccess = can('can_bioblog');
     const [items, setItems] = useState<BlogVideo[]>([]);
     const [loading, setLoading] = useState(true);
     const [showEditor, setShowEditor] = useState(false);
@@ -99,6 +105,19 @@ export function BlogVideosClient() {
         return `${m}:${String(s).padStart(2, '0')}`;
     };
 
+    const statusBadge = (s: string) => (
+        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+            s === 'published' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' :
+            s === 'approved' ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400' :
+            s === 'pending_review' ? 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400' :
+            s === 'rejected' ? 'bg-gray-200 dark:bg-gray-700 text-gray-500' :
+            'bg-gray-100 dark:bg-gray-800 text-gray-500'
+        }`}>{{
+            draft: 'Borrador', pending_review: 'En revisión', approved: 'Aprobado',
+            rejected: 'Rechazado', published: 'Publicado', archived: 'Archivado',
+        }[s] || s}</span>
+    );
+
     const pathname = usePathname();
 
     const BLOG_TABS = [
@@ -109,10 +128,54 @@ export function BlogVideosClient() {
         { label: 'Shorts', href: '/seller/blog/shorts', icon: Clapperboard },
     ];
 
+    if (capabilitiesLoading) return <div className="p-20 text-center text-gray-400">Verificando acceso...</div>;
+
+    if (!hasAccess) {
+        return (
+            <div className="relative space-y-6 animate-fadeIn font-industrial pb-20">
+                <div className="blur-sm pointer-events-none select-none">
+                    <ModuleHeader title="BioBlog" subtitle="Vídeos" icon="Video" />
+                    <div className="flex gap-1 p-1 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-2xl overflow-x-auto mt-6">
+                        {BLOG_TABS.map(tab => (
+                            <div key={tab.href} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider whitespace-nowrap text-gray-400 dark:text-[var(--text-muted)]">
+                                <tab.icon className="w-4 h-4" />
+                                {tab.label}
+                            </div>
+                        ))}
+                    </div>
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mt-6 p-6 space-y-3">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="h-10 bg-gray-100 dark:bg-gray-800 rounded-xl" />
+                        ))}
+                    </div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center max-w-xs">
+                        <div className="w-16 h-16 mx-auto mb-4">
+                            <img src="/img/LyriumEspecial.png" alt="Lyrium" className="w-full h-full object-contain" />
+                        </div>
+                        <p className="text-sm font-bold text-[var(--text-primary)] mb-1">Contenido bloqueado</p>
+                        <p className="text-xs text-[var(--text-secondary)] mb-4">El BioBlog está disponible desde el plan CRECE. Actualiza tu plan para acceder.</p>
+                        <a href="/seller/planes"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--brand-sky)] dark:bg-[var(--brand-teal)] text-white text-xs font-black uppercase tracking-wider hover:opacity-90 transition-all">
+                            Actualizar Plan
+                            <ArrowRight className="w-4 h-4" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
             <ModuleHeader title="BioBlog" subtitle="Vídeos" icon="Video"
-                actions={<BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Video</BaseButton>} />
+                actions={
+                    <BaseButton onClick={openCreate} variant="action" leftIcon="Plus" size="sm">
+                        <span className="hidden sm:inline">Nuevo Video</span>
+                        <span className="sm:hidden">Video</span>
+                    </BaseButton>
+                } />
 
             <div className="flex gap-1 p-1 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-2xl overflow-x-auto">
                 {BLOG_TABS.map(tab => {
@@ -155,7 +218,29 @@ export function BlogVideosClient() {
             <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 {loading ? <div className="p-20 text-center text-gray-400">Cargando...</div>
                 : items.length === 0 ? <div className="p-20 text-center text-gray-400">Sin videos</div>
-                : <div className="overflow-x-auto">
+                : <>
+                    {/* MÓVIL */}
+                    <div className="sm:hidden p-3 space-y-2">
+                        {pageItems.map(v => (
+                            <BlogContentMobileCard
+                                key={v.id}
+                                title={v.title}
+                                statusBadge={statusBadge(v.status)}
+                                thumbnailIcon={<Video className="w-5 h-5 text-gray-400" />}
+                                metaFields={[
+                                    { label: 'Plataforma', value: <span className="uppercase">{v.platform}</span> },
+                                    { label: 'Duración', value: fmtDuration(v.duration) || '—' },
+                                ]}
+                                status={v.status}
+                                onUpdateStatus={(status) => updateStatus(v.id, status)}
+                                onEdit={() => openEdit(v)}
+                                onDelete={() => handleDelete(v.id)}
+                            />
+                        ))}
+                    </div>
+
+                    {/* DESKTOP */}
+                    <div className="hidden sm:block overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
@@ -172,56 +257,16 @@ export function BlogVideosClient() {
                                     <td className="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">{v.title}</td>
                                     <td className="px-5 py-4 text-xs text-gray-500 uppercase">{v.platform}</td>
                                     <td className="px-5 py-4 text-gray-500">{fmtDuration(v.duration) || '—'}</td>
+                                    <td className="px-5 py-4">{statusBadge(v.status)}</td>
                                     <td className="px-5 py-4">
-                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                                            v.status === 'published' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' :
-                                            v.status === 'approved' ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400' :
-                                            v.status === 'pending_review' ? 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400' :
-                                            v.status === 'rejected' ? 'bg-gray-200 dark:bg-gray-700 text-gray-500' :
-                                            'bg-gray-100 dark:bg-gray-800 text-gray-500'
-                                        }`}>{{
-                                            draft: 'Borrador', pending_review: 'En revisión', approved: 'Aprobado',
-                                            rejected: 'Rechazado', published: 'Publicado', archived: 'Archivado',
-                                        }[v.status] || v.status}</span>
+                                        <ContentStatusActions status={v.status} onUpdateStatus={(status) => updateStatus(v.id, status)} onEdit={() => openEdit(v)} onDelete={() => handleDelete(v.id)} />
                                     </td>
-                                    <td className="px-5 py-4"><div className="flex gap-1.5 items-center">
-                                        {v.status === 'draft' && (
-                                            <button onClick={() => updateStatus(v.id, 'pending_review')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white transition shadow-md shadow-sky-500/20 dark:shadow-[#8FC3A1]/50">
-                                                <Send className="w-3 h-3 inline mr-1" />Enviar
-                                            </button>
-                                        )}
-                                        {v.status === 'pending_review' && (
-                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">En revisión</span>
-                                        )}
-                                        {v.status === 'approved' && (
-                                            <>
-                                                <button onClick={() => updateStatus(v.id, 'published')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white transition shadow-md shadow-sky-500/20 dark:shadow-[#8FC3A1]/50">
-                                                    <CheckCircle className="w-3 h-3 inline mr-1" />Publicar
-                                                </button>
-                                                <button onClick={() => updateStatus(v.id, 'draft')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-300 transition">
-                                                    Borrador
-                                                </button>
-                                            </>
-                                        )}
-                                        {v.status === 'rejected' && (
-                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-500">Rechazado</span>
-                                        )}
-                                        {v.status === 'published' && (
-                                            <button onClick={() => updateStatus(v.id, 'approved')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-300 transition">
-                                                Ocultar
-                                            </button>
-                                        )}
-                                        {v.status === 'archived' && (
-                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400">Archivado</span>
-                                        )}
-                                        <button onClick={() => openEdit(v)} className="p-1.5 rounded-lg hover:bg-teal-50 text-teal-500 transition"><Edit className="w-4 h-4" /></button>
-                                        <button onClick={() => handleDelete(v.id)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition"><Trash2 className="w-4 h-4" /></button>
-                                    </div></td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                </div>}
+                    </div>
+                </>}
                 <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={items.length} itemLabel="videos" />
             </div>
 
@@ -236,12 +281,16 @@ export function BlogVideosClient() {
                         </div>
                         <div className="p-6 space-y-4 overflow-y-auto green-scrollbar">
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Plataforma</label>
-                            <select value={form.platform} onChange={e => setForm(f => ({ ...f, platform: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">
-                                <option value="youtube">YouTube</option>
-                                <option value="vimeo">Vimeo</option>
-                                <option value="tiktok">TikTok</option>
-                            </select>
+                            <LyriumSelect
+                                label="Plataforma"
+                                value={form.platform}
+                                onChange={(v) => setForm(f => ({ ...f, platform: v }))}
+                                options={[
+                                    { value: 'youtube', label: 'YouTube' },
+                                    { value: 'vimeo', label: 'Vimeo' },
+                                    { value: 'tiktok', label: 'TikTok' }
+                                ]}
+                            />
                         </div>
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 mb-1">URL *</label>

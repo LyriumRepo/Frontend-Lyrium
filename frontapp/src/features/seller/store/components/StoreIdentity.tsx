@@ -3,6 +3,7 @@
 import React from 'react';
 import { ShopConfig } from '@/features/seller/store/types';
 import Icon from '@/components/ui/Icon';
+import { LyriumSelect } from '@/components/ui';
 import { CategoryResource } from '@/shared/lib/api/categoryRepository';
 
 interface StoreIdentityProps {
@@ -21,8 +22,8 @@ export default function StoreIdentity({ config, updateConfig, categories = [] }:
                         <Icon name="Building" className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                        <h3 className="text-xl sm:text-2xl font-black tracking-tighter leading-none">Sobre Nosotros</h3>
-                        <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-80">
+                        <h3 className="text-base sm:text-xl md:text-2xl font-bold md:font-black tracking-tight sm:tracking-tighter leading-none">Sobre Nosotros</h3>
+                        <p className="hidden sm:block text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-80">
                             Identidad, historia y descripción de tu empresa
                         </p>
                     </div>
@@ -53,20 +54,18 @@ export default function StoreIdentity({ config, updateConfig, categories = [] }:
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label htmlFor="store-category" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1 flex items-center gap-1">
-                                    <Icon name="Tag" className="w-3 h-3 text-sky-500 dark:text-[var(--icons-green)]" /> Categoría <span className="text-red-500 ml-1">*</span>
-                                </label>
-                                <select
-                                    id="store-category"
+                                <LyriumSelect
+                                    label={<>Categoría <span className="text-red-500">*</span></>}
                                     value={config.category || ''}
-                                    onChange={e => updateConfig({ category: e.target.value })}
-                                    className="w-full text-sm font-black text-[var(--text-primary)] bg-[var(--bg-secondary)] p-3 border-2 border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--icons-green)] focus:ring-2 focus:ring-sky-500/20 transition-all duration-300"
-                                >
-                                    <option value="">Seleccionar...</option>
-                                    {categories.map(cat => (
-                                        <option key={cat.id} value={cat.name}>{cat.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={(v) => updateConfig({ category: v })}
+                                    options={[
+                                        { value: '', label: 'Seleccionar...' },
+                                        ...categories.map((cat) => ({
+                                            value: cat.name,
+                                            label: cat.name
+                                        }))
+                                    ]}
+                                />
                             </div>
                             <div className="space-y-1">
                                 <label htmlFor="store-activity" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1 flex items-center gap-1">

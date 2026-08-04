@@ -28,7 +28,7 @@ function CategoryCard({ producto, onAddToCart, onQuickView }: {
             alt={producto.titulo}
             fill
             sizes="210px"
-            className="object-contain md:object-cover transition-transform duration-500 hover:scale-[1.08]"
+            className="object-cover transition-transform duration-500 hover:scale-[1.08]"
             draggable={false}
           />
         </Link>

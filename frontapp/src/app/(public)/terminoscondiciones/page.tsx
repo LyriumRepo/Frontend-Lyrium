@@ -145,6 +145,11 @@ export default function TermsAndConditionsPage() {
               .terms-content td {
                 color: #000 !important;
               }
+              @media (max-width: 640px) {
+                .terms-content strong {
+                  font-weight: 600 !important;
+                }
+              }
             `}</style>
 
             {/* ===================== HEADER SECTION ===================== */}
@@ -160,7 +165,7 @@ export default function TermsAndConditionsPage() {
                     text-base sm:text-lg md:text-[clamp(20px,2.6vw,34px)]" >
                 <FileText className="w-5 h-5 sm:w-7 sm:h-7 md:w-9 md:h-9 shrink-0 animate-float" /> Términos y condiciones </h1>
 </div>
-                <p className="text-gray-500 dark:text-[var(--text-primary)] max-w-3xl mx-auto text-lg">
+                <p className="text-gray-500 dark:text-[var(--text-primary)] max-w-3xl mx-auto text-sm sm:text-lg">
                     Revisa los términos aplicables al uso de <strong className="text-sky-600 dark:text-[var(--icons-green)]">LYRIUM BIO MARKETPLACE</strong>.
                     Usa las pestañas para cambiar entre Cliente y Vendedor.
                 </p>
@@ -235,7 +240,7 @@ export default function TermsAndConditionsPage() {
 
                     <div className="p-8 md:p-12 space-y-12">
                         <div className="text-center space-y-2">
-                            <h2 className="text-2xl font-black text-[#333333] uppercase tracking-tighter transition-all duration-500">{config.subtitle}</h2>
+                            <h2 className="text-lg sm:text-2xl font-bold sm:font-black text-[#333333] uppercase tracking-tight sm:tracking-tighter transition-all duration-500">{config.subtitle}</h2>
                             <div className="text-sky-500 dark:text-[var(--brand-green)] font-bold text-sm tracking-widest">- LYRIUM BIOMARKETPLACE -</div>
                         </div>
 
@@ -247,11 +252,11 @@ export default function TermsAndConditionsPage() {
                                     ref={el => { sectionRefs.current[section.id] = el }}
                                     className="space-y-6 pt-10 border-t border-dashed border-gray-100 first:border-0 first:pt-0 group/section"
                                 >
-                                    <h3 className="text-2xl md:text-2xl font-bold text-[#333333] tracking-tight group-hover/section:text-sky-600 dark:group-hover/section:text-[var(--brand-green)] transition-colors">
+                                    <h3 className="text-base sm:text-2xl font-bold text-[#333333] tracking-tight group-hover/section:text-sky-600 dark:group-hover/section:text-[var(--brand-green)] transition-colors">
                                         {section.title}
                                     </h3>
                                     <div
-                                        className="text-justify text-gray-600 text-[16px] leading-relaxed terms-content"
+                                        className="text-justify text-gray-600 text-sm sm:text-[16px] leading-relaxed terms-content"
                                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(section.content) }}
                                     />
                                 </div>

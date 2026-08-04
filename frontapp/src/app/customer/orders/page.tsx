@@ -9,7 +9,7 @@ import Pagination from '@/components/ui/Pagination';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { Eye, Info } from "lucide-react";
 import { orderApi, OrderResource } from '@/shared/lib/api/orderRepository';
-import { BaseDatePicker } from '@/components/ui';
+import { BaseDatePicker, LyriumSelect } from '@/components/ui';
 import ClientRescheduleModal, { SelectedSpecialist } from './ClientRescheduleModal';
 import { TrackingStepper } from '@/shared/components/tracking/TrackingStepper';
 
@@ -49,6 +49,7 @@ interface EnvioInfo {
     district: string;
     phone: string | null;
     hours: string | null;
+    mapsUrl: string | null;
   } | null;
 }
 
@@ -62,6 +63,7 @@ interface Order {
   fecha: string;
   hora: string;
   tienda: string;
+  tiendas: string[];
   detalle: string;
   total: string;
   estado: EstadoPedido;
@@ -275,7 +277,17 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
   const itemCount = items.length;
   const serviceItemCount = serviceItems.length;
   const firstItem = items[0];
-  const tienda = firstItem?.store?.name ?? firstItem?.store_name ?? item.customer_name ?? 'Tienda';
+  const tiendasUnicas = [...new Set([
+    ...items.map((i: any) => i.store?.name).filter(Boolean),
+    ...serviceItems.map((i: any) => i.store?.name ?? i.storeName ?? i.store_name).filter(Boolean)
+  ])];
+  const tienda = tiendasUnicas.length === 0
+    ? (item.customer_name ?? 'Tienda')
+    : tiendasUnicas.length === 1
+      ? tiendasUnicas[0]
+      : tiendasUnicas.length === 2
+        ? `${tiendasUnicas[0]} + ${tiendasUnicas[1]}`
+        : `${tiendasUnicas[0]} + ${tiendasUnicas.length - 1} más`;
   const firstImage = firstItem?.product?.image ?? '';
   const detalleParts: string[] = [];
   if (itemCount > 0) detalleParts.push(`${itemCount} ${itemCount === 1 ? 'producto' : 'productos'}`);
@@ -295,6 +307,7 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
     fecha,
     hora,
     tienda,
+    tiendas: tiendasUnicas,
     detalle,
     total: `S/ ${Number(item.total).toFixed(2)}`,
     estado: (() => {
@@ -330,6 +343,7 @@ function mapOrderResourceToOrder(raw: OrderResource): Order {
             district: item.branch.district ?? '',
             phone: item.branch.phone ?? null,
             hours: item.branch.hours ?? null,
+            mapsUrl: item.branch.mapsUrl ?? null,
           } : null,
         }
       : undefined,
@@ -502,6 +516,16 @@ function TrackingCard({ envio, tipoEnvio }: { envio: EnvioInfo; tipoEnvio: TipoE
               </div>
             )}
           </div>
+          {envio.branch!.mapsUrl && (
+            <a
+              href={envio.branch!.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-[52px] inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-600 dark:text-[var(--icons-green)] hover:underline uppercase tracking-widest"
+            >
+              <Icon name="Map" className="w-3.5 h-3.5" /> Ver ubicación en Google Maps
+            </a>
+          )}
         </div>
       ) : (
         <div className="flex items-start gap-3">
@@ -835,7 +859,7 @@ export default function CustomerOrdersPage() {
     result = result.filter((o) => o.tipo === filters.categoria);
 
     if (filters.empresa) {
-      result = result.filter((o) => o.tienda.toLowerCase().includes(filters.empresa.toLowerCase()));
+      result = result.filter((o) => o.tiendas.some(t => t.toLowerCase().includes(filters.empresa.toLowerCase())));
     }
 
     if (filters.tipo_envio) {
@@ -973,8 +997,6 @@ export default function CustomerOrdersPage() {
     );
   }
 
-  const selectClass =
-    'w-full text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] bg-white dark:bg-[var(--bg-secondary)] p-3 border-2 border-gray-200 dark:border-[var(--border-subtle)] rounded-xl outline-none focus:border-sky-500 dark:focus:border-[var(--brand-green)] focus:ring-2 focus:ring-sky-100 transition-all duration-300 cursor-pointer';
   const shippingOptions =
     filters.categoria === 'productos'
       ? [
@@ -1039,7 +1061,7 @@ export default function CustomerOrdersPage() {
             <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 dark:from-[var(--brand-green)] dark:to-[var(--brand-green-hover)] rounded-2xl flex items-center justify-center shadow-lg">
               <Icon name="Search" className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-xl font-black text-gray-800 dark:text-[var(--text-primary)]">
+            <h3 className="text-xl font-bold md:font-black text-gray-800 dark:text-[var(--text-primary)]">
               Filtros de Búsqueda
             </h3>
           </div>
@@ -1055,21 +1077,18 @@ export default function CustomerOrdersPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-              Tienda
-            </label>
-            <select
-              value={filters.empresa}
-              onChange={(e) => setFilters({ ...filters, empresa: e.target.value })}
-              className={selectClass}
-            >
-              <option value="">Todos</option>
-              {Array.from(new Set(orders.map(o => o.tienda).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'es')).map(tienda => (
-                <option key={tienda} value={tienda}>{tienda}</option>
-              ))}
-            </select>
-          </div>
+          <LyriumSelect
+            label="Tienda"
+            value={filters.empresa}
+            onChange={(v) => setFilters({ ...filters, empresa: v })}
+            searchable
+            options={[
+              { value: '', label: 'Todos' },
+              ...Array.from(new Set(orders.flatMap(o => o.tiendas)))
+                .sort((a, b) => a.localeCompare(b, 'es'))
+                .map(t => ({ value: t, label: t }))
+            ]}
+          />
 
           <BaseDatePicker
             label="Desde"
@@ -1085,50 +1104,30 @@ export default function CustomerOrdersPage() {
             placeholder="Seleccionar fecha"
           />
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-              Tipo de envío
-            </label>
-            <select
-              value={filters.tipo_envio}
-              onChange={(e) =>
-                setFilters({
-                  ...filters,
-                  tipo_envio: e.target.value,
-                  estado: '',
-                })
-              }
-              className={selectClass}
-            >
-              <option value="">Todos</option>
-              {shippingOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <LyriumSelect
+            label="Tipo de envío"
+            value={filters.tipo_envio}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                tipo_envio: v,
+                estado: '',
+              })
+            }
+            options={[
+              { value: '', label: 'Todos' },
+              ...shippingOptions.map(o => ({ value: o.value, label: o.label }))
+            ]}
+          />
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest ml-1">
-              Estado
-            </label>
-            <select
-              disabled={!filters.tipo_envio}
-              value={filters.estado}
-              onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
-              className={`${selectClass} ${!filters.tipo_envio ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <option value="">
-                {!filters.tipo_envio ? 'Seleccione un tipo de envío' : 'Todos los estados'}
-              </option>
-              {selectedStatusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <LyriumSelect
+            label="Estado"
+            value={filters.estado}
+            onChange={(v) => setFilters({ ...filters, estado: v })}
+            disabled={!filters.tipo_envio}
+            placeholder={!filters.tipo_envio ? 'Seleccione un tipo de envío' : 'Todos los estados'}
+            options={selectedStatusOptions.map(o => ({ value: o.value, label: o.label }))}
+          />
         </div>
 
 
@@ -1152,25 +1151,22 @@ export default function CustomerOrdersPage() {
               {filteredOrders.length} Pedidos
             </span>
 
-            <select
+            <LyriumSelect
               value={filters.categoria}
-              onChange={(e) =>
+              onChange={(v) =>
                 setFilters({
                   ...filters,
-                  categoria: e.target.value as 'productos' | 'servicios',
+                  categoria: v as 'productos' | 'servicios',
                   tipo_envio: '',
                   estado: '',
                 })
               }
-              className="bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-xl px-4 py-2 outline-none"
-            >
-              <option value="productos" className="text-black">
-                Productos
-              </option>
-              <option value="servicios" className="text-black">
-                Servicios
-              </option>
-            </select>
+              options={[
+                { value: 'productos', label: 'Productos' },
+                { value: 'servicios', label: 'Servicios' }
+              ]}
+              className="[&_button]:bg-white/10 [&_button]:backdrop-blur-md [&_button]:border-white/20 [&_button]:text-white [&_button]:text-[10px] [&_button]:font-black [&_button]:uppercase [&_button]:tracking-widest [&_button]:rounded-xl [&_button]:px-4 [&_button]:py-2 [&_button]:hover:border-white/40 [&_button]:focus:ring-white/20 [&_button]:focus:border-white/40 [&_svg]:text-white/70"
+            />
           </div>
         </div>
 
@@ -1557,7 +1553,21 @@ export default function CustomerOrdersPage() {
                 <div className="flex-1 text-center md:text-left">
                   <p className="text-[10px] font-black text-sky-400 dark:text-[var(--icons-green)] uppercase tracking-widest mb-1">Establecimiento</p>
                   <h4 className="text-2xl font-black text-gray-800 dark:text-[var(--text-primary)] tracking-tighter">
-                    {selectedOrder.tienda}
+                    {selectedOrder.tiendas.length === 1 ? (
+                      selectedOrder.tienda
+                    ) : (
+                      <span className="flex flex-wrap gap-2">
+                        {selectedOrder.tiendas.map((t) => (
+                          <span
+                            key={t}
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 dark:bg-[var(--icons-green)]/10 text-sky-600 dark:text-[var(--icons-green)] text-sm font-bold border border-sky-200 dark:border-[var(--icons-green)]/20"
+                          >
+                            <Icon name="Store" className="w-3.5 h-3.5" />
+                            {t}
+                          </span>
+                        ))}
+                      </span>
+                    )}
                   </h4>
                   <div className="flex items-center justify-center md:justify-start gap-2 mt-2">
                     <span className="w-2 h-2 rounded-full bg-green-500" />
@@ -1664,7 +1674,7 @@ export default function CustomerOrdersPage() {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)]">{selectedOrder.detalle}</p>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Subtotal Bruto</p>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Desglose del Pedido</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -1699,6 +1709,35 @@ export default function CustomerOrdersPage() {
                           </span>
                         </div>
                       ))}
+
+                      {/* Envío */}
+                      {selectedOrder.shippingCost != null && selectedOrder.shippingCost > 0 && (
+                        <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 dark:border-[var(--border-subtle)]">
+                          <span className="text-gray-500 dark:text-gray-400">
+                            Envío
+                            {selectedOrder.tipo_envio && (
+                              <span className="ml-1 text-[9px] text-gray-400">
+                                ({selectedOrder.tipo_envio === 'domicilio' ? 'A domicilio' :
+                                  selectedOrder.tipo_envio === 'retiro_en_tienda' ? 'Retiro en tienda' :
+                                  selectedOrder.tipo_envio === 'agencia' ? 'Agencia' : selectedOrder.tipo_envio})
+                              </span>
+                            )}
+                          </span>
+                          <span className="font-mono font-bold text-gray-600 dark:text-gray-300">
+                            S/ {selectedOrder.shippingCost.toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Descuento */}
+                      {selectedOrder.discountAmount != null && selectedOrder.discountAmount > 0 && (
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-gray-500 dark:text-gray-400">Descuento</span>
+                          <span className="font-mono font-bold text-red-500">
+                            -S/ {selectedOrder.discountAmount.toFixed(2)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -1769,6 +1808,7 @@ export default function CustomerOrdersPage() {
             reprogramaciones: selectedOrder.reprogramaciones,
             solicitudEnviada: selectedOrder.solicitudEnviada,
             tienda: selectedOrder.tienda,
+            tiendas: selectedOrder.tiendas,
             detalle: selectedOrder.detalle,
           }}
           onConfirm={handleRescheduleConfirm}

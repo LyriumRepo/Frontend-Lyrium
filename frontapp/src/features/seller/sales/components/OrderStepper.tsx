@@ -1,4 +1,5 @@
 import React from 'react';
+import { Store } from 'lucide-react';
 import { TipoEnvio } from '@/features/seller/sales/types';
 import { TrackingStepper } from '@/shared/components/tracking/TrackingStepper';
 
@@ -12,6 +13,10 @@ interface OrderStepperProps {
     tipoEnvio: TipoEnvio | null | undefined;
     /** True cuando el cliente ya validó la recepción — pinta el último paso como completado. */
     validated?: boolean;
+    /** Presente solo cuando el pedido incluye productos de otras tiendas. */
+    isMultiStore?: boolean;
+    /** Abre el modal con el detalle de qué tiendas ya confirmaron. */
+    onShowStores?: () => void;
 }
 
 const FLOW_STEPS: Record<TipoEnvio, Step[]> = {
@@ -41,7 +46,7 @@ const FLOW_STEPS: Record<TipoEnvio, Step[]> = {
     ],
 };
 
-export default function ProductOrderStepper({ currentStep, tipoEnvio, validated = false }: OrderStepperProps) {
+export default function ProductOrderStepper({ currentStep, tipoEnvio, validated = false, isMultiStore = false, onShowStores }: OrderStepperProps) {
     const flowSteps = FLOW_STEPS[tipoEnvio ?? 'domicilio'] ?? FLOW_STEPS['domicilio'];
 
     // Retiro en tienda tiene su propio set de íconos (clipboard→tienda→camión→tienda+pin→persona),
@@ -55,10 +60,20 @@ export default function ProductOrderStepper({ currentStep, tipoEnvio, validated 
     return (
         <div className="rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden">
             {/* Header */}
-            <div className="px-5 pt-4 pb-3">
+            <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-2">
                 <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
                     Seguimiento del Pedido
                 </p>
+                {isMultiStore && onShowStores && (
+                    <button
+                        type="button"
+                        onClick={onShowStores}
+                        title="Este pedido incluye productos de varias tiendas"
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[9px] font-black uppercase tracking-wider hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors"
+                    >
+                        <Store className="w-3 h-3" /> Varias tiendas
+                    </button>
+                )}
             </div>
 
             <div className="px-5 pb-6">

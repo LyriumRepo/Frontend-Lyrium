@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Keyboard from 'react-simple-keyboard';
+import { Volume2, VolumeX } from 'lucide-react';
 import 'react-simple-keyboard/build/css/index.css';
 import './VirtualKeyboard.css';
+import { useKeySound } from './hooks/useKeySound';
 
 interface VirtualKeyboardProps {
   value: string;
@@ -43,6 +45,7 @@ export default function VirtualKeyboard({
   visible,
 }: VirtualKeyboardProps) {
   const [layoutName, setLayoutName] = useState('default');
+  const { play, enabled, toggle } = useKeySound();
 
   useEffect(() => {
     if (!visible) {
@@ -52,19 +55,28 @@ export default function VirtualKeyboard({
 
   const handleKeyPress = useCallback(
     (button: string) => {
+      play();
       if (button === '{shift}') {
         setLayoutName((prev) => (prev === 'default' ? 'shift' : 'default'));
       } else if (button === '{hide}') {
         onClose();
       }
     },
-    [onClose],
+    [onClose, play],
   );
 
   if (!visible) return null;
 
   return (
-    <div className="w-full shadow-2xl rounded-b-2xl overflow-hidden">
+    <div className="w-full shadow-2xl rounded-b-2xl overflow-hidden relative">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={enabled ? 'Silenciar teclado' : 'Activar sonido'}
+        className="absolute top-1 right-1 z-10 p-1.5 rounded-full text-[var(--text-secondary)] hover:bg-[var(--celeste-100)] dark:hover:bg-[rgba(42,90,77,0.35)] transition-colors"
+      >
+        {enabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+      </button>
       <Keyboard
         input={value}
         onChange={onChange}

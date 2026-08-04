@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import IntroCover from '@/components/ui/IntroCover';
+import Icon from '@/components/ui/Icon';
 import { UserTypeToggle } from './UserTypeToggle';
 import { LoginPanel } from './LoginPanel';
 import { RegisterPanel } from './RegisterPanel';
@@ -28,6 +29,7 @@ export function AuthContainer({ onSuccess, revokedReason }: AuthContainerProps) 
         registroStep,
         rpaResult,
         rpaStep,
+        setMode,
         setUserType,
         setFormError,
         setFormSuccess,
@@ -79,8 +81,10 @@ export function AuthContainer({ onSuccess, revokedReason }: AuthContainerProps) 
     }, [register, router]);
 
     const handleContinue = useCallback(() => {
+        setMode('login');
+        resetRegistro();
         router.push('/login');
-    }, [router]);
+    }, [router, setMode, resetRegistro]);
 
     const handleRetry = useCallback(() => {
         resetRegistro();
@@ -103,26 +107,37 @@ export function AuthContainer({ onSuccess, revokedReason }: AuthContainerProps) 
     const isRegister = mode === 'register';
 
     return (
-        <div className="min-h-screen bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex-1 flex items-start sm:items-center justify-center p-3 pt-6 sm:p-4">
+        <div className="min-h-full bg-[#F8F9FA] dark:bg-[var(--bg-primary)] flex-1 flex items-start sm:items-center justify-center p-3 pt-6 sm:p-4">
             <div className="relative w-full max-w-[1200px] min-h-[650px] bg-white dark:bg-[var(--bg-secondary)] rounded-[30px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col sm:flex-row">
 
-                {/* Mobile Header */}
-                <div className="sm:hidden relative w-full bg-gradient-to-br from-sky-500/90 to-lime-500/90 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] p-6 text-white overflow-hidden">
-                    <img src="/img/intro/Flor6.png" alt="" className="absolute -bottom-10 -right-20 w-[300px] max-w-none opacity-50 mix-blend-overlay pointer-events-none" />
-                    <div className="relative z-10">
-                        <h2 className="text-xl font-black mb-2 tracking-[0.2em]">
-                            {isRegister ? 'Únete a Lyrium' : '¡Bienvenido!'}
-                        </h2>
-                        <p className="text-sm text-white/80 mb-3">
-                            {isRegister ? 'Crea tu cuenta' : 'Accede a tu cuenta'}
-                        </p>
-                        <button
-                            type="button"
-                            onClick={toggleMode}
-                            className="py-2 px-4 bg-white text-sky-500 dark:text-[var(--brand-green)] rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
-                        >
-                            {isRegister ? 'Iniciar Sesión' : 'Crear cuenta'}
-                        </button>
+                {/* Mobile Header — mismo lenguaje visual que el intro de /contactanos */}
+                <div className="sm:hidden p-3 pb-0">
+                    <div className="relative w-full rounded-[24px] bg-[linear-gradient(135deg,rgba(14,165,233,0.85)_0%,rgba(132,204,22,0.85)_100%)] dark:bg-[linear-gradient(135deg,var(--brand-green)_0%,var(--icons-green)_50%,var(--brand-green-hover)_100%)] p-5 text-white overflow-hidden">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                        <img
+                            src="/img/intro/Flor6.png"
+                            alt=""
+                            aria-hidden="true"
+                            className="absolute -bottom-16 -left-40 w-[320px] max-w-none opacity-70 mix-blend-overlay pointer-events-none select-none"
+                        />
+                        <div className="relative z-10 flex flex-col items-center text-center">
+                            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 border border-white/20 backdrop-blur-sm">
+                                <Icon name="ShoppingBag" className="w-6 h-6" />
+                            </div>
+                            <h2 className="text-xl font-black mb-1 tracking-tight">
+                                {isRegister ? 'Únete a Lyrium' : '¡Bienvenido!'}
+                            </h2>
+                            <p className="text-sm text-white/90 mb-4">
+                                {isRegister ? 'Crea tu cuenta' : 'Accede a tu cuenta'}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={toggleMode}
+                                className="py-2 px-4 bg-white text-sky-500 dark:text-[var(--brand-green)] rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+                            >
+                                {isRegister ? 'Iniciar Sesión' : 'Crear cuenta'}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -160,7 +175,7 @@ export function AuthContainer({ onSuccess, revokedReason }: AuthContainerProps) 
                             </>
                         ) : (
                             <>
-                                <h2 className="text-[2rem] font-black mb-4 leading-tight tracking-[0.2em]">
+                                <h2 className="text-[2rem] font-black mb-4 leading-tight tracking-[0.2em] text-center">
                                     {userType === 'vendedor' ? '¡Qué gusto verte de nuevo!' : '¡Bienvenido de nuevo!'}
                                 </h2>
                                 <p className="text-white/95 text-center max-w-[300px] mx-auto">

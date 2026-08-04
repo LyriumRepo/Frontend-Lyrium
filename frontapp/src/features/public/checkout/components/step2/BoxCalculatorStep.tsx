@@ -236,11 +236,11 @@ export default function BoxCalculatorStep() {
     <div className="space-y-5">
 
       
-      <div className="rounded-2xl bg-gradient-to-r from-[var(--brand-sky)] to-[var(--brand-sky-hover)] dark:from-emerald-600 dark:to-emerald-700 p-5 text-white">
-        <div className="flex items-center justify-between mb-4">
+      <div className="rounded-2xl bg-gradient-to-r from-[var(--brand-sky)] to-[var(--brand-sky-hover)] dark:from-emerald-600 dark:to-emerald-700 p-4 sm:p-5 text-white">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 sm:mb-4">
           <div>
-            <h2 className="text-lg font-black tracking-tight">📦 Cálculo de Cajas</h2>
-            <p className="text-sky-100 dark:text-white/70 text-xs mt-0.5">Empaque optimizado por tienda</p>
+            <h2 className="text-base sm:text-lg font-black tracking-tight">📦 Cálculo de Cajas</h2>
+            <p className="text-sky-100 dark:text-white/70 text-[11px] sm:text-xs mt-0.5">Empaque optimizado por tienda</p>
           </div>
           <button
             onClick={recalcular}
@@ -251,15 +251,15 @@ export default function BoxCalculatorStep() {
             Calcular
           </button>
         </div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4">
           {[
             { label: 'Cajas',      value: isLoadingBox ? '…' : totalCajas },
             { label: 'Tiendas',    value: grupos.size },
             { label: 'Productos',  value: totalUnits },
           ].map(({ label, value }) => (
-            <div key={label} className="rounded-xl bg-white/20 backdrop-blur-sm p-3 text-center">
-              <p className="text-[11px] text-white/80 leading-none">{label}</p>
-              <p className="font-black text-xl mt-0.5">{value}</p>
+            <div key={label} className="rounded-xl bg-white/20 backdrop-blur-sm p-2 sm:p-3 text-center">
+              <p className="text-[10px] sm:text-[11px] text-white/80 leading-none">{label}</p>
+              <p className="font-black text-base sm:text-xl mt-0.5">{value}</p>
             </div>
           ))}
         </div>

@@ -84,19 +84,18 @@ function MobileInvoiceCard({ invoice: inv, onViewDetail }: MobileCardProps) {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Pedido</p>
-                            <span className="text-[10px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-100 inline-block">
-                                {inv.order_id}
-                            </span>
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Emisión</p>
-                            <p className="text-[10px] font-bold text-[var(--text-secondary)]">
-                                {new Date(inv.emission_date).toLocaleDateString('es-PE')}
-                            </p>
-                        </div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Pedido</span>
+                        <span className="text-[10px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-100 inline-block">
+                            {inv.order_id}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)]">Emisión</span>
+                        <span className="text-[10px] font-bold text-[var(--text-secondary)]">
+                            {new Date(inv.emission_date).toLocaleDateString('es-PE')}
+                        </span>
                     </div>
 
                     <div className="flex items-center justify-between">

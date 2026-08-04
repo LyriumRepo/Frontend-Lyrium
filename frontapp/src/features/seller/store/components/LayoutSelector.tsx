@@ -241,8 +241,9 @@ interface LayoutSelectorProps {
 
 export default function LayoutSelector({ config, updateConfig, storeId }: LayoutSelectorProps) {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    const { planSlug } = usePlanCapabilities();
-    const isEmprende = planSlug === 'emprende';
+    const { capabilities } = usePlanCapabilities();
+    const allowedLayouts = capabilities?.layouts ?? ['emprende'];
+    const isEmprende = allowedLayouts.length <= 1 && allowedLayouts.includes('emprende');
 
     return (
         <div className="glass-card p-0 overflow-hidden border-none rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl bg-[var(--bg-card)] mb-4 sm:mb-6 md:mb-8 animate-fadeIn">
@@ -253,8 +254,8 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                         <Icon name="Palette" className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                        <h3 className="text-xl sm:text-2xl font-black tracking-tighter leading-none">Personalización Visual</h3>
-                        <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-80">
+                        <h3 className="text-base sm:text-xl md:text-2xl font-bold md:font-black tracking-tight sm:tracking-tighter leading-none">Personalización Visual</h3>
+                        <p className="hidden sm:block text-[10px] font-bold text-sky-100 uppercase tracking-[0.2em] mt-1 opacity-80">
                             Define la estructura y estética de tu escaparate digital
                         </p>
                     </div>
@@ -288,7 +289,7 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6 max-w-3xl mx-auto">
                             {layouts.map(layout => {
-                                const isLocked = isEmprende && layout.id !== 'emprende';
+                                const isLocked = !allowedLayouts.includes(layout.id);
                                 return (
                                     <label
                                         htmlFor={`layout-${layout.id}`}
@@ -314,7 +315,7 @@ export default function LayoutSelector({ config, updateConfig, storeId }: Layout
                                             {isLocked && (
                                                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/10 backdrop-blur-[1px]">
                                                     <img src="/img/LyriumEspecial.png" alt="Bloqueado" className="w-16 h-16 mb-2 object-contain" />
-                                                    <span className="text-[9px] font-black text-[var(--lima-500)] uppercase tracking-widest text-center px-4">
+                                                    <span className="text-[9px] font-black text-[var(--plan-lock-accent)] uppercase tracking-widest text-center px-4">
                                                         Disponible en planes superiores
                                                     </span>
                                                 </div>

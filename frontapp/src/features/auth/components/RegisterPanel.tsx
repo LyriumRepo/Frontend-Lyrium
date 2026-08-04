@@ -837,6 +837,15 @@ export function RegisterPanel({
                                         </span>{' '}
                                         de Lyrium Biomarketplace
                                         <span className="text-red-500 ml-0.5">*</span>
+                                        <a
+                                            href={ACUERDO_PDF_PLACEHOLDER}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 ml-2 text-xs font-semibold text-sky-600 dark:text-[var(--icons-green)] hover:underline"
+                                        >
+                                            <ExternalLink className="w-3 h-3" />
+                                            Ver PDF
+                                        </a>
                                     </label>
                                     {!isFormComplete && (
                                         <p className="mt-1 text-xs text-slate-400 dark:text-[var(--text-secondary)]">

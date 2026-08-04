@@ -37,22 +37,22 @@ export const aboutData = {
         {
             title: 'Orgánico',
             description: 'Libre de químicos y pesticidas, cultivado respetando la naturaleza.',
-            image: 'img/nosotros/organic-1024x1024.avif',
+            image: 'img/nosotros/organico-transparent.png',
         },
         {
             title: 'Natural',
             description: 'Ingredientes que conservan su pureza y propiedades originales.',
-            image: 'img/nosotros/natural-1024x1024.avif',
+            image: 'img/nosotros/natural-transparent.png',
         },
         {
             title: 'Bienestar',
             description: 'Apoya tu salud física y emocional de manera equilibrada.',
-            image: 'img/nosotros/Bienestar.avif',
+            image: 'img/nosotros/bienestar-transparent.png',
         },
         {
             title: 'Saludable',
             description: 'Promueve hábitos sanos y un estilo de vida activo.',
-            image: 'img/nosotros/Saludable.avif',
+            image: 'img/nosotros/saludable-transparent.png',
         },
     ],
     acrosticSection: {

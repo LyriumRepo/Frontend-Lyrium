@@ -3,7 +3,7 @@
 import React from 'react';
 import SmartSidebar from '@/components/layout/shared/SmartSidebar';
 import { adminNavigation } from '@/shared/lib/constants/admin-nav';
-import { useChatUnreadCount } from '@/shared/hooks/useChatUnreadCount';
+import { useNavNotificationBadges } from '@/shared/hooks/useNavNotificationBadges';
 
 interface AdminSidebarProps {
     isMobileOpen: boolean;
@@ -11,7 +11,7 @@ interface AdminSidebarProps {
 }
 
 export default function AdminSidebar({ isMobileOpen, onClose }: AdminSidebarProps) {
-    const chatUnread = useChatUnreadCount();
+    const notificationBadges = useNavNotificationBadges('administrator');
 
     const adminUser = {
         name: 'Admin Marketplace',
@@ -19,7 +19,7 @@ export default function AdminSidebar({ isMobileOpen, onClose }: AdminSidebarProp
         avatar: undefined
     };
 
-    const badges: Record<string, number> = chatUnread > 0 ? { helpdesk: chatUnread } : {};
+    const badges: Record<string, number> = { ...notificationBadges };
 
     return (
         <SmartSidebar

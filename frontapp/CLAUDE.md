@@ -36,15 +36,14 @@ api/         — Next.js API routes (proxy/adapter layer — see below)
 
 ### Authentication & Middleware
 
-`src/proxy.ts` **is the intended Next.js middleware, but it is currently non-functional.** Two bugs prevent Next.js from activating it: (1) the filename must be `src/middleware.ts`, not `src/proxy.ts`; (2) the exported function must be named `middleware` (or be a default export), but it exports `proxy`. The `config.matcher` in the file is correct, but it never runs. Effectively, **there is no server-side route protection on the frontend right now** — all role checks are client-side only. It:
-1. Reads the `auth_token` cookie (httpOnly JWT issued by Laravel Sanctum).
-2. Decodes the JWT payload client-side to extract `roles[0]`.
-3. Redirects to `/login` if no token or wrong role for the requested path segment (`/admin`, `/seller`, `/logistics`).
-4. Forwards the resolved role as `x-user-role` request header.
+`src/middleware.ts` **is active and functional** (correct filename, exports `middleware`). It:
+1. Matches `/admin`, `/seller`, `/customer`, `/logistics` path prefixes.
+2. Checks for the presence of the `laravel_token` cookie (Sanctum plainTextToken, format `"1|xxxx"` — not a JWT, so it cannot be decoded here).
+3. Redirects to `/login?redirect={pathname}` if the cookie is missing.
 
-**Known bugs in proxy.ts:**
-- Checks `userRole !== 'logistics'` but the backend role is `'logistics_operator'` — logistics users are incorrectly redirected to login.
-- `/customer/*` routes have no role enforcement — any authenticated user can access them.
+**Current limitation:** this only enforces authentication (cookie present), not role/authorization — it does not check whether the user's role matches the requested path segment. Role-based access is still enforced client-side only, by `AuthContext` after `/auth/validate`. A user authenticated as `customer` could still reach `/admin/*` past the middleware and would only be blocked client-side.
+
+Historical note: an earlier version of this file was named `src/proxy.ts` and exported a `proxy` function, which Next.js silently ignored (no server-side protection at all then). That version has since been replaced by the current `src/middleware.ts`.
 
 The token is stored in two places for different consumers:
 - `auth_token` cookie → read by `proxy.ts` (middleware, no JS access)

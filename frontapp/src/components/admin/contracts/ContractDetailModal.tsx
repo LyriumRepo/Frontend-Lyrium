@@ -3,6 +3,7 @@ import { StatusBadge, AuditTimeline } from './ContractsUIComponents';
 import { Contract } from '@/lib/types/admin/contracts';
 import { FileText, FolderOpen, CheckCircle, XCircle, Landmark, Shield, Calendar, Users, Eye, HelpCircle, Building2, Phone, Mail, MapPin, User, FileDigit, CreditCard } from 'lucide-react';
 import BaseButton from '@/components/ui/BaseButton';
+import { LyriumSelect } from '@/components/ui';
 
 interface ContractDetailModalProps {
     contract: Contract;
@@ -147,20 +148,28 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <label className={labelClass}>Modalidad</label>
-                            <select value={formState.modality || ''} onChange={(e) => handleChange('modality', e.target.value)} className={`${inputClass} cursor-pointer`}>
-                                <option value="VIRTUAL">VIRTUAL (DIGITAL)</option>
-                                <option value="PHYSICAL">PRESENCIAL (FÍSICO)</option>
-                            </select>
+                            <LyriumSelect
+                                label="Modalidad"
+                                value={formState.modality || ''}
+                                onChange={(v) => handleChange('modality', v)}
+                                options={[
+                                    { value: 'VIRTUAL', label: 'VIRTUAL (DIGITAL)' },
+                                    { value: 'PHYSICAL', label: 'PRESENCIAL (FÍSICO)' }
+                                ]}
+                            />
                         </div>
                         <div className="space-y-1.5">
-                            <label className={labelClass}>Plan</label>
-                            <select value={formState.plan || ''} onChange={(e) => handleChange('plan', e.target.value)} className={`${inputClass} cursor-pointer`}>
-                                <option value="">Seleccione plan...</option>
-                                <option value="Emprende">Emprende (5% comisión)</option>
-                                <option value="Crece">Crece (10% comisión)</option>
-                                <option value="Especial">Especial (15% comisión)</option>
-                            </select>
+                            <LyriumSelect
+                                label="Plan"
+                                value={formState.plan || ''}
+                                onChange={(v) => handleChange('plan', v)}
+                                placeholder="Seleccione plan..."
+                                options={[
+                                    { value: 'Emprende', label: 'Emprende (5% comisión)' },
+                                    { value: 'Crece', label: 'Crece (10% comisión)' },
+                                    { value: 'Especial', label: 'Especial (15% comisión)' }
+                                ]}
+                            />
                         </div>
                         <div className="space-y-1.5">
                             <label className={labelClass}>Fecha de Firma</label>
@@ -184,31 +193,31 @@ export const ContractDetailModal: React.FC<ContractDetailModalProps> = ({
             </div>
 
             {/* Botones de acción */}
-            <div className="px-4 py-4 sm:px-10 sm:py-6 bg-[var(--bg-secondary)]/50 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap gap-2">
+            <div className="px-4 py-4 sm:px-10 sm:py-6 bg-[var(--bg-secondary)]/50 border-t border-[var(--border-subtle)] flex flex-col-reverse sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3">
+                <div className="grid grid-cols-1 w-full sm:w-auto sm:flex sm:gap-2">
                     {isNewContract ? (
                         <button onClick={() => handleUpdateStatus('ACTIVE')} disabled={!isFormComplete}
-                            className="h-10 sm:h-12 rounded-xl flex items-center justify-center gap-2 px-4 sm:px-6 bg-[var(--icons-green)] hover:bg-[var(--icons-green)] active:bg-[var(--icons-green)] text-white border-0 shadow-lg shadow-[var(--icons-green)]/20 font-black text-xs uppercase tracking-widest disabled:opacity-45 disabled:cursor-not-allowed duration-300 transition-all active:scale-[0.97]">
+                            className="w-full sm:w-auto h-10 sm:h-12 rounded-xl flex items-center justify-center gap-2 px-4 sm:px-6 bg-[var(--icons-green)] hover:bg-[var(--icons-green)] active:bg-[var(--icons-green)] text-white border-0 shadow-lg shadow-[var(--icons-green)]/20 font-black text-xs uppercase tracking-widest disabled:opacity-45 disabled:cursor-not-allowed duration-300 transition-all active:scale-[0.97] min-h-[44px]">
                             <CheckCircle className="w-4 h-4 shrink-0" /> Validar y Activar
                         </button>
                     ) : (
                         <>
                             <button onClick={() => handleUpdateStatus('ACTIVE')}
-                                className="h-10 sm:h-12 rounded-xl flex items-center justify-center gap-2 px-4 sm:px-6 bg-[var(--icons-green)] hover:bg-[var(--icons-green)] active:bg-[var(--icons-green)] text-white border-0 shadow-lg shadow-[var(--icons-green)]/20 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97]">
+                                className="w-full sm:w-auto h-10 sm:h-12 rounded-xl flex items-center justify-center gap-2 px-4 sm:px-6 bg-[var(--icons-green)] hover:bg-[var(--icons-green)] active:bg-[var(--icons-green)] text-white border-0 shadow-lg shadow-[var(--icons-green)]/20 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97] min-h-[44px]">
                                 <CheckCircle className="w-4 h-4 shrink-0" /> Validar y Activar
                             </button>
                             <button onClick={() => handleUpdateStatus('PENDING')}
-                                className="h-10 sm:h-12 rounded-xl border border-[var(--icons-green)] text-[var(--icons-green)] hover:bg-[var(--icons-green)]/10 flex items-center justify-center gap-2 px-4 sm:px-6 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97]">
+                                className="w-full sm:w-auto h-10 sm:h-12 rounded-xl border border-[var(--icons-green)] text-[var(--icons-green)] hover:bg-[var(--icons-green)]/10 flex items-center justify-center gap-2 px-4 sm:px-6 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97] min-h-[44px]">
                                 <FileText className="w-4 h-4 shrink-0" /> En revisión
                             </button>
                             <button onClick={() => handleUpdateStatus('EXPIRED')}
-                                className="h-10 sm:h-12 rounded-xl border border-[var(--color-error)]/30 text-[var(--color-error)] hover:bg-[var(--color-error)]/10 flex items-center justify-center gap-2 px-4 sm:px-6 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97]">
+                                className="w-full sm:w-auto h-10 sm:h-12 rounded-xl border border-[var(--color-error)]/30 text-[var(--color-error)] hover:bg-[var(--color-error)]/10 flex items-center justify-center gap-2 px-4 sm:px-6 font-black text-xs uppercase tracking-widest duration-300 transition-all active:scale-[0.97] min-h-[44px]">
                                 <XCircle className="w-4 h-4 shrink-0" /> Rechazado
                             </button>
                         </>
                     )}
                 </div>
-                <button onClick={onClose} className="text-[10px] font-black text-[var(--text-muted)] hover:text-[var(--celeste-500)] uppercase tracking-widest transition-all hover:translate-x-1 flex items-center gap-1.5 shrink-0">
+                <button onClick={onClose} className="text-[10px] font-black text-[var(--text-muted)] hover:text-[var(--celeste-500)] uppercase tracking-widest transition-all hover:translate-x-1 flex items-center justify-center sm:justify-start gap-1.5 shrink-0 py-3 min-h-[44px] w-full sm:w-auto">
                     Volver al Panel
                 </button>
             </div>

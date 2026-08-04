@@ -37,12 +37,12 @@ export default function FinancialBreakdownCard({ data }: FinancialBreakdownCardP
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {items.map((item) => (
-                    <div key={item.label} className="bg-[var(--bg-secondary)] p-5 rounded-2xl space-y-2">
-                        <div className="flex items-center gap-2" style={{ color: item.color }}>
-                            <Icon name={item.icon} className="w-4 h-4" />
+                    <div key={item.label} className="bg-[var(--bg-secondary)] p-5 rounded-2xl flex flex-col gap-2">
+                        <div className="flex items-start gap-2 min-h-[28px] leading-tight" style={{ color: item.color }}>
+                            <Icon name={item.icon} className="w-4 h-4 mt-0.5 shrink-0" />
                             <span className="text-[9px] font-black uppercase tracking-widest">{item.label}</span>
                         </div>
-                        <p className="text-xl font-black text-[var(--text-primary)] tracking-tighter">
+                        <p className="text-xl font-black text-[var(--text-primary)] tracking-tighter mt-auto">
                             {formatCurrency(item.value)}
                         </p>
                     </div>
@@ -89,28 +89,28 @@ export default function FinancialBreakdownCard({ data }: FinancialBreakdownCardP
                 <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                         {items.map((item) => (
-                            <div key={item.label} className="bg-[var(--bg-secondary)] p-6 rounded-2xl space-y-2">
+                            <div key={item.label} className="bg-[var(--bg-secondary)] p-4 sm:p-6 rounded-2xl space-y-2">
                                 <div className="flex items-center gap-2" style={{ color: item.color }}>
                                     <Icon name={item.icon} className="w-5 h-5" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
                                 </div>
-                                <p className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">
+                                <p className="text-lg sm:text-2xl font-black text-[var(--text-primary)] tracking-tighter">
                                     {formatCurrency(item.value)}
                                 </p>
                             </div>
                         ))}
                     </div>
-                    <div className="bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border-subtle)]">
+                    <div className="bg-[var(--bg-card)] p-4 sm:p-6 rounded-2xl border border-[var(--border-subtle)]">
                         <h4 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-wider mb-4">Estado de Pagos</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="p-4 rounded-xl" style={{ backgroundColor: `${companyColors.verde}1A` }}>
                                 <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: companyColors.verde }}>Completados</p>
-                                <p className="text-2xl font-black" style={{ color: companyColors.verde }}>{data.completedCount}</p>
+                                <p className="text-lg sm:text-2xl font-black" style={{ color: companyColors.verde }}>{data.completedCount}</p>
                                 <p className="text-sm font-bold" style={{ color: `${companyColors.verde}B3` }}>{formatCurrency(data.totalCompleted)}</p>
                             </div>
                             <div className="p-4 rounded-xl" style={{ backgroundColor: `${companyColors.celeste}1A` }}>
                                 <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: companyColors.celeste }}>Pendientes</p>
-                                <p className="text-2xl font-black" style={{ color: companyColors.celeste }}>{data.pendingCount}</p>
+                                <p className="text-lg sm:text-2xl font-black" style={{ color: companyColors.celeste }}>{data.pendingCount}</p>
                                 <p className="text-sm font-bold" style={{ color: `${companyColors.celeste}B3` }}>{formatCurrency(data.totalPending)}</p>
                             </div>
                             <div className="p-4 rounded-xl" style={{ backgroundColor: `${companyColors.azulCeleste}1A` }}>

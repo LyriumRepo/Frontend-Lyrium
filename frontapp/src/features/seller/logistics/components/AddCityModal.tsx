@@ -5,7 +5,7 @@ import { peruCoverage } from '@/shared/lib/data/coverageData';
 import { CityRate } from '@/features/seller/logistics/types';
 import BaseModal from '@/components/ui/BaseModal';
 import BaseButton from '@/components/ui/BaseButton';
-import Icon from '@/components/ui/Icon';
+import { LyriumSelect } from '@/components/ui';
 
 interface AddCityModalProps {
     isOpen: boolean;
@@ -42,36 +42,28 @@ export default function AddCityModal({ isOpen, onClose, onSave }: AddCityModalPr
             <div className="p-8 space-y-8">
                 <div className="bg-[var(--bg-secondary)]/50 p-8 rounded-[3rem] border border-[var(--border-subtle)] shadow-inner space-y-6">
                     <div className="space-y-2">
-                        <label htmlFor="city-dept" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Departamento Originario</label>
-                        <div className="relative">
-                            <select
-                                id="city-dept"
-                                value={dept}
-                                onChange={(e) => { setDept(e.target.value); setCity(''); }}
-                                className="w-full px-6 py-5 bg-[var(--bg-card)] border-none rounded-[1.75rem] font-black text-[var(--text-primary)] shadow-xl shadow-[var(--border-subtle)]/50 focus:ring-4 focus:ring-[var(--color-success)]/10 transition-all outline-none appearance-none cursor-pointer"
-                            >
-                                <option value="">Selecciona Jurisdicción</option>
-                                {departments.map(d => <option key={d} value={d}>{d}</option>)}
-                            </select>
-                            <Icon name="ChevronDown" className="absolute right-6 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none w-4 h-4" />
-                        </div>
+                        <LyriumSelect
+                            label="Departamento Originario"
+                            value={dept}
+                            onChange={(v) => { setDept(v); setCity(''); }}
+                            searchable
+                            options={[
+                                { value: '', label: 'Selecciona Jurisdicción' },
+                                ...departments.map(d => ({ value: d, label: d }))
+                            ]}
+                        />
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="city-name" className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Ciudad / Distrito Destino</label>
-                        <div className="relative">
-                            <select
-                                id="city-name"
-                                value={city}
-                                onChange={(e) => setCity(e.target.value)}
-                                disabled={!dept}
-                                className="w-full px-6 py-5 bg-[var(--bg-card)] border-none rounded-[1.75rem] font-black text-[var(--text-primary)] shadow-xl shadow-[var(--border-subtle)]/50 focus:ring-4 focus:ring-[var(--color-success)]/10 transition-all outline-none appearance-none cursor-pointer disabled:opacity-30 disabled:scale-[0.98]"
-                            >
-                                <option value="">{dept ? 'Selecciona Ciudad' : 'Esperando Departamento...'}</option>
-                                {cities.map((c: string) => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                            <Icon name="ChevronDown" className="absolute right-6 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none w-4 h-4" />
-                        </div>
+                        <LyriumSelect
+                            label="Ciudad / Distrito Destino"
+                            value={city}
+                            onChange={(v) => setCity(v)}
+                            disabled={!dept}
+                            placeholder={!dept ? 'Selecciona departamento primero' : 'Seleccionar...'}
+                            searchable
+                            options={cities.map((c: string) => ({ value: c, label: c }))}
+                        />
                     </div>
 
                     <div className="space-y-2">

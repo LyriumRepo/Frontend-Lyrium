@@ -41,7 +41,7 @@ function GaugeVisual({ value, color, max = 60 }: { value: number; color: string;
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-4xl font-black" style={{ color }}>{value}</span>
+        <span className="text-2xl sm:text-4xl font-black" style={{ color }}>{value}</span>
         <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-1">minutos promedio</span>
       </div>
     </div>

@@ -55,7 +55,7 @@ export interface LaravelService {
   currency?: string;
   category?: string;
   image?: string | null;
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | 'approved';
   is_home_service: boolean;
   booking_advance_hours: number;
   max_capacity: number;
@@ -66,6 +66,7 @@ export interface LaravelService {
   specialists?: LaravelSpecialist[];
   created_at?: string;
   updated_at?: string;
+  reviewed_at?: string | null;
 }
 
 export interface LaravelBooking {
@@ -252,7 +253,8 @@ export function adaptServiceToFrontend(beService: LaravelService): Service {
       typeof beService.price === 'string'
         ? parseFloat(beService.price)
         : beService.price || 0,
-    estado: beService.status === 'active' ? 'publicado' : 'borrador',
+    estado: beService.status === 'active' || beService.status === 'approved' ? 'publicado' : 'borrador',
+    reviewedAt: beService.reviewed_at ?? null,
     domicilio: !!beService.is_home_service,
     anticipacionReserva: anticipacion,
     sticker,

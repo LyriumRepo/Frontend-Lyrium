@@ -7,6 +7,7 @@ import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useCategories } from '@/features/admin/categories/hooks/useCategories';
 import CategoryTree from './components/CategoryTree';
 import CategoryForm from './components/CategoryForm';
+import { LyriumSelect } from '@/components/ui';
 
 export function CategoriesPageClient() {
     const {
@@ -18,6 +19,8 @@ export function CategoriesPageClient() {
         selectedCategoryId,
         setSelectedCategoryId,
         parentOptions,
+        editableParentOptions,
+        selectedCategoryChildrenCount,
         refresh,
         addCategory,
         editCategory,
@@ -64,8 +67,7 @@ export function CategoriesPageClient() {
 
     const handleUploadImage = useCallback(
         async (id: number, file: File): Promise<string | undefined> => {
-            await uploadImage(id, file);
-            return undefined;
+            return uploadImage(id, file);
         },
         [uploadImage]
     );
@@ -137,30 +139,29 @@ export function CategoriesPageClient() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Padre</label>
-                                <select
-                                    value={newParent}
-                                    onChange={(e) => setNewParent(Number(e.target.value))}
-                                    className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-2xl text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--icons-green)]/20 focus:border-[var(--border-focus)] transition"
-                                >
-                                    <option value={0}>Ninguno (Raíz - N1)</option>
-                                    {parentOptions.filter((p) => p.type === newType).map((p) => (
-                                        <option key={p.id} value={p.id}>
-                                            {'─'.repeat(p.level)} {p.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                <LyriumSelect
+                                    label="Padre"
+                                    value={String(newParent)}
+                                    onChange={(v) => setNewParent(Number(v))}
+                                    options={[
+                                        { value: '0', label: 'Ninguno (Raíz - N1)' },
+                                        ...parentOptions.filter((p) => p.type === newType).map((p) => ({
+                                            value: String(p.id),
+                                            label: `${'─'.repeat(p.level)} ${p.name}`
+                                        }))
+                                    ]}
+                                />
                             </div>
                             <div className="space-y-2">
-                                <label className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Tipo</label>
-                                <select
+                                <LyriumSelect
+                                    label="Tipo"
                                     value={newType}
-                                    onChange={(e) => { setNewType(e.target.value); setNewParent(0); }}
-                                    className="w-full px-4 py-3 border border-[var(--border-subtle)] rounded-2xl text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--icons-green)]/20 focus:border-[var(--border-focus)] transition"
-                                >
-                                    <option value="product">Producto</option>
-                                    <option value="service">Servicio</option>
-                                </select>
+                                    onChange={(v) => { setNewType(v); setNewParent(0); }}
+                                    options={[
+                                        { value: 'product', label: 'Producto' },
+                                        { value: 'service', label: 'Servicio' }
+                                    ]}
+                                />
                             </div>
                         </div>
                         <button
@@ -214,7 +215,8 @@ export function CategoriesPageClient() {
                     <div className="lg:col-span-7 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-subtle)] shadow-sm p-6">
                         <CategoryForm
                             category={selectedCategory}
-                            parentOptions={parentOptions}
+                            parentOptions={editableParentOptions}
+                            childrenCount={selectedCategoryChildrenCount}
                             onSave={handleSave}
                             onDelete={handleDelete}
                             onUploadImage={handleUploadImage}

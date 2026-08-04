@@ -103,6 +103,19 @@ function StatusBadge({ label, className }: { label: string; className: string })
   );
 }
 
+/** Badge informativo: ya confirmé mis items, la orden espera a otra(s) tienda(s). */
+function WaitingOtherStoreBadge() {
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[8px] font-extrabold uppercase tracking-wider bg-sky-100 text-sky-700"
+      title="Ya confirmaste tu parte. La orden espera la confirmación de otra tienda."
+    >
+      <Icon name="Store" className="w-2.5 h-2.5" />
+      Esperando otra tienda
+    </span>
+  );
+}
+
 /** Badge de solo lectura: el cliente validó la recepción (o se cerró por inacción). */
 function ValidationBadge({ order }: { order: Order }) {
   if (!order.customerValidatedAt) return null;
@@ -162,7 +175,7 @@ function ActionsCell({
   isAdvancing: boolean;
   isCancelling: boolean;
 }) {
-  const canConfirm = order.estado === 'pending_seller' && !isAdvancing;
+  const canConfirm = order.estado === 'pending_seller' && !order.waitingOnOtherStore && !isAdvancing;
   const canCancel = order.estado === 'pending_seller' && !isCancelling;
 
   return (
@@ -228,7 +241,7 @@ interface MobileOrderCardProps {
 function MobileOrderCard({ order, onViewDetail, onConfirm, onCancel, isAdvancing, isCancelling }: MobileOrderCardProps) {
   const [expanded, setExpanded] = useState(false);
   const statusConfig = ORDER_STATUS_CONFIG[order.estado] ?? { class: 'bg-gray-100 text-gray-600' };
-  const canConfirm = order.estado === 'pending_seller' && !isAdvancing;
+  const canConfirm = order.estado === 'pending_seller' && !order.waitingOnOtherStore && !isAdvancing;
   const canCancel  = order.estado === 'pending_seller' && !isCancelling;
 
   return (
@@ -239,34 +252,41 @@ function MobileOrderCard({ order, onViewDetail, onConfirm, onCancel, isAdvancing
       {/* ── Fila colapsada — siempre visible ── */}
       <button
         onClick={() => setExpanded(v => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-[var(--bg-secondary)]/60 transition-colors"
+        className="w-full flex flex-col gap-1.5 px-4 py-3.5 text-left active:bg-[var(--bg-secondary)]/60 transition-colors"
       >
-        {/* Nº Orden + Tipo + Cliente */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+        {/* Nº Orden + Tipo + Chevron */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
             <span className="text-[9px] font-black text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md font-mono tracking-tight whitespace-nowrap">
               {order.orderNumber}
             </span>
             <TypeBadge orderType={order.orderType} />
           </div>
-          <p className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
-            {order.cliente}
-          </p>
+          <Icon
+            name={expanded ? 'ChevronUp' : 'ChevronDown'}
+            className="w-4 h-4 flex-shrink-0 text-[var(--text-secondary)]"
+          />
         </div>
 
+        {/* Cliente */}
+        <p className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
+          {order.cliente}
+        </p>
+
         {/* Estado + Total */}
-        <div className="flex flex-col items-end gap-1 flex-shrink-0">
-          <StatusBadge label={order.statusLabel} className={statusConfig.class} />
-          <ValidationBadge order={order} />
-          <span className="text-sm font-black text-[var(--text-primary)] tracking-tight">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+            {order.waitingOnOtherStore ? (
+              <WaitingOtherStoreBadge />
+            ) : (
+              <StatusBadge label={order.statusLabel} className={statusConfig.class} />
+            )}
+            <ValidationBadge order={order} />
+          </div>
+          <span className="text-xs sm:text-sm font-black text-[var(--text-primary)] tracking-tight whitespace-nowrap">
             {formatCurrency(order.total)}
           </span>
         </div>
-
-        <Icon
-          name={expanded ? 'ChevronUp' : 'ChevronDown'}
-          className="w-4 h-4 flex-shrink-0 text-[var(--text-secondary)]"
-        />
       </button>
 
       {/* ── Panel expandido ── */}
@@ -288,7 +308,7 @@ function MobileOrderCard({ order, onViewDetail, onConfirm, onCancel, isAdvancing
           </div>
 
           {/* Tres datos en fila */}
-          <div className="grid grid-cols-3 gap-2 pt-0.5">
+          <div className="grid grid-cols-3 gap-1 max-[380px]:gap-0.5 pt-0.5">
             <div>
               <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Cantidad</p>
               <span className="text-sm font-black text-[var(--text-primary)]">{order.unidades}</span>
@@ -299,7 +319,7 @@ function MobileOrderCard({ order, onViewDetail, onConfirm, onCancel, isAdvancing
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">Fecha</p>
-              <span className="text-[10px] font-bold text-[var(--text-secondary)] whitespace-nowrap">
+              <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-secondary)] whitespace-nowrap">
                 {new Date(order.fecha).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: '2-digit' })}
               </span>
             </div>
@@ -441,7 +461,11 @@ const SalesTable = memo(function SalesTable({
           const config = ORDER_STATUS_CONFIG[order.estado] ?? { class: 'bg-gray-100 text-gray-600' };
           return (
             <div className="flex flex-col items-start gap-1">
-              <StatusBadge label={order.statusLabel} className={config.class} />
+              {order.waitingOnOtherStore ? (
+                <WaitingOtherStoreBadge />
+              ) : (
+                <StatusBadge label={order.statusLabel} className={config.class} />
+              )}
               <ValidationBadge order={order} />
             </div>
           );

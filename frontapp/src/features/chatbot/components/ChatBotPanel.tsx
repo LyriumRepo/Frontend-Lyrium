@@ -75,8 +75,8 @@ export default function ChatBotPanel({
          */
         <div
             className={`fixed z-[100] transition-all duration-300 ease-out
-                inset-x-0 bottom-0 h-[85vh] h-[80dvh] max-h-[640px] pb-[env(safe-area-inset-bottom)]
-                sm:inset-auto sm:bottom-20 sm:right-5 sm:h-auto sm:max-h-none sm:w-[560px] sm:max-w-[calc(100vw-2rem)] sm:pb-0 ${
+                inset-x-2 top-0 bottom-0 h-[100dvh] max-h-none pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]
+                sm:inset-auto sm:bottom-20 sm:right-5 sm:h-auto sm:max-h-none sm:w-[560px] sm:max-w-[calc(100vw-2rem)] sm:pt-0 sm:pb-0 ${
                 isMinimized
                     ? 'opacity-0 pointer-events-none translate-y-4 scale-95'
                     : 'opacity-100 translate-y-0 scale-100'
@@ -86,6 +86,7 @@ export default function ChatBotPanel({
                 height: mobileKeyboardViewport.height,
                 bottom: 'auto',
                 maxHeight: 'none',
+                paddingTop: 0,
                 paddingBottom: 0,
             } : undefined}
         >
@@ -135,7 +136,7 @@ export default function ChatBotPanel({
             )}
 
             {/* ── Panel interior con overflow-hidden para bordes redondeados ── */}
-            <div className="h-full bg-white dark:bg-[var(--bg-card)] rounded-t-2xl sm:rounded-2xl shadow-2xl border border-[var(--border-subtle)] overflow-hidden flex flex-col animate-slide-up">
+            <div className="h-full bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-2xl border border-[var(--border-subtle)] overflow-hidden flex flex-col animate-slide-up">
                 <ChatBotHeader onMinimize={onMinimize} onClose={onClose} onClear={onClear} />
 
                 <div

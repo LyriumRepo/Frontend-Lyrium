@@ -37,6 +37,7 @@ import {
   Search,
 } from 'lucide-react';
 import Pagination from '@/components/ui/Pagination';
+import { LyriumSelect } from '@/components/ui';
 
 // ─── Tipos extendidos ─────────────────────────────────────────────────────────
 
@@ -311,18 +312,15 @@ export const ProductModeration: React.FC<ProductModerationProps> = ({
           />
         </div>
         <div className="w-px h-6 bg-[var(--border-subtle)]" />
-        <select
-          value={storeFilter}
-          onChange={(e) => setStoreFilter(e.target.value)}
-          className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-[11px] font-black text-[var(--text-primary)] outline-none cursor-pointer uppercase tracking-widest"
-        >
-          <option value="">Todas las tiendas</option>
-          {stores.map(([name]) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
+        <div className="w-[200px]">
+          <LyriumSelect
+            value={storeFilter}
+            onChange={setStoreFilter}
+            placeholder="Todas las tiendas"
+            searchable
+            options={stores.map(([name]) => ({ value: name, label: name }))}
+          />
+        </div>
         <div className="w-px h-6 bg-[var(--border-subtle)]" />
         <div className="flex items-center gap-3">
           <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
@@ -691,18 +689,15 @@ export const ServiceModeration: React.FC<ServiceModerationProps> = ({
           />
         </div>
         <div className="w-px h-6 bg-[var(--border-subtle)]" />
-        <select
-          value={storeFilter}
-          onChange={(e) => setStoreFilter(e.target.value)}
-          className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl text-[11px] font-black text-[var(--text-primary)] outline-none cursor-pointer uppercase tracking-widest"
-        >
-          <option value="">Todas las tiendas</option>
-          {stores.map(([name]) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
+        <div className="w-[200px]">
+          <LyriumSelect
+            value={storeFilter}
+            onChange={setStoreFilter}
+            placeholder="Todas las tiendas"
+            searchable
+            options={stores.map(([name]) => ({ value: name, label: name }))}
+          />
+        </div>
         <div className="w-px h-6 bg-[var(--border-subtle)]" />
         <div className="flex items-center gap-3">
           <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest">

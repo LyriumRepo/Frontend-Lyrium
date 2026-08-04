@@ -556,20 +556,34 @@ export const sellerApi = {
     return response.data as StoreData;
   },
 
-  // Profile Request - Approval Flow
+  // Profile Request - Approval Flow.
+  // ProfileRequestController::me() responde un objeto plano (sin envoltorio
+  // "data"): { profile_status, profile_updated_at, pending_request, rejected_request }.
+  // Antes se leía response.data, que siempre era undefined -> esta función
+  // nunca devolvía una solicitud real, tuviera o no una pendiente/rechazada.
   getProfileRequest: async (): Promise<{
     id: number;
-    store_id: number;
-    data: Record<string, unknown>;
-    status: 'pending' | 'approved' | 'rejected';
-    admin_notes: string | null;
-    attempts: number;
+    status: 'pending' | 'rejected';
+    admin_notes?: string | null;
+    attempts?: number;
+    can_retry?: boolean;
     created_at: string;
-    updated_at: string;
   } | null> => {
     try {
-      const response = await request<ApiResponse<any>>(`/stores/me/profile-request`);
-      return response.data || null;
+      const response = await request<{
+        profile_status: string;
+        profile_updated_at: string | null;
+        pending_request: { id: number; status: string; created_at: string } | null;
+        rejected_request: { id: number; status: string; admin_notes: string | null; attempts: number; can_retry: boolean; created_at: string } | null;
+      }>(`/stores/me/profile-request`);
+      return (response.pending_request ?? response.rejected_request) as {
+        id: number;
+        status: 'pending' | 'rejected';
+        admin_notes?: string | null;
+        attempts?: number;
+        can_retry?: boolean;
+        created_at: string;
+      } | null;
     } catch {
       return null;
     }

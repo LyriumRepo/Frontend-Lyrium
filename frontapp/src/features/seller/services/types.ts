@@ -76,6 +76,7 @@ export interface Service {
   cupos: number;
   precio: number;
   estado: ServiceEstado;
+  reviewedAt?: string | null;
   domicilio: boolean;
   anticipacionReserva: AnticipacionReserva;
   sticker?: 'nuevo' | 'descuento' | 'oferta' | 'liquidacion' | 'bestseller' | 'envio_gratis' | null;

@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { MessagesSquare, Plus, Eye, MessageCircle, ThumbsUp, Pencil, Image as ImageIcon, X, Calendar, User, Hash, ChevronLeft, Heart, Send, CheckCircle } from 'lucide-react';
+import { MessagesSquare, Plus, Eye, MessageCircle, ThumbsUp, Pencil, Image as ImageIcon, X, Calendar, User, Hash, ChevronLeft, Heart, Send, CheckCircle, ArrowRight } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import { forumApi, ForumTopic } from '@/shared/lib/api/bioblogRepository';
+import { LyriumSelect } from '@/components/ui';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import { TopicCard } from './components/TopicCard';
 
 const GRADIENTS = [
   'from-emerald-500 via-teal-500 to-sky-500',
@@ -18,6 +21,8 @@ function topicGradient(id: number): string {
 }
 
 export function ForumClient() {
+  const { can, capabilitiesLoading } = usePlanCapabilities();
+  const hasAccess = can('can_bioblog');
   const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreator, setShowCreator] = useState(false);
@@ -100,6 +105,23 @@ export function ForumClient() {
     return <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${styles[s] || styles.draft}`}>{labels[s] || s}</span>;
   };
 
+  const renderActions = (t: ForumTopic) => (
+    <>
+      <button onClick={() => setViewingTopic(t)} className="text-xs px-3 py-1.5 bg-gradient-to-r from-emerald-400/10 to-sky-400/10 dark:from-[var(--brand-green)]/10 dark:to-[var(--icons-green)]/10 text-emerald-600 dark:text-emerald-400 rounded-lg hover:from-emerald-400/20 hover:to-sky-400/20 dark:hover:from-[var(--brand-green)]/20 dark:hover:to-[var(--icons-green)]/20 transition font-semibold">Ver</button>
+      {t.status === 'draft' && (
+        <button onClick={async () => { try { await forumApi.topics.submitForReview(t.id); fetch(); } catch {} }} className="text-xs px-3 py-1.5 bg-gradient-to-r from-emerald-400/10 to-sky-400/10 dark:from-[var(--brand-green)]/10 dark:to-[var(--icons-green)]/10 text-emerald-600 dark:text-emerald-400 rounded-lg hover:from-emerald-400/20 hover:to-sky-400/20 dark:hover:from-[var(--brand-green)]/20 dark:hover:to-[var(--icons-green)]/20 transition font-semibold flex items-center gap-1"><Send className="w-3 h-3" /> Enviar</button>
+      )}
+      {t.status === 'approved' && (
+        <button onClick={async () => { try { await forumApi.topics.publish(t.id); fetch(); } catch {} }} className="text-xs px-3 py-1.5 bg-gradient-to-r from-emerald-400/10 to-sky-400/10 dark:from-[var(--brand-green)]/10 dark:to-[var(--icons-green)]/10 text-emerald-600 dark:text-emerald-400 rounded-lg hover:from-emerald-400/20 hover:to-sky-400/20 dark:hover:from-[var(--brand-green)]/20 dark:hover:to-[var(--icons-green)]/20 transition font-semibold flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Publicar</button>
+      )}
+      {t.status === 'published' && (
+        <button onClick={async () => { try { await forumApi.topics.hide(t.id); fetch(); } catch {} }} className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition font-semibold flex items-center gap-1"><Eye className="w-3 h-3" /> Ocultar</button>
+      )}
+      <button onClick={() => openEdit(t)} className="text-xs px-3 py-1.5 bg-gradient-to-r from-emerald-400/10 to-sky-400/10 dark:from-[var(--brand-green)]/10 dark:to-[var(--icons-green)]/10 text-emerald-600 dark:text-emerald-400 rounded-lg hover:from-emerald-400/20 hover:to-sky-400/20 dark:hover:from-[var(--brand-green)]/20 dark:hover:to-[var(--icons-green)]/20 transition font-semibold">Editar</button>
+      <button onClick={() => handleDelete(t.id)} className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition font-semibold">Eliminar</button>
+    </>
+  );
+
   function ImageInput({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
     return (
       <div>
@@ -132,15 +154,66 @@ export function ForumClient() {
     );
   }
 
+  if (capabilitiesLoading) return <div className="p-20 text-center text-gray-400">Verificando acceso...</div>;
+
+  if (!hasAccess) {
+    return (
+      <div className="relative space-y-6 animate-fadeIn font-industrial pb-20">
+        <div className="blur-sm pointer-events-none select-none">
+          <ModuleHeader title="BioForo" subtitle="Foro de discusión con tu comunidad" icon="MessagesSquare" />
+          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mt-6 p-6 space-y-3">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-12 bg-gray-100 dark:bg-gray-800 rounded-xl" />
+            ))}
+          </div>
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center max-w-xs">
+            <div className="w-16 h-16 mx-auto mb-4">
+              <img src="/img/LyriumEspecial.png" alt="Lyrium" className="w-full h-full object-contain" />
+            </div>
+            <p className="text-sm font-bold text-[var(--text-primary)] mb-1">Contenido bloqueado</p>
+            <p className="text-xs text-[var(--text-secondary)] mb-4">El BioForo está disponible desde el plan CRECE. Actualiza tu plan para acceder.</p>
+            <a href="/seller/planes"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--brand-sky)] dark:bg-[var(--brand-teal)] text-white text-xs font-black uppercase tracking-wider hover:opacity-90 transition-all">
+              Actualizar Plan
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fadeIn font-industrial pb-20">
       <ModuleHeader title="BioForo" subtitle="Foro de discusión con tu comunidad" icon="MessagesSquare"
-        actions={<BaseButton onClick={() => setShowCreator(true)} variant="action" leftIcon="Plus" size="md">Crear Tema</BaseButton>} />
+        actions={<BaseButton onClick={() => setShowCreator(true)} variant="action" leftIcon="Plus" size="sm">Crear Tema</BaseButton>} />
 
       <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
         {loading ? <div className="p-20 text-center text-gray-400">Cargando...</div>
         : topics.length === 0 ? <div className="p-20 text-center text-gray-400">Aún no hay temas de discusión</div>
-        : <div className="overflow-x-auto">
+        : <>
+          {/* MÓVIL */}
+          <div className="sm:hidden p-3 space-y-2">
+            {topics.map(t => (
+              <TopicCard
+                key={t.id}
+                image={t.image}
+                title={t.title}
+                category={t.category?.name || ''}
+                statusBadge={statusBadge(t.status)}
+                replyCount={t.reply_count}
+                views={t.views}
+                reactions={(t as any).total_reactions ?? 0}
+                date={new Date(t.created_at).toLocaleDateString('es-PE')}
+                actions={renderActions(t)}
+              />
+            ))}
+          </div>
+
+          {/* DESKTOP */}
+          <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
@@ -178,25 +251,15 @@ export function ForumClient() {
                   <td className="px-5 py-4 text-xs text-gray-400">{new Date(t.created_at).toLocaleDateString('es-PE')}</td>
                   <td className="px-5 py-4">
                     <div className="flex gap-2">
-                      <button onClick={() => setViewingTopic(t)} className="text-xs px-3 py-1.5 bg-gradient-to-r from-emerald-400/10 to-sky-400/10 dark:from-[var(--brand-green)]/10 dark:to-[var(--icons-green)]/10 text-emerald-600 dark:text-emerald-400 rounded-lg hover:from-emerald-400/20 hover:to-sky-400/20 dark:hover:from-[var(--brand-green)]/20 dark:hover:to-[var(--icons-green)]/20 transition font-semibold">Ver</button>
-                      {t.status === 'draft' && (
-                        <button onClick={async () => { try { await forumApi.topics.submitForReview(t.id); fetch(); } catch {} }} className="text-xs px-3 py-1.5 bg-gradient-to-r from-emerald-400/10 to-sky-400/10 dark:from-[var(--brand-green)]/10 dark:to-[var(--icons-green)]/10 text-emerald-600 dark:text-emerald-400 rounded-lg hover:from-emerald-400/20 hover:to-sky-400/20 dark:hover:from-[var(--brand-green)]/20 dark:hover:to-[var(--icons-green)]/20 transition font-semibold flex items-center gap-1"><Send className="w-3 h-3" /> Enviar</button>
-                      )}
-                      {t.status === 'approved' && (
-                        <button onClick={async () => { try { await forumApi.topics.publish(t.id); fetch(); } catch {} }} className="text-xs px-3 py-1.5 bg-gradient-to-r from-emerald-400/10 to-sky-400/10 dark:from-[var(--brand-green)]/10 dark:to-[var(--icons-green)]/10 text-emerald-600 dark:text-emerald-400 rounded-lg hover:from-emerald-400/20 hover:to-sky-400/20 dark:hover:from-[var(--brand-green)]/20 dark:hover:to-[var(--icons-green)]/20 transition font-semibold flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Publicar</button>
-                      )}
-                      {t.status === 'published' && (
-                        <button onClick={async () => { try { await forumApi.topics.hide(t.id); fetch(); } catch {} }} className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition font-semibold flex items-center gap-1"><Eye className="w-3 h-3" /> Ocultar</button>
-                      )}
-                      <button onClick={() => openEdit(t)} className="text-xs px-3 py-1.5 bg-gradient-to-r from-emerald-400/10 to-sky-400/10 dark:from-[var(--brand-green)]/10 dark:to-[var(--icons-green)]/10 text-emerald-600 dark:text-emerald-400 rounded-lg hover:from-emerald-400/20 hover:to-sky-400/20 dark:hover:from-[var(--brand-green)]/20 dark:hover:to-[var(--icons-green)]/20 transition font-semibold">Editar</button>
-                      <button onClick={() => handleDelete(t.id)} className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition font-semibold">Eliminar</button>
+                      {renderActions(t)}
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>}
+          </div>
+        </>}
       </div>
 
       {/* View Topic Modal */}
@@ -310,14 +373,18 @@ export function ForumClient() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Categoría</label>
-                <select value={form.forum_category_id} onChange={e => setForm(f => ({ ...f, forum_category_id: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">
-                  <option value="1">General</option>
-                  <option value="2">Nutricion</option>
-                  <option value="3">Microbiota</option>
-                  <option value="4">Fitness</option>
-                  <option value="5">Salud Mental</option>
-                </select>
+                <LyriumSelect
+                  label="Categoría"
+                  value={form.forum_category_id}
+                  onChange={(v) => setForm(f => ({ ...f, forum_category_id: v }))}
+                  options={[
+                    { value: '1', label: 'General' },
+                    { value: '2', label: 'Nutricion' },
+                    { value: '3', label: 'Microbiota' },
+                    { value: '4', label: 'Fitness' },
+                    { value: '5', label: 'Salud Mental' }
+                  ]}
+                />
               </div>
 
               <ImageInput value={form.image} onChange={v => setForm(f => ({ ...f, image: v }))} label="Imagen (URL)" />
@@ -359,14 +426,18 @@ export function ForumClient() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Categoría</label>
-                <select value={editForm.forum_category_id} onChange={e => setEditForm(f => ({ ...f, forum_category_id: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">
-                  <option value="1">General</option>
-                  <option value="2">Nutricion</option>
-                  <option value="3">Microbiota</option>
-                  <option value="4">Fitness</option>
-                  <option value="5">Salud Mental</option>
-                </select>
+                <LyriumSelect
+                  label="Categoría"
+                  value={editForm.forum_category_id}
+                  onChange={(v) => setEditForm(f => ({ ...f, forum_category_id: v }))}
+                  options={[
+                    { value: '1', label: 'General' },
+                    { value: '2', label: 'Nutricion' },
+                    { value: '3', label: 'Microbiota' },
+                    { value: '4', label: 'Fitness' },
+                    { value: '5', label: 'Salud Mental' }
+                  ]}
+                />
               </div>
 
               <ImageInput value={editForm.image} onChange={v => setEditForm(f => ({ ...f, image: v }))} label="Imagen (URL)" />
@@ -377,13 +448,17 @@ export function ForumClient() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Estado</label>
-                <select value={editForm.status} onChange={e => setEditForm(f => ({ ...f, status: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">
-                  <option value="draft">Borrador</option>
-                  <option value="pending_review">En revisión</option>
-                  <option value="published">Publicado</option>
-                  <option value="closed">Cerrado</option>
-                </select>
+                <LyriumSelect
+                  label="Estado"
+                  value={editForm.status}
+                  onChange={(v) => setEditForm(f => ({ ...f, status: v }))}
+                  options={[
+                    { value: 'draft', label: 'Borrador' },
+                    { value: 'pending_review', label: 'En revisión' },
+                    { value: 'published', label: 'Publicado' },
+                    { value: 'closed', label: 'Cerrado' }
+                  ]}
+                />
               </div>
             </div>
 

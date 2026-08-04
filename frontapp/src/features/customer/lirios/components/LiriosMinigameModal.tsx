@@ -312,7 +312,8 @@ export default function LiriosMinigameModal({
                 {d.key === 'hard' && (
                     <span className="relative group inline-flex items-center">
                     <Info className="w-3 h-3 text-sky-500 dark:text-emerald-400" />
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block z-50">
+                    <div className="absolute top-full right-0 mt-2 w-56 hidden group-hover:block z-50">
+                      <div className="absolute bottom-full right-1 -mb-1 w-3 h-3 bg-sky-800 dark:bg-emerald-950 rotate-45" />
                       <div className="bg-sky-800 dark:bg-emerald-950 text-white text-[10px] leading-relaxed rounded-xl p-3 shadow-xl text-center">
                         <p className="font-bold mb-1">💎 Modo difícil</p>
                         <p className="text-gray-200">
@@ -327,7 +328,6 @@ export default function LiriosMinigameModal({
                           </p>
                         )}
                       </div>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-3 h-3 bg-sky-800 dark:bg-emerald-950 rotate-45" />
                     </div>
                   </span>
                 )}

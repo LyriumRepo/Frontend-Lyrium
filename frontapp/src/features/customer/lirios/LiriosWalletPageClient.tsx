@@ -64,6 +64,8 @@ const TIERS = [
   { min: 8000,  label: 'Jardín',       discount: '3%',   color: 'from-indigo-500 to-indigo-400' },
   { min: 16000, label: 'Bosque',       discount: '3%',   color: 'from-violet-600 to-violet-400' },
   { min: 32000, label: 'Lirio Épico',  discount: '3%',   color: 'from-amber-500 to-yellow-400' },
+  { min: 64000,  label: 'Selva',        discount: '3%',   color: 'from-rose-600 to-rose-400' },
+  { min: 128000, label: 'Lirio Divino', discount: '3%',   color: 'from-yellow-500 to-orange-400' },
 ];
 
 function getTier(balance: number) {

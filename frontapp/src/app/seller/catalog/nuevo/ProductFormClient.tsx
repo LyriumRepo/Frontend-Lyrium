@@ -7,6 +7,7 @@ import { createProduct, ProductActionResult } from '@/shared/lib/actions/product
 import { ProductFormSchema } from '@/shared/lib/schemas/product.schema';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import Icon from '@/components/ui/Icon';
+import { LyriumSelect } from '@/components/ui';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import { useRouter } from 'next/navigation';
 
@@ -137,7 +138,7 @@ function ImageUploader({
           <p className="text-sm text-gray-500">
             Arrastra imágenes o <span className="text-sky-500 font-bold">haz clic para seleccionar</span>
           </p>
-          <p className="text-xs text-gray-400">JPEG, PNG, WebP o GIF. Máximo 5MB cada una.</p>
+          <p className="text-xs text-gray-400">JPEG, PNG, WebP o GIF. Máx. 5MB. Mín. 800×800 px, fondo blanco.</p>
         </div>
       </div>
 
@@ -417,27 +418,19 @@ export default function ProductFormClient() {
             </div>
 
             <div>
-              <label htmlFor="product-category" className="block text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">
-                Categoría *
-              </label>
-              <select
-                id="product-category"
-                name="category"
-                required
+              <LyriumSelect
+                label={<>Categoría <span className="text-red-500">*</span></>}
                 value={categoryValue}
-                onChange={(e) => setCategoryValue(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl font-bold text-gray-700 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-100"
-              >
-                <option value="">Seleccionar Categoría...</option>
-                {categories.map((cat) => {
-                  const isParent = cat.level < 2;
-                  return (
-                    <option key={cat.id} value={isParent ? '' : cat.slug} disabled={isParent}>
-                      {'\u00A0\u00A0'.repeat(cat.level)}{isParent ? '-- ' : ''}{cat.name}
-                    </option>
-                  );
-                })}
-              </select>
+                onChange={(v) => setCategoryValue(v)}
+                options={[
+                  { value: '', label: 'Seleccionar Categoría...' },
+                  ...categories.map((cat) => ({
+                    value: cat.slug,
+                    label: `${'  '.repeat(cat.level)}${cat.level < 2 ? '-- ' : ''}${cat.name}`,
+                    disabled: cat.level < 2
+                  }))
+                ]}
+              />
             </div>
           </div>
         </div>

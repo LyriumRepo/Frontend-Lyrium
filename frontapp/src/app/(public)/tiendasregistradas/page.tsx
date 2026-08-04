@@ -144,7 +144,7 @@ export default function TiendasRegistradasPage() {
                     )}
 
                     <div className="absolute inset-0 p-4 flex flex-col justify-between z-5">
-                      <div>
+                      <div className="mt-9 sm:mt-8">
                         <h3 className="text-white font-extrabold text-lg sm:text-xl drop-shadow-lg leading-tight line-clamp-2">
                           {store.name}
                         </h3>

@@ -22,7 +22,7 @@ export default function OrderCard({ order, onClick }: OrderCardProps) {
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(order); }}
             className="card-pedido glass-card group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden p-0 h-full flex flex-col"
         >
-            <div className="p-6 flex-1">
+            <div className="p-4 sm:p-6 flex-1">
                 <div className="flex justify-between items-start mb-4">
                     <div className="space-y-1">
                         <span className="text-[10px] font-black text-sky-500 uppercase tracking-widest bg-sky-500/10 px-2 py-0.5 rounded-md">
@@ -70,7 +70,7 @@ export default function OrderCard({ order, onClick }: OrderCardProps) {
                 </div>
             </div>
 
-            <div className="px-6 py-4 bg-[var(--bg-secondary)]/50 border-t border-[var(--border-subtle)] flex justify-between items-center">
+            <div className="px-4 sm:px-6 py-4 bg-[var(--bg-secondary)]/50 border-t border-[var(--border-subtle)] flex justify-between items-center">
                 <div>
                     <p className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-wider mb-0.5">Total a Cobrar</p>
                     <p className="text-lg font-black text-[var(--text-primary)] tracking-tight">

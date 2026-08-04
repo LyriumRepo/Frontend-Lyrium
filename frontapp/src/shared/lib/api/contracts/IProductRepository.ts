@@ -62,6 +62,7 @@ export interface IProductRepository {
   ): Promise<Product>;
   deleteProduct(id: string): Promise<boolean>;
   updateStock(id: string, quantity: number): Promise<Product>;
+  toggleProductVisibility(id: string, visible: boolean): Promise<Product>;
   uploadProductImage(productId: string, file: File): Promise<{ url: string }>;
   getSellerBranchStock(): Promise<Record<string, number>>;
 }

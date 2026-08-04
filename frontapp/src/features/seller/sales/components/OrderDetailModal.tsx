@@ -11,6 +11,7 @@ import { formatDate, formatDateTime } from '@/shared/lib/utils/formatters';
 import { generateOrderPdf } from '../utils/generateOrderPdf';
 import SalesLegendModal from './SalesLegendModal';
 import LogisticsModal from './LogisticsModal';
+import MultiStoreStatusModal from './MultiStoreStatusModal';
 import { CARRIERS, CARRIER_CODES } from '@/features/seller/sales/config/logistics';
 
 interface OrderDetailModalProps {
@@ -40,17 +41,22 @@ const PRODUCT_FLOW_ACTIONS: Record<TipoEnvio, Record<number, StepAction>> = {
         3: { label: 'Confirmar En Transporte',      icon: 'Truck'        },
         4: { label: 'Listo para Recojo en Agencia', icon: 'ScanBarcode'  },
     },
+    // Misma cadena secuencial confirmed→processing→shipped→delivered que
+    // domicilio/agencia (es lo único que el backend permite — ver
+    // ADVANCE_FLOW_RETiro en LaravelOrderRepository.ts), solo con etiquetas
+    // propias de recojo en tienda para los pasos 3 y 4.
     retiro_tienda: {
         1: { label: 'Confirmar Validación',           icon: 'CheckCircle2' },
         2: { label: 'Marcar Despachado',              icon: 'Package'      },
         3: { label: 'Listo para Recojo en Tienda',    icon: 'Store'        },
+        4: { label: 'Confirmar Entrega en Tienda',    icon: 'BadgeCheck'   },
     },
 };
 
 const PRODUCT_MAX_STEP: Record<TipoEnvio, number> = {
     domicilio: 5,
     agencia:   5,
-    retiro_tienda: 4,
+    retiro_tienda: 5,
 };
 
 // ── Service flow configs (status→action) ──
@@ -274,6 +280,7 @@ export default function OrderDetailModal({
     );
     const [showLegend, setShowLegend] = useState(false);
     const [showLogistics, setShowLogistics] = useState(false);
+    const [showStoresModal, setShowStoresModal] = useState(false);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -399,7 +406,7 @@ export default function OrderDetailModal({
     };
 
     const footer = (
-        <div className="flex flex-col sm:flex-row justify-between items-center bg-sky-500 p-8 rounded-[3rem] shadow-2xl w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-center bg-sky-500 p-5 sm:p-8 rounded-[3rem] shadow-2xl w-full">
             <div className="mb-4 sm:mb-0 text-center sm:text-left">
                 <p className="text-[10px] font-black text-sky-200 uppercase tracking-widest mb-1 flex items-center gap-1 justify-center sm:justify-start">
                     <Icon name="CheckCircle2" className="text-white w-3 h-3" /> Total a Liquidar
@@ -542,7 +549,7 @@ export default function OrderDetailModal({
                         </div>
                         {openSection === 'products' && (
                             <div className="space-y-6">
-                                <ProductOrderStepper currentStep={order.productCurrentStep} tipoEnvio={tipoEnvio} validated={!!order.customerValidatedAt} />
+                                <ProductOrderStepper currentStep={order.productCurrentStep} tipoEnvio={tipoEnvio} validated={!!order.customerValidatedAt} isMultiStore={!!order.isMultiStore} onShowStores={() => setShowStoresModal(true)} />
                                 <div className="bg-[var(--bg-secondary)]/50 p-6 rounded-[2rem] border border-[var(--border-subtle)]">
                                     {tipoEnvio === 'retiro_tienda' ? (
                                         <>
@@ -592,6 +599,16 @@ export default function OrderDetailModal({
                                                             </div>
                                                         )}
                                                     </div>
+                                                    {order.branch.mapsUrl && (
+                                                        <a
+                                                            href={order.branch.mapsUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-600 dark:text-emerald-400 hover:underline uppercase tracking-widest"
+                                                        >
+                                                            <Icon name="Map" className="w-3.5 h-3.5" /> Ver ubicación en Google Maps
+                                                        </a>
+                                                    )}
                                                 </div>
                                             ) : (
                                                 <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
@@ -639,7 +656,7 @@ export default function OrderDetailModal({
                                                 </div>
                                             </div>
                                             {(order.envio.carrier || (order.envio.tracking && order.envio.tracking !== '-')) && (
-                                                <div className="mt-5 pt-5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-10 gap-y-3">
+                                                <div className="mt-5 pt-5 border-t border-[var(--border-subtle)] flex flex-wrap gap-x-4 sm:gap-x-10 gap-y-3">
                                                     {order.envio.carrier && (
                                                         <div className="flex items-center gap-3.5">
                                                             <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] flex items-center justify-center text-emerald-600 shadow-sm border border-[var(--border-subtle)]">
@@ -838,6 +855,16 @@ export default function OrderDetailModal({
                                                 </div>
                                             )}
                                         </div>
+                                        {order.branch.mapsUrl && (
+                                            <a
+                                                href={order.branch.mapsUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-600 dark:text-emerald-400 hover:underline uppercase tracking-widest"
+                                            >
+                                                <Icon name="Map" className="w-3.5 h-3.5" /> Ver ubicación en Google Maps
+                                            </a>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
@@ -1095,6 +1122,11 @@ export default function OrderDetailModal({
             </div>
         </BaseDrawer>
         <SalesLegendModal isOpen={showLegend} onClose={() => setShowLegend(false)} />
+        <MultiStoreStatusModal
+            isOpen={showStoresModal}
+            onClose={() => setShowStoresModal(false)}
+            stores={order.storesSummary ?? []}
+        />
         {onShipWithCarrier && (
             <LogisticsModal
                 isOpen={showLogistics}

@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Save, Trash2, Upload, X, ImageIcon } from 'lucide-react';
+import { LyriumSelect } from '@/components/ui';
 import type { CategoryNode } from '../hooks/useCategories';
 
 interface CategoryFormProps {
     category: CategoryNode | null;
     parentOptions: CategoryNode[];
-    onSave: (id: number, data: { name?: string; description?: string; parent?: number; type?: string; sort_order?: number }) => Promise<void>;
+    childrenCount: number;
+    onSave: (id: number, data: { name?: string; description?: string; parent?: number | null; type?: string; sort_order?: number }) => Promise<void>;
     onDelete: (id: number) => Promise<void>;
     onUploadImage: (id: number, file: File) => Promise<string | undefined>;
     loading: boolean;
@@ -16,6 +18,7 @@ interface CategoryFormProps {
 export default function CategoryForm({
     category,
     parentOptions,
+    childrenCount,
     onSave,
     onDelete,
     onUploadImage,
@@ -69,7 +72,7 @@ export default function CategoryForm({
             await onSave(category.id, {
                 name,
                 description,
-                parent: parentId || undefined,
+                parent: parentId === 0 ? null : parentId,
                 type,
                 sort_order: sortOrder,
             });
@@ -152,32 +155,31 @@ export default function CategoryForm({
             {/* Parent + Type row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1">Padre</label>
-                    <select
-                        value={parentId}
-                        onChange={(e) => setParentId(Number(e.target.value))}
-                        className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
-                    >
-                        <option value={0}>Ninguno (Raiz)</option>
-                        {parentOptions
-                            .filter((p) => p.id !== category.id && p.type === type)
-                            .map((p) => (
-                                <option key={p.id} value={p.id}>
-                                    {'─'.repeat(p.level)} {p.name}
-                                </option>
-                            ))}
-                    </select>
+                    <LyriumSelect
+                        label="Padre"
+                        value={String(parentId)}
+                        onChange={(v) => setParentId(Number(v))}
+                        options={[
+                            { value: '0', label: 'Ninguno (Raiz)' },
+                            ...parentOptions
+                                .filter((p) => p.id !== category.id && p.type === type)
+                                .map((p) => ({
+                                    value: String(p.id),
+                                    label: `${'─'.repeat(p.level)} ${p.name}`
+                                }))
+                        ]}
+                    />
                 </div>
                 <div>
-                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1">Tipo</label>
-                    <select
+                    <LyriumSelect
+                        label="Tipo"
                         value={type}
-                        onChange={(e) => { setType(e.target.value); setParentId(0); }}
-                        className="w-full px-4 py-2.5 border-2 border-[var(--border-subtle)] rounded-xl text-sm bg-[var(--bg-muted)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition"
-                    >
-                        <option value="product">Producto</option>
-                        <option value="service">Servicio</option>
-                    </select>
+                        onChange={(v) => { setType(v); setParentId(0); }}
+                        options={[
+                            { value: 'product', label: 'Producto' },
+                            { value: 'service', label: 'Servicio' }
+                        ]}
+                    />
                 </div>
             </div>
 
@@ -231,6 +233,11 @@ export default function CategoryForm({
             </div>
 
             {/* Actions */}
+            {confirmDelete && childrenCount > 0 && (
+                <div className="px-4 py-3 rounded-xl bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/20 text-[var(--color-warning)] text-xs font-semibold">
+                    Esta categoría tiene {childrenCount} subcategoría{childrenCount === 1 ? '' : 's'} que se {childrenCount === 1 ? 'moverá' : 'moverán'} a Nivel 1 al eliminarla.
+                </div>
+            )}
             <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)]">
                 <button
                     type="button"

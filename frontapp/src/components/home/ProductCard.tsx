@@ -36,7 +36,7 @@ export default function ProductCard({ producto, minWidth }: ProductCardProps) {
           alt={producto.titulo}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className="object-contain md:object-cover group-hover:scale-105 transition-transform duration-300"
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
         {descuentoPorcentaje > 0 && (
           <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full" aria-label={`Descuento de ${descuentoPorcentaje}%`}>

@@ -86,7 +86,7 @@ function MarketplaceSection({ title, bannerImage, products }: MarketplaceSection
                   className="flex-shrink-0 w-full sm:w-1/3 snap-start px-2"
                 >
                   <div
-                    className="group bg-white dark:bg-[#1E3028] rounded-[14px] overflow-hidden text-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] border border-[var(--turquesa-100)] dark:border-transparent transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_15px_35px_rgba(0,0,0,0.3)] flex flex-col justify-between h-full w-full max-w-[100px] sm:max-w-none mx-auto min-h-[155px] sm:min-h-[210px] xl:min-h-[360px] cursor-default"
+                    className="group bg-white dark:bg-[#1E3028] rounded-[14px] overflow-hidden text-center shadow-[0_8px_25px_rgba(0,0,0,0.15)] border border-[var(--turquesa-100)] dark:border-[var(--border-subtle)] transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_15px_35px_rgba(0,0,0,0.3)] flex flex-col justify-between h-full w-full max-w-[100px] sm:max-w-none mx-auto min-h-[155px] sm:min-h-[210px] xl:min-h-[360px] cursor-default"
                   >
                    
                     <div className="relative overflow-hidden w-full aspect-square sm:aspect-none sm:h-[110px] xl:h-[220px] flex items-center justify-center bg-white dark:bg-[var(--bg-muted)] group-hover:scale-[1.05] transition-transform duration-300">
@@ -130,8 +130,8 @@ function MarketplaceSection({ title, bannerImage, products }: MarketplaceSection
                 onClick={() => setCurrentPage(pageIndex)}
                 className={`h-[6px] rounded-full border-none cursor-pointer transition-all duration-300 ${
                   pageIndex === currentPage
-                    ? 'w-10 bg-[#4a3aff] shadow-sm'  
-                    : 'w-[18px] bg-slate-200 dark:bg-slate-800'  
+                    ? 'w-10 bg-[var(--celeste-500)] shadow-sm'
+                    : 'w-[18px] bg-slate-200 dark:bg-slate-800'
                 }`}
                 aria-label={`Ir a página ${pageIndex + 1}`}
               />

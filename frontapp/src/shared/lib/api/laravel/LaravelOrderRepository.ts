@@ -6,6 +6,7 @@ interface BackendItem {
     id: string;
     sellerId: number;
     isOwn: boolean;
+    store?: { id: number; name: string; slug: string } | null;
     productName: string;
     quantity: number;
     unitPrice: number;
@@ -119,8 +120,15 @@ const ADVANCE_FLOW: Record<string, string> = {
     delivered: 'delivered',
 };
 
+// El backend (OrderController@updateStatus / @updateItemStatus) SOLO permite
+// la cadena secuencial confirmed→processing→shipped→delivered, sin saltos,
+// para cualquier tipo de envío — no distingue retiro_tienda. Un flujo que
+// saltara 'processing' (como este mapa hacía antes) pedía una transición que
+// el backend rechaza en silencio (0 filas actualizadas), dejando el pedido
+// congelado en 'confirmed' aunque el vendedor siguiera haciendo clic.
 const ADVANCE_FLOW_RETiro: Record<string, string> = {
-    confirmed: 'shipped',
+    confirmed: 'processing',
+    processing: 'shipped',
     shipped: 'delivered',
     delivered: 'delivered',
 };
@@ -189,6 +197,7 @@ export class LaravelOrderRepository implements IOrderRepository {
         return {
             id: item.id,
             storeId: item.sellerId,
+            storeName: item.store?.name ?? '',
             isOwn: item.isOwn,
             name: item.productName,
             qty: item.quantity,

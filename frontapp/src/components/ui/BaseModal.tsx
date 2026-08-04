@@ -75,22 +75,42 @@ export default function BaseModal({
     setMounted(true);
   }, []);
 
+  // handleKeyDown's identity churns whenever the caller passes a non-memoized
+  // onClose (common — most callers define onClose inline or from a hook that
+  // isn't wrapped in useCallback). Reading it via a ref keeps the effect below
+  // keyed ONLY on isOpen, so it runs once per actual open/close transition
+  // instead of on every parent re-render — otherwise the initial-focus
+  // setTimeout below re-fires on every keystroke anywhere in the app that
+  // re-renders the modal's parent, yanking focus back to the first field.
+  const handleKeyDownRef = useRef(handleKeyDown);
   useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
-      setTimeout(() => {
+    handleKeyDownRef.current = handleKeyDown;
+  }, [handleKeyDown]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const listener = (e: KeyboardEvent) => handleKeyDownRef.current(e);
+    document.addEventListener('keydown', listener);
+    document.body.style.overflow = 'hidden';
+    const timer = setTimeout(() => {
+      const firstInput = modalRef.current?.querySelector<HTMLElement>(
+        'input, textarea, select',
+      );
+      if (firstInput) {
+        firstInput.focus();
+      } else {
         const first = modalRef.current?.querySelector<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
         );
         first?.focus();
-      }, 50);
-    }
+      }
+    }, 50);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keydown', listener);
       document.body.style.overflow = '';
+      clearTimeout(timer);
     };
-  }, [isOpen, handleKeyDown]);
+  }, [isOpen]);
 
   if (!isOpen || !mounted) return null;
 

@@ -155,6 +155,7 @@ export function ChatView({
   hasMoreMessages = false,
   showAdminControls = false,
   quickReplies = EMPTY_QUICK_REPLIES,
+  backButtonClassName = 'md:hidden',
   className,
 }: ChatViewProps) {
   const [showQuickReplies, setShowQuickReplies] = useState(false);
@@ -223,10 +224,15 @@ export function ChatView({
     };
   }, [ticket.source, ticket.requester.name, ticket.requester.company, ticket.assignedTo.name]);
 
-  // Scroll to bottom when ticket changes or new messages arrive (skip during load-more)
+  // Scroll to bottom when ticket changes or new messages arrive (skip during load-more).
+  // Uses scrollTop directly on the messages container instead of scrollIntoView —
+  // scrollIntoView walks every scrollable ancestor (including document.body, which
+  // BaseLayout locks to overflow:hidden for this route), so it was silently
+  // shifting body's own scroll position with no way for the user to undo it.
   useEffect(() => {
     if (prevScrollHeightRef.current !== 0) return;
-    bottomAnchorRef.current?.scrollIntoView({ behavior: 'auto' });
+    const container = msgContainerRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
   }, [ticket.id, ticket.messages.length]);
 
   // Capture scroll height BEFORE load-more renders older messages
@@ -269,14 +275,14 @@ export function ChatView({
   };
 
   return (
-    <div className={`relative flex flex-col flex-1 min-h-0 w-full overflow-hidden bg-[var(--bg-card)] overscroll-y-none rounded-[2rem] lg:rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm ${className ?? ''}`}>
+    <div className={`relative flex flex-col flex-1 min-h-0 w-full overflow-clip bg-[var(--bg-card)] overscroll-y-none rounded-[2rem] lg:rounded-[2.5rem] border border-[var(--border-subtle)] shadow-sm ${className ?? ''}`}>
       {/* Header */}
       <div className="flex shrink-0 items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/90 px-3 py-3 backdrop-blur-sm sm:px-4">
         {onBack && (
           <button
             onClick={onBack}
             aria-label="Volver a tickets"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] md:hidden"
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] ${backButtonClassName}`}
           >
             <ArrowLeft className="h-5 w-5" />
           </button>

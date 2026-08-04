@@ -11,48 +11,11 @@ import ConversationList from '@/components/shared/chat/ConversationList';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import BaseModal from '@/components/ui/BaseModal';
+import { LyriumSelect } from '@/components/ui';
 import { ChatCategory } from '@/features/customer/chat/types';
 import type { ChatSeller } from '@/shared/lib/api/chatRepository';
 import type { Message as BubbleMessage } from '@/components/shared/chat/MessageBubble';
 import type { Conversation } from '@/components/shared/chat/ConversationList';
-
-// ── CustomSelect ──────────────────────────────────────────────────────────────
-interface SelectOption { value: string; label: string }
-function CustomSelect({ value, onChange, options, disabled = false }: {
-    value: string; onChange: (v: string) => void;
-    options: SelectOption[]; disabled?: boolean;
-}) {
-    const [open, setOpen] = React.useState(false);
-    const ref = React.useRef<HTMLDivElement>(null);
-    const selected = options.find(o => o.value === value);
-    React.useEffect(() => {
-        const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
-        if (open) document.addEventListener('mousedown', h);
-        return () => document.removeEventListener('mousedown', h);
-    }, [open]);
-    return (
-        <div ref={ref} className={`relative${disabled ? ' opacity-50 pointer-events-none' : ''}`}>
-            <button type="button" onClick={() => setOpen(v => !v)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-[var(--bg-secondary)] rounded-2xl outline-none text-sm font-medium text-[var(--text-primary)] border-2 border-[var(--border-subtle)] hover:border-[var(--turquesa-500)] focus:border-[var(--turquesa-500)] cursor-pointer transition-all">
-                <span className="truncate">{selected?.label ?? options[0]?.label ?? ''}</span>
-                <svg className={`w-4 h-4 shrink-0 text-[var(--text-secondary)] transition-transform duration-200${open ? ' rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-            {open && (
-                <div className="absolute top-[calc(100%+4px)] left-0 right-0 bg-white dark:bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--border-subtle)] shadow-2xl z-[60] overflow-hidden max-h-[126px] overflow-y-auto scrollbar-none">
-                    {options.map(opt => (
-                        <button key={opt.value} type="button"
-                            onClick={() => { onChange(opt.value); setOpen(false); }}
-                            className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-[var(--turquesa-500)]/8 dark:hover:bg-[#1e2d28] ${opt.value === value ? 'font-bold text-[var(--turquesa-500)] bg-[var(--turquesa-500)]/5' : 'font-medium text-[var(--text-primary)]'}`}>
-                            {opt.label}
-                        </button>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
 
 function NewChatForm({
     onSubmit,
@@ -85,24 +48,25 @@ function NewChatForm({
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Vendedor</label>
-                    <CustomSelect
+                    <LyriumSelect
                         value={sellerId}
                         onChange={setSellerId}
+                        searchable
                         options={sellers.map(s => ({ value: String(s.id), label: `${s.store} — ${s.name}` }))}
                     />
                 </div>
 
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Categoría</label>
-                    <CustomSelect
+                    <LyriumSelect
                         value={category}
                         onChange={(v) => setCategory(v as ChatCategory)}
                         options={[
                             { value: 'informacion', label: 'Solicitud de Información' },
-                            { value: 'positivo',    label: 'Comentario Positivo' },
-                            { value: 'negativo',    label: 'Comentario Negativo' },
-                            { value: 'logistica',   label: 'Logística' },
-                            { value: 'facturacion', label: 'Soporte de Facturación' },
+                            { value: 'positivo', label: 'Comentario Positivo' },
+                            { value: 'negativo', label: 'Comentario Negativo' },
+                            { value: 'logistica', label: 'Logística' },
+                            { value: 'facturacion', label: 'Soporte de Facturación' }
                         ]}
                     />
                 </div>
@@ -295,16 +259,17 @@ export function ChatPageClient({ conversationId }: { conversationId?: string }) 
                                 className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                             />
                         ) : (
-                            <CustomSelect
+                            <LyriumSelect
                                 value={filterValue}
                                 onChange={setFilterValue}
+                                placeholder="Todas las categorías"
                                 options={[
-                                    { value: '',           label: 'Todas las categorías' },
-                                    { value: 'informacion',label: 'Solicitud de Información' },
-                                    { value: 'positivo',   label: 'Comentario Positivo' },
-                                    { value: 'negativo',   label: 'Comentario Negativo' },
-                                    { value: 'logistica',  label: 'Logística' },
-                                    { value: 'facturacion',label: 'Soporte de Facturación' },
+                                    { value: '', label: 'Todas las categorías' },
+                                    { value: 'informacion', label: 'Solicitud de Información' },
+                                    { value: 'positivo', label: 'Comentario Positivo' },
+                                    { value: 'negativo', label: 'Comentario Negativo' },
+                                    { value: 'logistica', label: 'Logística' },
+                                    { value: 'facturacion', label: 'Soporte de Facturación' }
                                 ]}
                             />
                         )}

@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, MessageCircle, Eye, Trash2, EyeOff } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Eye, Trash2, EyeOff, ArrowRight } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { forumApi, ForumTopic, ForumPost } from '@/shared/lib/api/bioblogRepository';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
 
 export function ForumTopicClient() {
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
+    const { can, capabilitiesLoading } = usePlanCapabilities();
+    const hasAccess = can('can_bioblog');
     const [topic, setTopic] = useState<ForumTopic | null>(null);
     const [replies, setReplies] = useState<ForumPost[]>([]);
     const [loading, setLoading] = useState(true);
@@ -49,6 +52,32 @@ export function ForumTopicClient() {
             setReplies(prev => prev.filter(p => p.id !== postId));
         } catch {}
     };
+
+    if (capabilitiesLoading) return <div className="p-20 text-center text-gray-400">Verificando acceso...</div>;
+
+    if (!hasAccess) {
+        return (
+            <div className="relative space-y-6 animate-fadeIn font-industrial pb-20 max-w-3xl">
+                <div className="blur-sm pointer-events-none select-none">
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 h-40" />
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center max-w-xs">
+                        <div className="w-16 h-16 mx-auto mb-4">
+                            <img src="/img/LyriumEspecial.png" alt="Lyrium" className="w-full h-full object-contain" />
+                        </div>
+                        <p className="text-sm font-bold text-[var(--text-primary)] mb-1">Contenido bloqueado</p>
+                        <p className="text-xs text-[var(--text-secondary)] mb-4">El BioForo está disponible desde el plan CRECE. Actualiza tu plan para acceder.</p>
+                        <a href="/seller/planes"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--brand-sky)] dark:bg-[var(--brand-teal)] text-white text-xs font-black uppercase tracking-wider hover:opacity-90 transition-all">
+                            Actualizar Plan
+                            <ArrowRight className="w-4 h-4" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) return <div className="p-20 text-center text-gray-400">Cargando tema...</div>;
     if (!topic) return <div className="p-20 text-center text-gray-400">Tema no encontrado</div>;

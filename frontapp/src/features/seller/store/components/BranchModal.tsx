@@ -5,8 +5,10 @@ import { Branch } from '@/features/seller/store/types';
 import BaseModal from '@/components/ui/BaseModal';
 import BaseButton from '@/components/ui/BaseButton';
 import Icon from '@/components/ui/Icon';
+import { LyriumSelect } from '@/components/ui';
 import { MapPin, ExternalLink } from 'lucide-react';
 import {peruLocations} from '@/data/peruLocations';
+import { useToast } from '@/shared/lib/context/ToastContext';
 
 interface BranchFormData {
     name: string;
@@ -30,6 +32,7 @@ interface BranchModalProps {
 }
 
 export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchModalProps) {
+    const { showToast } = useToast();
     const [formData, setFormData] = useState({
         name: '',
         address: '',
@@ -67,7 +70,6 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                 isPrincipal: branch.isPrincipal,
                 mapsUrl: branch.mapsUrl || ''
             });
-            console.log('BRANCH MODAL:', branch);
         } else {
             setFormData({
                 name: '',
@@ -85,6 +87,14 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const missing: string[] = [];
+        if (!formData.department) missing.push('Departamento');
+        if (!formData.province) missing.push('Provincia');
+        if (!formData.district) missing.push('Distrito');
+        if (missing.length > 0) {
+            showToast(`Completa: ${missing.join(', ')}`, 'error');
+            return;
+        }
         onSave({ ...branch, ...formData });
         onClose();
     };
@@ -130,86 +140,6 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                                 placeholder="Calle, Número, Urb..."
                                 className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-[1.5rem] font-bold text-[var(--text-primary)] focus:ring-4 focus:ring-sky-500/5 focus:bg-[var(--bg-card)] transition-all outline-none"
                             />
-                        </div>
-
-                        {/* Departamento / Provincia / Distrito */}
-                        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                            {/* Departamento */}
-                            <div className="space-y-1">
-                                <label className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    Dpto.
-                                </label>
-                                <select
-                                    value={formData.department || ''}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            department: e.target.value,
-                                            province: '',
-                                            district: '',
-                                        })
-                                    }
-                                    className="w-full px-2 sm:px-3 py-2.5 sm:py-3 text-[11px] sm:text-[12px] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl sm:rounded-2xl font-semibold text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-sky-500/10 transition-all"
-                                >
-                                    <option value="">Departamento</option>
-                                    {peruLocations.map((dep) => (
-                                        <option key={dep.department} value={dep.department}>
-                                            {dep.department}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Provincia */}
-                            <div className="space-y-1">
-                                <label className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    Prov.
-                                </label>
-                                <select
-                                    value={formData.province || ''}
-                                    disabled={!formData.department}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            province: e.target.value,
-                                            district: '',
-                                        })
-                                    }
-                                    className="w-full px-2 sm:px-3 py-2.5 sm:py-3 text-[11px] sm:text-[12px] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl sm:rounded-2xl font-semibold text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-sky-500/10 transition-all disabled:opacity-50"
-                                >
-                                    <option value="">Provincia</option>
-                                    {provinces.map((prov) => (
-                                        <option key={prov.province} value={prov.province}>
-                                            {prov.province}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Distrito */}
-                            <div className="space-y-1">
-                                <label className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">
-                                    Dist.
-                                </label>
-                                <select
-                                    value={formData.district || ''}
-                                    disabled={!formData.province}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            district: e.target.value,
-                                        })
-                                    }
-                                    className="w-full px-2 sm:px-3 py-2.5 sm:py-3 text-[11px] sm:text-[12px] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl sm:rounded-2xl font-semibold text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-sky-500/10 transition-all disabled:opacity-50"
-                                >
-                                    <option value="">Distrito</option>
-                                    {districts.map((district) => (
-                                        <option key={district} value={district}>
-                                            {district}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
                         </div>
                     </div>
 
@@ -285,6 +215,48 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                                 Operación Principal
                             </span>
                         </label>
+                    </div>
+                </div>
+
+                {/* Departamento / Provincia / Distrito — fila de ancho completo
+                    (fuera de la columna angosta) para que el texto de las
+                    opciones no se corte dentro del select ni del dropdown */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                    <div className="space-y-1">
+                        <LyriumSelect
+                            label="Dpto."
+                            value={formData.department || ''}
+                            onChange={(v) => setFormData({ ...formData, department: v, province: '', district: '' })}
+                            searchable
+                            options={[
+                                { value: '', label: 'Departamento' },
+                                ...peruLocations.map(dep => ({ value: dep.department, label: dep.department }))
+                            ]}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <LyriumSelect
+                            label="Prov."
+                            value={formData.province || ''}
+                            onChange={(v) => setFormData({ ...formData, province: v, district: '' })}
+                            disabled={!formData.department}
+                            placeholder={!formData.department ? 'Primero Dpto.' : 'Provincia'}
+                            searchable
+                            options={provinces.map(prov => ({ value: prov.province, label: prov.province }))}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <LyriumSelect
+                            label="Dist."
+                            value={formData.district || ''}
+                            onChange={(v) => setFormData({ ...formData, district: v })}
+                            disabled={!formData.province}
+                            placeholder={!formData.province ? 'Primero Prov.' : 'Distrito'}
+                            searchable
+                            options={districts.map(d => ({ value: d, label: d }))}
+                        />
                     </div>
                 </div>
 

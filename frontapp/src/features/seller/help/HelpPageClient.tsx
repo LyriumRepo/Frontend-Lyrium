@@ -5,6 +5,7 @@ import { useSellerHelp } from '@/features/seller/help/hooks/useSellerHelp';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
+import { LyriumSelect } from '@/components/ui';
 import { SellerTicket, TicketStatus, TicketCategory, CATEGORY_LABELS } from '@/features/seller/help/types';
 import { ChatView } from '@/modules/chat';
 import { ticketApi } from '@/lib/api/ticketRepository';
@@ -72,14 +73,7 @@ function TicketList({
             <div className="px-4 pt-3 pb-2 flex items-center gap-2 shrink-0">
                 <button
                     onClick={onNewTicket}
-                    title="Nuevo Ticket"
-                    className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--turquesa-500)]/10 text-[var(--turquesa-500)] hover:bg-[var(--turquesa-500)]/20 transition-colors shrink-0"
-                >
-                    <Icon name="Plus" className="w-4 h-4" />
-                </button>
-                <button
-                    onClick={onNewTicket}
-                    className="hidden md:flex flex-1 items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-[10px] uppercase tracking-wider hover:opacity-90 transition-all shadow-sm"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] text-white rounded-xl font-bold text-[10px] uppercase tracking-wider hover:opacity-90 transition-all shadow-sm"
                 >
                     <Icon name="Plus" className="w-3.5 h-3.5" />
                     Nuevo Ticket
@@ -149,16 +143,15 @@ function TicketList({
                                 className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
                             />
                         ) : (
-                            <select
+                            <LyriumSelect
                                 value={filterValue}
-                                onChange={(e) => setFilterValue(e.target.value)}
-                                className="w-full px-3 py-1.5 text-sm bg-[var(--bg-secondary)] rounded-xl outline-none text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                            >
-                                <option value="">Todas las categorías</option>
-                                {(Object.entries(CATEGORY_LABELS) as [TicketCategory, string][]).map(([value, label]) => (
-                                    <option key={value} value={value}>{label}</option>
-                                ))}
-                            </select>
+                                onChange={setFilterValue}
+                                placeholder="Todas las categorías"
+                                options={Object.entries(CATEGORY_LABELS).map(([value, label]) => ({
+                                    value,
+                                    label
+                                }))}
+                            />
                         )}
                     </div>
                 )}
@@ -279,16 +272,14 @@ function NewTicketForm({
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto green-scrollbar p-6 space-y-4">
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">Categoría</label>
-                    <select
+                    <LyriumSelect
                         value={category}
-                        onChange={(e) => setCategory(e.target.value as TicketCategory)}
-                        className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl outline-none text-sm font-medium text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--turquesa-500)]/20 border border-[var(--border-subtle)]"
-                        required
-                    >
-                        {(Object.entries(CATEGORY_LABELS) as [TicketCategory, string][]).map(([value, label]) => (
-                            <option key={value} value={value}>{label}</option>
-                        ))}
-                    </select>
+                        onChange={(v) => setCategory(v as TicketCategory)}
+                        options={Object.entries(CATEGORY_LABELS).map(([value, label]) => ({
+                            value,
+                            label
+                        }))}
+                    />
                 </div>
 
                 <div>
@@ -415,9 +406,9 @@ export function HelpPageClient() {
             <div className="flex-1 overflow-hidden">
 
                 {/* ─────────────────────────────────────────────────────────────────
-                    TABLET+ (md+): lista fija + detalle al lado, igual que Helpdesk admin
+                    DESKTOP (lg+): lista fija + detalle al lado, igual que Helpdesk admin
                     ───────────────────────────────────────────────────────────────── */}
-                <div className="hidden md:flex gap-6 h-full">
+                <div className="hidden lg:flex gap-6 h-full">
                     {!showNewTicketForm && (
                         <div className="w-72 lg:w-96 shrink-0">
                             <TicketList
@@ -467,11 +458,11 @@ export function HelpPageClient() {
                 </div>
 
                 {/* ─────────────────────────────────────────────────────────────────
-                    MOBILE (< md): lista O detalle (nunca ambos)
+                    MOBILE + TABLET (< lg): lista O detalle (nunca ambos)
                     ───────────────────────────────────────────────────────────────── */}
 
                 {/* Panel lista */}
-                <div className={`md:hidden h-full ${(isMobileListVisible && !showNewTicketForm) ? 'block' : 'hidden'}`}>
+                <div className={`lg:hidden h-full ${(isMobileListVisible && !showNewTicketForm) ? 'block' : 'hidden'}`}>
                     <TicketList
                         tickets={tickets}
                         activeTicketId={activeTicketId}
@@ -482,7 +473,7 @@ export function HelpPageClient() {
                 </div>
 
                 {/* Panel detalle / formulario */}
-                <div className={`md:hidden h-full ${(!isMobileListVisible || showNewTicketForm) ? 'flex flex-col' : 'hidden'}`}>
+                <div className={`lg:hidden h-full ${(!isMobileListVisible || showNewTicketForm) ? 'flex flex-col' : 'hidden'}`}>
                     {showNewTicketForm ? (
                         <NewTicketForm
                             onSubmit={async (data) => {
@@ -503,6 +494,7 @@ export function HelpPageClient() {
                             onCloseTicket={() => handleCloseTicket(activeTicket.id)}
                             onSubmitSurvey={handleSubmitSurvey}
                             onBack={handleBack}
+                            backButtonClassName="lg:hidden"
                             isSending={isSending}
                             isClosing={isClosing}
                             showAdminControls={false}

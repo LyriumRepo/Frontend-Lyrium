@@ -20,8 +20,11 @@ import { useToast } from '@/shared/lib/context/ToastContext';
 import BaseLoading from '@/components/ui/BaseLoading';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
+import { LyriumSelect } from '@/components/ui';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import ServicesGuideModal from './components/ServicesGuideModal';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import PlanUpgradeMessage from '@/features/seller/store/components/PlanUpgradeMessage';
 
 type AppointmentWithClient = Appointment & { clientId?: number };
 
@@ -42,6 +45,7 @@ export function ServicesPageClient() {
 
     const { showToast } = useToast();
     const { confirm, ConfirmDialog } = useConfirmDialog();
+    const { exceeds } = usePlanCapabilities();
 
     const [activeService, setActiveService] = useState<Service | null>(null);
     const [selectedSpecialist, setSelectedSpecialist] = useState<Specialist | null>(null);
@@ -112,14 +116,15 @@ export function ServicesPageClient() {
     };
 
     const handlePublish = (service: Service) => {
-        const nuevoEstado = service.estado === 'publicado' ? 'borrador' : 'publicado';
-        handleSaveService({ ...service, estado: nuevoEstado });
-        showToast(
-            nuevoEstado === 'publicado'
-                ? `"${service.denominacion}" publicado exitosamente`
-                : `"${service.denominacion}" movido a borradores`,
-            nuevoEstado === 'publicado' ? 'success' : 'info',
-        );
+        const isCurrentlyPublished = service.estado === 'publicado';
+
+        if (isCurrentlyPublished) {
+            handleSaveService({ ...service, estado: 'borrador' });
+            showToast(`"${service.denominacion}" movido a borradores`, 'info');
+        } else if (service.reviewedAt) {
+            handleSaveService({ ...service, estado: 'publicado' });
+            showToast(`"${service.denominacion}" re-publicado`, 'success');
+        }
     };
 
     // ── Derived ──────────────────────────────────────────────────────────────
@@ -139,6 +144,9 @@ export function ServicesPageClient() {
     const publishedCount = services.filter((s) => s.estado === 'publicado').length;
     const draftCount = services.filter((s) => s.estado === 'borrador').length;
 
+    const atServiceLimit = exceeds('max_services', services.length);
+    const atSpecialistLimit = exceeds('max_specialists', specialists.length);
+
     // ── Specialist pagination ─────────────────────────────────────────────────
 
     const SPECIALIST_PAGE_SIZE = 4;
@@ -156,24 +164,28 @@ export function ServicesPageClient() {
             <BaseButton
                 variant="action"
                 leftIcon="Briefcase"
-                size="md"
+                size="sm"
+                disabled={atServiceLimit}
                 onClick={() => {
+                    if (atServiceLimit) return;
                     setActiveService(null);
                     setModals({ ...modals, serviceConfig: true });
                 }}
             >
-                Nuevo Servicio
+                {atServiceLimit ? 'Límite Alcanzado' : 'Nuevo Servicio'}
             </BaseButton>
             <BaseButton
                 variant="action"
                 leftIcon="PlusCircle"
-                size="md"
+                size="sm"
+                disabled={atSpecialistLimit}
                 onClick={() => {
+                    if (atSpecialistLimit) return;
                     setSelectedSpecialist(null);
                     setModals({ ...modals, specialist: true });
                 }}
             >
-                Especialista
+                {atSpecialistLimit ? 'Límite Alcanzado' : 'Especialista'}
             </BaseButton>
         </div>
     );
@@ -271,19 +283,16 @@ export function ServicesPageClient() {
                     {/* Estado + Especialistas + Acciones */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Estado</label>
-                            <div className="relative">
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); setCurrentPage(1); }}
-                                    className="appearance-none w-full p-3 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-2xl text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--icons-green)]/20 cursor-pointer outline-none"
-                                >
-                                    <option value="todos">Todos ({services.length})</option>
-                                    <option value="publicado">Publicados ({publishedCount})</option>
-                                    <option value="borrador">Borradores ({draftCount})</option>
-                                </select>
-                                <Icon name="ChevronDown" className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)] pointer-events-none" />
-                            </div>
+                            <LyriumSelect
+                                label="Estado"
+                                value={statusFilter}
+                                onChange={(v) => { setStatusFilter(v as StatusFilter); setCurrentPage(1); }}
+                                options={[
+                                    { value: 'todos', label: `Todos (${services.length})` },
+                                    { value: 'publicado', label: `Publicados (${publishedCount})` },
+                                    { value: 'borrador', label: `Borradores (${draftCount})` }
+                                ]}
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest ml-1">Equipo</label>
@@ -309,6 +318,17 @@ export function ServicesPageClient() {
                             {secondaryActions}
                         </div>
                     </div>
+
+                    {(atServiceLimit || atSpecialistLimit) && (
+                        <div className="mt-4 space-y-2">
+                            {atServiceLimit && (
+                                <PlanUpgradeMessage message="Has alcanzado el límite máximo de servicios permitido por tu plan. Actualiza tu plan para agregar más." />
+                            )}
+                            {atSpecialistLimit && (
+                                <PlanUpgradeMessage message="Has alcanzado el límite máximo de especialistas permitido por tu plan. Actualiza tu plan para agregar más." />
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Tabla */}
@@ -394,9 +414,9 @@ export function ServicesPageClient() {
                                 : `No hay servicios en estado "${statusFilter}".`
                         }
                         icon="Services"
-                        actionLabel={statusFilter === 'todos' ? 'Nuevo Servicio' : undefined}
+                        actionLabel={statusFilter === 'todos' && !atServiceLimit ? 'Nuevo Servicio' : undefined}
                         onAction={
-                            statusFilter === 'todos'
+                            statusFilter === 'todos' && !atServiceLimit
                                 ? () => {
                                     setActiveService(null);
                                     setModals((prev) => ({ ...prev, serviceConfig: true }));
@@ -445,11 +465,13 @@ export function ServicesPageClient() {
                         {/* Agregar especialista desde el drawer */}
                         <button
                             onClick={() => {
+                                if (atSpecialistLimit) return;
                                 setSelectedSpecialist(null);
                                 setModals({ ...modals, specialist: true });
                             }}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-sky-500/10 dark:bg-[#8FC3A1]/10 text-sky-500 dark:text-[#8FC3A1] hover:bg-sky-500/20 dark:hover:bg-[#8FC3A1]/20 transition-colors"
-                            title="Agregar especialista"
+                            disabled={atSpecialistLimit}
+                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-sky-500/10 dark:bg-[#8FC3A1]/10 text-sky-500 dark:text-[#8FC3A1] hover:bg-sky-500/20 dark:hover:bg-[#8FC3A1]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            title={atSpecialistLimit ? 'Límite de especialistas alcanzado' : 'Agregar especialista'}
                         >
                             <Icon name="Plus" className="w-3.5 h-3.5" />
                         </button>
@@ -484,15 +506,17 @@ export function ServicesPageClient() {
                             <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
                                 Sin especialistas
                             </p>
-                            <button
-                                onClick={() => {
-                                    setSelectedSpecialist(null);
-                                    setModals({ ...modals, specialist: true });
-                                }}
-                                className="mt-2 px-4 py-1.5 rounded-xl border border-sky-500/20 dark:border-[#8FC3A1]/20 bg-sky-500/10 dark:bg-[#8FC3A1]/10 text-sky-500 dark:text-[#8FC3A1] text-[10px] font-black uppercase tracking-widest hover:bg-sky-500/20 transition-colors"
-                            >
-                                Agregar el primero
-                            </button>
+                            {!atSpecialistLimit && (
+                                <button
+                                    onClick={() => {
+                                        setSelectedSpecialist(null);
+                                        setModals({ ...modals, specialist: true });
+                                    }}
+                                    className="mt-2 px-4 py-1.5 rounded-xl border border-sky-500/20 dark:border-[#8FC3A1]/20 bg-sky-500/10 dark:bg-[#8FC3A1]/10 text-sky-500 dark:text-[#8FC3A1] text-[10px] font-black uppercase tracking-widest hover:bg-sky-500/20 transition-colors"
+                                >
+                                    Agregar el primero
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

@@ -141,11 +141,11 @@ export default function QuickViewModal({
                 src={producto.imagen || '/img/no-image.png'}
                 alt={producto.titulo}
                 fill
-                className="object-contain"
+                className="object-cover"
                 priority
               />
             ) : (
-              <Image src="/img/no-image.png" alt="Sin imagen" fill className="object-contain" />
+              <Image src="/img/no-image.png" alt="Sin imagen" fill className="object-cover" />
             )}
           </div>
           

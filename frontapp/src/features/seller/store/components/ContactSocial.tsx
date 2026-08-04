@@ -34,8 +34,8 @@ export default function ContactSocial({ config, updateConfig }: ContactSocialPro
                         <Icon name="Contact" className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                        <h3 className="text-xl sm:text-2xl font-black tracking-tighter leading-none">Información de Contacto</h3>
-                        <p className="text-[10px] font-bold text-emerald-100 uppercase tracking-[0.2em] mt-1 opacity-80">
+                        <h3 className="text-base sm:text-xl md:text-2xl font-bold md:font-black tracking-tight sm:tracking-tighter leading-none">Información de Contacto</h3>
+                        <p className="hidden sm:block text-[10px] font-bold text-emerald-100 uppercase tracking-[0.2em] mt-1 opacity-80">
                             Canales de comunicación y redes sociales oficiales
                         </p>
                     </div>

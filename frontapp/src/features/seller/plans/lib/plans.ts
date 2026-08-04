@@ -7,7 +7,10 @@ import type { PlansMap, DurationPreset } from '@/features/seller/plans/types';
 export const FIXED_ORDER = ['basic', 'standard', 'premium'];
 
 export function buildPlanOrder(plans: PlansMap): string[] {
-  const active = Object.keys(plans).filter(k => plans[k].isActive !== false);
+  // Los planes "-lifetime" (ej. crece-lifetime) no son una tarjeta más: son una
+  // duración especial dentro de la tarjeta de su plan base (ver preset 'lifetime'
+  // en durationPresets). Se excluyen de la grilla aunque vengan activos desde /plans.
+  const active = Object.keys(plans).filter(k => plans[k].isActive !== false && !k.endsWith('-lifetime'));
   const fixed  = FIXED_ORDER.filter(k => active.includes(k));
   const rest   = active.filter(k => !FIXED_ORDER.includes(k));
   rest.sort((a, b) => (plans[a].orden ?? 99) - (plans[b].orden ?? 99));
@@ -37,7 +40,7 @@ export const defaultPlansData: PlansMap = {
     allDetails: [], detailedBenefits: [], timelineIcon: 'shield',
   },
   standard: {
-    id: 'standard', name: 'CRECE', price: 7.99, priceAnnual: 95.88,
+    id: 'standard', name: 'CRECE', price: 40, priceAnnual: 480,
     period: '/mes', periodAnnual: '/año', currency: 'S/',
     usePriceMode: true, priceText: '', priceSubtext: '',
     description: 'Haz crecer tu tienda con herramientas avanzadas, capacitaciones y atención preferencial.',
@@ -82,25 +85,25 @@ export const defaultPlansData: PlansMap = {
   },
 };
 
+// Tabla de duraciones según "Precios de Suscripción de mis Planes.md":
+// el % de descuento se aplica sobre el precio mensual x la duración completa
+// (precio_mensual x (1 - descuento%) x meses) — verificado contra los 4 totales
+// del MD para el plan Crece (S/40 base): 432 / 768 / 1008 / 1152.
+// `discountMonths` ("meses gratis") es solo el dato equivalente que muestra el MD
+// para marketing/UI — NO es el mecanismo de cobro.
 export const durationPresets: DurationPreset[] = [
-  { id: 'trial',  label: 'Prueba',       months: 1,  isTrial: true  },
-  { id: '1m',     label: '1 mes',        months: 1,  isTrial: false },
-  { id: '6m',     label: '6 meses',      months: 6,  isTrial: false },
-  { id: '12m',    label: '12 meses',     months: 12, isTrial: false },
-  { id: '24m',    label: '24 meses',     months: 24, isTrial: false },
-  { id: '48m',    label: '48 meses',     months: 48, isTrial: false },
-  { id: 'custom', label: 'Personalizar', months: 0,  isTrial: false },
+  { id: 'trial',    label: 'Prueba',   months: 1,    isTrial: true },
+  { id: '1m',       label: '1 mes',    months: 1,    isTrial: false },
+  { id: '12m',      label: '1 año',    months: 12,   isTrial: false, discountMonths: 1,  discountPercent: 10 },
+  { id: '24m',      label: '2 años',   months: 24,   isTrial: false, discountMonths: 4,  discountPercent: 20 },
+  { id: '36m',      label: '3 años',   months: 36,   isTrial: false, discountMonths: 10, discountPercent: 30 },
+  { id: '48m',      label: '4 años',   months: 48,   isTrial: false, discountMonths: 19, discountPercent: 40 },
+  { id: 'lifetime', label: 'Por Vida', months: null, isTrial: false, isLifetime: true, lifetimePrice: 1500 },
 ];
 
 export function getDiscountForMonths(totalMonths: number): number {
-  if (totalMonths <= 1)  return 0;
-  if (totalMonths <= 3)  return 5;
-  if (totalMonths <= 6)  return 12;
-  if (totalMonths <= 12) return 22;
-  if (totalMonths <= 18) return 30;
-  if (totalMonths <= 24) return 38;
-  if (totalMonths <= 36) return 48;
-  return Math.min(Math.floor(48 + (totalMonths - 36)), 60);
+  const preset = durationPresets.find(p => !p.isTrial && !p.isLifetime && p.months === totalMonths);
+  return preset?.discountPercent ?? 0;
 }
 
 export const notificationMessages = [

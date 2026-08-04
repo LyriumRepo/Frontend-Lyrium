@@ -1,4 +1,0 @@
-[2026-07-09T05:17:06.085Z] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[2026-07-09T05:17:06.693Z] [log] [HMR] connected
-[2026-07-09T05:17:12.039Z] [warning] Image with src "http://localhost:3000/img/logo_lyrium_blanco_01-scaled.webp" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[2026-07-09T05:17:12.564Z] [warning] WebSocket connection to 'wss://localhost:8080/app/qzg5p7xmovk4uthurig0?protocol=7&client=js&version=8.4.0&flash=false' failed: WebSocket is closed before the connection is established.

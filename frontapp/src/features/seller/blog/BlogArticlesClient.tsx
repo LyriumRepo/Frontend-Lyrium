@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
-import { FileText, Plus, Search, Edit, Trash2, Eye, Send, Save, CheckCircle, Folder, Info, AlertCircle, BookOpen, Headphones, Video, Clapperboard, X } from 'lucide-react';
+import { FileText, Plus, Search, Eye, Save, Folder, Info, AlertCircle, BookOpen, Headphones, Video, Clapperboard, X, ArrowRight } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
 import Pagination from '@/components/ui/Pagination';
@@ -12,8 +12,14 @@ import { blogApi, BlogArticle } from '@/shared/lib/api/bioblogRepository';
 import { blogApi as publicBlogApi } from '@/shared/lib/api/blog';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { LyriumSelect } from '@/components/ui';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import { BlogContentMobileCard } from './components/BlogContentMobileCard';
+import { ContentStatusActions } from './components/ContentStatusActions';
 
 export function BlogArticlesClient() {
+    const { can, capabilitiesLoading } = usePlanCapabilities();
+    const hasAccess = can('can_bioblog');
     const [articles, setArticles] = useState<BlogArticle[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -122,10 +128,54 @@ export function BlogArticlesClient() {
         { label: 'Shorts', href: '/seller/blog/shorts', icon: Clapperboard },
     ];
 
+    if (capabilitiesLoading) return <div className="p-20 text-center text-gray-400">Verificando acceso...</div>;
+
+    if (!hasAccess) {
+        return (
+            <div className="relative space-y-6 animate-fadeIn font-industrial pb-20">
+                <div className="blur-sm pointer-events-none select-none">
+                    <ModuleHeader title="BioBlog" subtitle="Artículos" icon="FileText" />
+                    <div className="flex gap-1 p-1 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-2xl overflow-x-auto mt-6">
+                        {BLOG_TABS.map(tab => (
+                            <div key={tab.href} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider whitespace-nowrap text-gray-400 dark:text-[var(--text-muted)]">
+                                <tab.icon className="w-4 h-4" />
+                                {tab.label}
+                            </div>
+                        ))}
+                    </div>
+                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mt-6 p-6 space-y-3">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="h-10 bg-gray-100 dark:bg-gray-800 rounded-xl" />
+                        ))}
+                    </div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center max-w-xs">
+                        <div className="w-16 h-16 mx-auto mb-4">
+                            <img src="/img/LyriumEspecial.png" alt="Lyrium" className="w-full h-full object-contain" />
+                        </div>
+                        <p className="text-sm font-bold text-[var(--text-primary)] mb-1">Contenido bloqueado</p>
+                        <p className="text-xs text-[var(--text-secondary)] mb-4">El BioBlog está disponible desde el plan CRECE. Actualiza tu plan para acceder.</p>
+                        <a href="/seller/planes"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--brand-sky)] dark:bg-[var(--brand-teal)] text-white text-xs font-black uppercase tracking-wider hover:opacity-90 transition-all">
+                            Actualizar Plan
+                            <ArrowRight className="w-4 h-4" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6 animate-fadeIn font-industrial pb-20">
             <ModuleHeader title="BioBlog" subtitle="Artículos" icon="FileText"
-                actions={<BaseButton onClick={openCreate} variant="primary" leftIcon="Plus" size="md">Nuevo Artículo</BaseButton>} />
+                actions={
+                    <BaseButton onClick={openCreate} variant="action" leftIcon="Plus" size="sm">
+                        <span className="hidden sm:inline">Nuevo Artículo</span>
+                        <span className="sm:hidden">Artículo</span>
+                    </BaseButton>
+                } />
 
             <div className="flex gap-1 p-1 bg-gray-100 dark:bg-[var(--bg-muted)] rounded-2xl overflow-x-auto">
                 {BLOG_TABS.map(tab => {
@@ -169,15 +219,19 @@ export function BlogArticlesClient() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar artículos..." className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200 focus:outline-none focus:border-teal-500 transition" />
                 </div>
-                <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200">
-                    <option value="">Todos</option>
-                    <option value="draft">Borrador</option>
-                    <option value="pending_review">En revisión</option>
-                    <option value="approved">Aprobado</option>
-                    <option value="rejected">Rechazado</option>
-                    <option value="published">Publicado</option>
-                    <option value="archived">Archivado</option>
-                </select>
+                <LyriumSelect
+                    value={statusFilter}
+                    onChange={(v) => setStatusFilter(v)}
+                    placeholder="Todos"
+                    options={[
+                        { value: 'draft', label: 'Borrador' },
+                        { value: 'pending_review', label: 'En revisión' },
+                        { value: 'approved', label: 'Aprobado' },
+                        { value: 'rejected', label: 'Rechazado' },
+                        { value: 'published', label: 'Publicado' },
+                        { value: 'archived', label: 'Archivado' }
+                    ]}
+                />
             </div>
 
             {error && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-200 dark:border-red-800">{error}</div>}
@@ -185,7 +239,28 @@ export function BlogArticlesClient() {
             <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 {loading ? <div className="p-20 text-center text-gray-400">Cargando...</div>
                 : articles.length === 0 ? <div className="p-20 text-center text-gray-400">Sin artículos</div>
-                : <div className="overflow-x-auto">
+                : <>
+                    {/* MÓVIL */}
+                    <div className="sm:hidden p-3 space-y-2">
+                        {pageArticles.map(a => (
+                            <BlogContentMobileCard
+                                key={a.id}
+                                title={a.title}
+                                statusBadge={statusBadge(a.status)}
+                                metaFields={[
+                                    { label: 'Vistas', value: a.views_count },
+                                    { label: 'Fecha', value: a.published_at ? new Date(a.published_at).toLocaleDateString('es-PE') : new Date(a.created_at).toLocaleDateString('es-PE') },
+                                ]}
+                                status={a.status}
+                                onUpdateStatus={(status) => updateStatus(a.id, status)}
+                                onEdit={() => openEdit(a)}
+                                onDelete={() => handleDelete(a.id)}
+                            />
+                        ))}
+                    </div>
+
+                    {/* DESKTOP */}
+                    <div className="hidden sm:block overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">
@@ -203,44 +278,15 @@ export function BlogArticlesClient() {
                                     <td className="px-5 py-4">{statusBadge(a.status)}</td>
                                     <td className="px-5 py-4 text-gray-500">{a.views_count}</td>
                                     <td className="px-5 py-4 text-xs text-gray-400">{a.published_at ? new Date(a.published_at).toLocaleDateString('es-PE') : new Date(a.created_at).toLocaleDateString('es-PE')}</td>
-                                    <td className="px-5 py-4"><div className="flex gap-1.5 items-center">
-                                        {a.status === 'draft' && (
-                                            <button onClick={() => updateStatus(a.id, 'pending_review')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white transition shadow-md shadow-sky-500/20 dark:shadow-[#8FC3A1]/50">
-                                                <Send className="w-3 h-3 inline mr-1" />Enviar
-                                            </button>
-                                        )}
-                                        {a.status === 'pending_review' && (
-                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">En revisión</span>
-                                        )}
-                                        {a.status === 'approved' && (
-                                            <>
-                                                <button onClick={() => updateStatus(a.id, 'published')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] text-white transition shadow-md shadow-sky-500/20 dark:shadow-[#8FC3A1]/50">
-                                                    <CheckCircle className="w-3 h-3 inline mr-1" />Publicar
-                                                </button>
-                                                <button onClick={() => updateStatus(a.id, 'draft')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-300 transition">
-                                                    Borrador
-                                                </button>
-                                            </>
-                                        )}
-                                        {a.status === 'rejected' && (
-                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-500">Rechazado</span>
-                                        )}
-                                        {a.status === 'published' && (
-                                            <button onClick={() => updateStatus(a.id, 'approved')} className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-300 transition">
-                                                Ocultar
-                                            </button>
-                                        )}
-                                        {a.status === 'archived' && (
-                                            <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400">Archivado</span>
-                                        )}
-                                        <button onClick={() => openEdit(a)} className="p-1.5 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 text-teal-500 transition"><Edit className="w-4 h-4" /></button>
-                                        <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition"><Trash2 className="w-4 h-4" /></button>
-                                    </div></td>
+                                    <td className="px-5 py-4">
+                                        <ContentStatusActions status={a.status} onUpdateStatus={(status) => updateStatus(a.id, status)} onEdit={() => openEdit(a)} onDelete={() => handleDelete(a.id)} />
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                </div>}
+                    </div>
+                </>}
                 <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={articles.length} itemLabel="artículos" />
             </div>
 

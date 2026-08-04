@@ -5,6 +5,7 @@ import { Settings, Shield, RefreshCw, RotateCcw, AlertTriangle } from 'lucide-re
 import BaseButton from '@/components/ui/BaseButton';
 import BaseLoading from '@/components/ui/BaseLoading';
 import BaseErrorState from '@/components/ui/BaseErrorState';
+import BaseModal from '@/components/ui/BaseModal';
 import { useSecuritySettings } from '@/features/admin/security/hooks/useSecuritySettings';
 
 export default function SettingsPageClient() {
@@ -148,22 +149,24 @@ export default function SettingsPageClient() {
       </div>
 
       {/* Reset Confirmation */}
-      {showResetConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowResetConfirm(false)} />
-          <div className="relative bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-subtle)] shadow-2xl p-8 max-w-md w-full animate-scaleIn space-y-5">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="w-6 h-6 text-red-500" />
-              <h3 className="text-lg font-black text-[var(--text-primary)]">Restablecer configuración</h3>
-            </div>
+      <BaseModal
+        isOpen={showResetConfirm}
+        onClose={() => setShowResetConfirm(false)}
+        title="Restablecer configuración"
+        subtitle="SEGURIDAD"
+        size="sm"
+      >
+        <div className="space-y-5">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-6 h-6 text-red-500 shrink-0" />
             <p className="text-sm text-[var(--text-secondary)]">Se perderán todos los cambios personalizados y se volverá a los valores por defecto.</p>
-            <div className="flex justify-end gap-3">
-              <BaseButton variant="outline" onClick={() => setShowResetConfirm(false)}>Cancelar</BaseButton>
-              <BaseButton variant="danger" onClick={handleReset} isLoading={isMutating}>Restablecer</BaseButton>
-            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <BaseButton variant="outline" onClick={() => setShowResetConfirm(false)}>Cancelar</BaseButton>
+            <BaseButton variant="danger" onClick={handleReset} isLoading={isMutating}>Restablecer</BaseButton>
           </div>
         </div>
-      )}
+      </BaseModal>
     </div>
   );
 }

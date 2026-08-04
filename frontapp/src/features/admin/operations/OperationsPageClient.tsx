@@ -629,7 +629,7 @@ export function OperationsPageClient() {
             <div className="w-12 h-12 bg-[var(--brand-green)] rounded-2xl flex items-center justify-center shadow-lg shrink-0">
               <Icon name="Search" className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-xl font-black text-[var(--text-primary)]">
+            <h3 className="text-base sm:text-xl font-black text-[var(--text-primary)]">
               Filtros de Búsqueda
             </h3>
           </div>

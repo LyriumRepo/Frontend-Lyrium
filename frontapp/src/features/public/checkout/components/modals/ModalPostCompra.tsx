@@ -79,7 +79,7 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
     return (
         <>
             {/* Backdrop */}
-            <div className="fixed inset-0 bg-white/80 dark:bg-black/60 backdrop-blur-sm z-[20000] animate-fade-in" />
+            <div className="fixed inset-0 bg-[rgba(0,0,0,0.45)] dark:bg-[rgba(0,0,0,0.65)] backdrop-blur-xl z-[20000] animate-fade-in" />
 
             {/* Modal */}
             <div className="fixed inset-0 z-[30000] flex items-center justify-center p-4 overflow-y-auto green-scrollbar">
@@ -89,20 +89,20 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
                     aria-modal="true"
                     aria-label="Compra exitosa"
                     tabIndex={-1}
-                    className="bg-white dark:bg-[var(--bg-card)] w-full max-w-sm shadow-2xl relative flex flex-col rounded-[2rem] overflow-hidden animate-modal-pop"
+                    className="bg-white/95 dark:bg-[var(--bg-card)] backdrop-blur-xl w-full max-w-sm shadow-2xl relative flex flex-col rounded-[2.5rem] overflow-hidden animate-modal-pop border border-white/20 dark:border-[var(--border-subtle)]"
                 >
 
                     {/* Header */}
-                    <div className="relative h-28 shrink-0 flex flex-col items-center justify-center bg-gradient-to-br from-sky-500 to-blue-700 dark:from-emerald-700 dark:to-emerald-800 p-4 text-center">
+                    <div className="relative h-28 shrink-0 flex flex-col items-center justify-center bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] dark:from-emerald-700 dark:to-emerald-900 p-4 text-center">
                         <div className="relative z-20 flex flex-col items-center gap-1.5">
                             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-2xl animate-bounce-slow">
                                 <Check className="w-6 h-6 text-white drop-shadow-lg" />
                             </div>
                             <div className="space-y-0.5">
-                                <h3 className="text-lg font-black tracking-tight text-white uppercase leading-none">
+                                <h3 className="text-2xl font-black tracking-tight text-white leading-none">
                                     {phase === 1 ? '¡Listo!' : 'Casi listo'}
                                 </h3>
-                                <p className="text-[10px] font-bold text-sky-100 uppercase tracking-[0.3em] opacity-80">
+                                <p className="text-sm text-white/70 font-bold mt-1.5">
                                     {phase === 1 ? 'Compra Exitosa' : 'Sincronización al 80%'}
                                 </p>
                             </div>
@@ -112,8 +112,8 @@ export default function ModalPostCompra({ isOpen, email, onClose, onSync, onOpen
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
                         <div className="absolute bottom-0 left-0 w-24 h-24 bg-sky-400/20 dark:bg-emerald-400/10 rounded-full -ml-12 -mb-12 blur-2xl" />
 
-                        <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/10 flex items-center justify-center text-white hover:bg-black/20 hover:scale-110 transition-all z-30">
-                            <X className="w-4 h-4" />
+                        <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all z-30">
+                            <X className="w-5 h-5" />
                         </button>
                     </div>
 

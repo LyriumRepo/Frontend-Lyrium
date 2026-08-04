@@ -47,6 +47,8 @@ export default function ProfileCompletionGuide({ userId, missing }: ProfileCompl
         delayTimer = setTimeout(() => {
           if (cancelled) return;
 
+          const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+
           const steps: DriveStep[] = missingRef.current
             .filter(({ key }) => document.querySelector(`#${key}`))
             .map(({ key, label }) => ({
@@ -54,8 +56,8 @@ export default function ProfileCompletionGuide({ userId, missing }: ProfileCompl
               popover: {
                 title: `Te falta: ${label}`,
                 description: `Añade tu ${label.toLowerCase()} para acercarte al 100% de tu perfil.`,
-                side: 'top',
-                align: 'start',
+                side: isDesktop ? 'top' as const : 'bottom' as const,
+                align: 'start' as const,
               },
             }));
 

@@ -38,7 +38,7 @@ export default function PackagingSummary() {
         <h3 className="font-bold text-white">Resumen de empaque</h3>
       </div>
 
-      <div className="p-5 space-y-4">
+      <div className="p-4 sm:p-5 space-y-4">
         
         {Array.from(grupos.entries()).map(([storeId, items]) => {
           const box       = boxByStore.get(storeId);
@@ -94,7 +94,7 @@ export default function PackagingSummary() {
           </div>
           <div className="text-right">
             <p className="text-[11px] text-gray-400">Subtotal</p>
-            <p className="font-mono font-black text-lg text-[var(--brand-sky-hover)] dark:text-emerald-400">
+            <p className="font-mono font-black text-base sm:text-lg text-[var(--brand-sky-hover)] dark:text-emerald-400">
               S/ {subtotal.toFixed(2)}
             </p>
           </div>

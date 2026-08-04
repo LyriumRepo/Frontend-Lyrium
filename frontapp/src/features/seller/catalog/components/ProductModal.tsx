@@ -8,6 +8,7 @@ import BaseModal from '@/components/ui/BaseModal';
 import BaseButton from '@/components/ui/BaseButton';
 import { useToast } from '@/shared/lib/context/ToastContext';
 import Icon from '@/components/ui/Icon';
+import { LyriumSelect } from '@/components/ui';
 import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
 import PlanUpgradeMessage from '@/features/seller/store/components/PlanUpgradeMessage';
 
@@ -100,7 +101,7 @@ function BranchStockSection({ productId, storeId, onStockChange }: { productId?:
                     .map((b: any) => ({
                         id: b.id, name: b.name, address: b.address, district: b.district,
                         is_principal: b.is_principal ?? false,
-                        branch_stock: 0, pickup_enabled: true,
+                        branch_stock: 0, pickup_enabled: false,
                     }));
         };
 
@@ -321,7 +322,7 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                 setPreviewImage(productToEdit.image);
                 setEtiquetas(etiquetasFromProduct(productToEdit));
             } else {
-                setFormData({ ...initialProduct, id: Date.now().toString() });
+                setFormData(initialProduct);
                 setPreviewImage('');
                 setEtiquetas({ nuevo: true });
             }
@@ -650,6 +651,9 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                 onChange={handleImageChange}
                             />
                         </div>
+                        <p className="text-[8px] text-[var(--text-muted)] leading-tight text-center">
+                            Mín. 800×800 px · fondo blanco · JPG, PNG o WebP
+                        </p>
                     </div>
 
                     {/* Metadata Table + Etiqueta Config Panels */}
@@ -672,21 +676,19 @@ export default function ProductModal({ isOpen, onClose, onSave, productToEdit }:
                                     <tr>
                                         <td className="px-5 py-3 font-black text-[var(--text-secondary)] text-[10px] uppercase tracking-tighter">Categoría</td>
                                         <td className="px-5 py-3">
-                                            <select
-                                                name="category" required
-                                                value={formData.category} onChange={handleChange}
-                                                className="w-full bg-[var(--bg-card)] border-none focus:ring-0 font-bold text-[var(--text-primary)] p-0 outline-none cursor-pointer"
-                                            >
-                                                <option value="">Seleccionar Categoría...</option>
-                                                {categories.map((cat) => {
-                                                    const isParent = (cat.level || 0) < 2;
-                                                    return (
-                                                        <option key={cat.id} value={isParent ? '' : cat.slug} disabled={isParent}>
-                                                            {'\u00A0\u00A0'.repeat(cat.level || 0)}{isParent ? '-- ' : ''}{cat.name}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </select>
+                                            <LyriumSelect
+                                                label={<>Categoría <span className="text-red-500">*</span></>}
+                                                value={formData.category}
+                                                onChange={(v) => handleChange({ target: { name: 'category', value: v } } as unknown as React.ChangeEvent<HTMLSelectElement>)}
+                                                options={[
+                                                    { value: '', label: 'Seleccionar Categoría...' },
+                                                    ...categories.map((cat) => ({
+                                                        value: cat.slug,
+                                                        label: `${'  '.repeat(cat.level || 0)}${(cat.level || 0) < 2 ? '-- ' : ''}${cat.name}`,
+                                                        disabled: (cat.level || 0) < 2
+                                                    }))
+                                                ]}
+                                            />
                                         </td>
                                     </tr>
                                     <tr className="bg-[var(--bg-secondary)]/10">

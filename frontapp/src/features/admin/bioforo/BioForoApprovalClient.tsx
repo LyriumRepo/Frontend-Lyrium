@@ -88,7 +88,7 @@ export function BioForoApprovalClient() {
     ];
 
     return (
-        <div className="px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
+        <div className="px-4 sm:px-8 pb-20 space-y-8 animate-fadeIn font-industrial">
             <ModuleHeader
                 title="BioForo"
                 subtitle="Revisa y aprueba los temas del foro enviados por los vendedores"
@@ -99,9 +99,11 @@ export function BioForoApprovalClient() {
                         onClick={load}
                         disabled={loading}
                         leftIcon="RefreshCw"
-                        className={`shadow-xl shadow-sky-500/40 ${loading ? 'animate-pulse' : ''}`}
+                        size="sm"
+                        aria-label="Actualizar"
+                        className={`shadow-xl shadow-sky-500/40 !px-2.5 sm:!px-4 ${loading ? 'animate-pulse' : ''}`}
                     >
-                        Actualizar
+                        <span className="hidden sm:inline">Actualizar</span>
                     </BaseButton>
                 }
             />
@@ -182,50 +184,99 @@ export function BioForoApprovalClient() {
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     layout
-                                    className="p-5 flex items-center gap-4 hover:bg-[var(--bg-muted)] transition"
+                                    className="p-4 sm:p-5 hover:bg-[var(--bg-muted)] transition"
                                 >
-                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shrink-0">
-                                        <MessagesSquare className="w-4 h-4 text-white" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-0.5">
-                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase text-white bg-gradient-to-r from-sky-500 to-cyan-500">Tema</span>
-                                            <p className="font-semibold text-sm text-[var(--text-primary)] truncate">{item.title || 'Sin título'}</p>
+                                    {/* MÓVIL */}
+                                    <div className="sm:hidden space-y-3">
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shrink-0">
+                                                <MessagesSquare className="w-4 h-4 text-white" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase text-white bg-gradient-to-r from-sky-500 to-cyan-500">Tema</span>
+                                                <p className="font-semibold text-sm text-[var(--text-primary)] mt-1">{item.title || 'Sin título'}</p>
+                                                <div className="flex flex-col gap-0.5 text-[11px] text-[var(--text-muted)] mt-1">
+                                                    {item.store && (
+                                                        <span className="flex items-center gap-1">
+                                                            <Store className="w-3 h-3" /> {item.store.name}
+                                                        </span>
+                                                    )}
+                                                    <span className="flex items-center gap-1">
+                                                        <Calendar className="w-3 h-3" /> {new Date(item.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-4 text-[11px] text-[var(--text-muted)]">
-                                            {item.store && (
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <button
+                                                onClick={() => handleApprove(item.id)}
+                                                disabled={actionLoading === `${item.id}-approve`}
+                                                className="flex items-center justify-center gap-1 py-2.5 text-xs font-bold uppercase rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white transition disabled:opacity-50 shadow-sm min-h-[44px]"
+                                            >
+                                                {actionLoading === `${item.id}-approve` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                                Aprobar
+                                            </button>
+                                            <button
+                                                onClick={() => setRejectModal({ id: item.id, title: item.title || 'Sin título' })}
+                                                disabled={actionLoading === `${item.id}-reject`}
+                                                className="flex items-center justify-center gap-1 py-2.5 text-xs font-bold uppercase rounded-xl bg-[var(--bg-muted)] hover:bg-red-50 dark:hover:bg-red-900/20 text-[var(--text-secondary)] hover:text-red-500 transition disabled:opacity-50 min-h-[44px]"
+                                            >
+                                                <XCircle className="w-3.5 h-3.5" /> Rechazar
+                                            </button>
+                                            <button
+                                                onClick={() => setPreviewItem(item)}
+                                                className="col-span-2 flex items-center justify-center gap-1 py-2.5 text-xs font-bold uppercase rounded-xl bg-[var(--bg-muted)] hover:bg-[var(--border-subtle)] text-[var(--text-secondary)] transition min-h-[44px]"
+                                            >
+                                                <Eye className="w-3.5 h-3.5" /> Ver detalle
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* DESKTOP */}
+                                    <div className="hidden sm:flex items-center gap-4">
+                                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shrink-0">
+                                            <MessagesSquare className="w-4 h-4 text-white" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase text-white bg-gradient-to-r from-sky-500 to-cyan-500">Tema</span>
+                                                <p className="font-semibold text-sm text-[var(--text-primary)] truncate">{item.title || 'Sin título'}</p>
+                                            </div>
+                                            <div className="flex items-center gap-4 text-[11px] text-[var(--text-muted)]">
+                                                {item.store && (
+                                                    <span className="flex items-center gap-1">
+                                                        <Store className="w-3 h-3" /> {item.store.name}
+                                                    </span>
+                                                )}
                                                 <span className="flex items-center gap-1">
-                                                    <Store className="w-3 h-3" /> {item.store.name}
+                                                    <Calendar className="w-3 h-3" /> {new Date(item.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                 </span>
-                                            )}
-                                            <span className="flex items-center gap-1">
-                                                <Calendar className="w-3 h-3" /> {new Date(item.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                            </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="flex gap-1.5 shrink-0">
-                                        <button
-                                            onClick={() => setPreviewItem(item)}
-                                            className="flex items-center gap-1 px-3 py-2 text-xs font-bold uppercase rounded-xl bg-[var(--bg-muted)] hover:bg-[var(--border-subtle)] text-[var(--text-secondary)] transition"
-                                            title="Ver detalle"
-                                        >
-                                            <Eye className="w-3.5 h-3.5" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleApprove(item.id)}
-                                            disabled={actionLoading === `${item.id}-approve`}
-                                            className="flex items-center gap-1 px-3 py-2 text-xs font-bold uppercase rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white transition disabled:opacity-50 shadow-sm"
-                                        >
-                                            {actionLoading === `${item.id}-approve` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
-                                            Aprobar
-                                        </button>
-                                        <button
-                                            onClick={() => setRejectModal({ id: item.id, title: item.title || 'Sin título' })}
-                                            disabled={actionLoading === `${item.id}-reject`}
-                                            className="flex items-center gap-1 px-3 py-2 text-xs font-bold uppercase rounded-xl bg-[var(--bg-muted)] hover:bg-red-50 dark:hover:bg-red-900/20 text-[var(--text-secondary)] hover:text-red-500 transition disabled:opacity-50"
-                                        >
-                                            <XCircle className="w-3.5 h-3.5" /> Rechazar
-                                        </button>
+                                        <div className="flex gap-1.5 shrink-0">
+                                            <button
+                                                onClick={() => setPreviewItem(item)}
+                                                className="flex items-center gap-1 px-3 py-2 text-xs font-bold uppercase rounded-xl bg-[var(--bg-muted)] hover:bg-[var(--border-subtle)] text-[var(--text-secondary)] transition"
+                                                title="Ver detalle"
+                                            >
+                                                <Eye className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleApprove(item.id)}
+                                                disabled={actionLoading === `${item.id}-approve`}
+                                                className="flex items-center gap-1 px-3 py-2 text-xs font-bold uppercase rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white transition disabled:opacity-50 shadow-sm"
+                                            >
+                                                {actionLoading === `${item.id}-approve` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                                Aprobar
+                                            </button>
+                                            <button
+                                                onClick={() => setRejectModal({ id: item.id, title: item.title || 'Sin título' })}
+                                                disabled={actionLoading === `${item.id}-reject`}
+                                                className="flex items-center gap-1 px-3 py-2 text-xs font-bold uppercase rounded-xl bg-[var(--bg-muted)] hover:bg-red-50 dark:hover:bg-red-900/20 text-[var(--text-secondary)] hover:text-red-500 transition disabled:opacity-50"
+                                            >
+                                                <XCircle className="w-3.5 h-3.5" /> Rechazar
+                                            </button>
+                                        </div>
                                     </div>
                                 </motion.div>
                             ))}
@@ -278,17 +329,17 @@ export function BioForoApprovalClient() {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end gap-3 pt-2 border-t border-[var(--border-subtle)]">
+                            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-[var(--border-subtle)]">
                                 <button
                                     onClick={() => { setPreviewItem(null); setRejectModal({ id: previewItem.id, title: previewItem.title || 'Sin título' }); }}
-                                    className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 rounded-xl transition shadow-sm"
+                                    className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 rounded-xl transition shadow-sm w-full sm:w-auto min-h-[44px]"
                                 >
                                     <XCircle className="w-4 h-4" /> Rechazar
                                 </button>
                                 <button
                                     onClick={() => { const item = previewItem; setPreviewItem(null); handleApprove(item.id); }}
                                     disabled={actionLoading === `${previewItem.id}-approve`}
-                                    className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-xl transition disabled:opacity-50 shadow-sm"
+                                    className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-xl transition disabled:opacity-50 shadow-sm w-full sm:w-auto min-h-[44px]"
                                 >
                                     {actionLoading === `${previewItem.id}-approve` ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                                     Aprobar
@@ -309,7 +360,7 @@ export function BioForoApprovalClient() {
                     >
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-md p-6 space-y-4"
+                            className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-[var(--border-subtle)] w-full max-w-md mx-4 p-5 sm:p-6 space-y-4"
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="flex items-center justify-between">
@@ -336,14 +387,14 @@ export function BioForoApprovalClient() {
                                     <p className="text-[11px] text-[var(--text-muted)] mt-1">Debes escribir un motivo para rechazar</p>
                                 )}
                             </div>
-                            <div className="flex justify-end gap-3 pt-2">
-                                <button onClick={() => { setRejectModal(null); setRejectNote(''); }} className="px-5 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition">
+                            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
+                                <button onClick={() => { setRejectModal(null); setRejectNote(''); }} className="px-5 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition w-full sm:w-auto min-h-[44px]">
                                     Cancelar
                                 </button>
                                 <button
                                     onClick={handleReject}
                                     disabled={actionLoading === `${rejectModal.id}-reject` || !rejectNote.trim()}
-                                    className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 rounded-xl transition disabled:opacity-50 shadow-sm"
+                                    className="flex items-center justify-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 rounded-xl transition disabled:opacity-50 shadow-sm w-full sm:w-auto min-h-[44px]"
                                 >
                                     {actionLoading === `${rejectModal.id}-reject` ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
                                     Rechazar

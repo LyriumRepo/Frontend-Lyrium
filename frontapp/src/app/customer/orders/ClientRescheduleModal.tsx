@@ -111,6 +111,7 @@ export interface ClientRescheduleOrderData {
   reprogramaciones?: number; // 0 = ninguna, 1 = ya hizo 1
   solicitudEnviada?: boolean;
   tienda?: string;
+  tiendas?: string[];
   detalle?: string;
 }
 
@@ -312,11 +313,19 @@ export default function ClientRescheduleModal({
               </div>
               <div>
                 <h3 className="text-sm font-black tracking-tighter leading-none">Reprogramar Cita</h3>
-                {order.tienda && (
+                {order.tiendas && order.tiendas.length > 1 ? (
+                  <div className="flex flex-wrap gap-1 mt-0.5">
+                    {order.tiendas.map((t) => (
+                      <span key={t} className="text-[8px] font-bold text-white/80 bg-white/15 px-1.5 py-0.5 rounded-full">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                ) : order.tienda ? (
                   <p className="text-[9px] font-bold text-white/80 uppercase tracking-[0.2em] mt-0.5 truncate max-w-[160px]">
                     {order.tienda}
                   </p>
-                )}
+                ) : null}
               </div>
             </div>
             <button

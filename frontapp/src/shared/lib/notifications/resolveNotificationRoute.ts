@@ -45,6 +45,10 @@ export function resolveNotificationRoute(
             }
             if (role === 'seller') return '/seller/store';
             return '/';
+        case 'profile_request':
+            if (role === 'administrator') return '/admin/sellers?tab=validacion';
+            if (role === 'seller') return '/seller/profile';
+            return `${prefix}/profile`;
         case 'plans':
             if (role === 'administrator') return '/admin/planes';
             if (role === 'seller') return '/seller/planes';

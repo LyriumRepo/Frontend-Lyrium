@@ -3,7 +3,7 @@
 import React, { useState, useTransition, useOptimistic } from 'react';
 import Image from 'next/image';
 import { Product } from '@/features/seller/catalog/types';
-import ProductCard from './components/ProductCard';
+import ProductCard, { ProductStatusBadge } from './components/ProductCard';
 import dynamic from 'next/dynamic';
 const ProductModal = dynamic(() => import('./components/ProductModal'), { ssr: false });
 import ProductDetailModal from './components/ProductDetailModal';
@@ -19,6 +19,8 @@ import { USE_MOCKS } from '@/shared/lib/config/flags';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import CatalogGuideModal from './components/CatalogGuideModal';
+import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
+import PlanUpgradeMessage from '@/features/seller/store/components/PlanUpgradeMessage';
 
 function toRelativeStorageUrl(url: string): string {
     const idx = url.indexOf('/storage/');
@@ -108,13 +110,14 @@ function PriceEditInput({ product, onPriceUpdate }: PriceEditInputProps) {
 // ─── Mobile accordion card ────────────────────────────────────────────────────
 
 interface MobileProductCardProps {
-    product:    Product;
-    onEdit:     (product: Product) => void;
-    onDelete:   (productId: string) => void;
-    onViewInfo: (product: Product) => void;
+    product:            Product;
+    onEdit:             (product: Product) => void;
+    onDelete:           (productId: string) => void;
+    onViewInfo:         (product: Product) => void;
+    onToggleVisibility: (productId: string, visible: boolean) => void;
 }
 
-function MobileProductCard({ product, onEdit, onDelete, onViewInfo }: MobileProductCardProps) {
+function MobileProductCard({ product, onEdit, onDelete, onViewInfo, onToggleVisibility }: MobileProductCardProps) {
     const [expanded, setExpanded] = useState(false);
 
     return (
@@ -196,6 +199,26 @@ function MobileProductCard({ product, onEdit, onDelete, onViewInfo }: MobileProd
                         </span>
                     </div>
 
+                    {/* Detalle: Estado / Visibilidad */}
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">Estado</span>
+                        {product.status === 'approved' || product.status === 'inactive' ? (
+                            <button
+                                onClick={() => onToggleVisibility(product.id, product.status !== 'approved')}
+                                className={`relative inline-flex items-center h-5 w-9 rounded-full transition-colors ${
+                                    product.status === 'approved' ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'
+                                }`}
+                                title={product.status === 'approved' ? 'Ocultar producto' : 'Publicar producto'}
+                            >
+                                <span className={`inline-block w-3.5 h-3.5 bg-white rounded-full transition-transform ${
+                                    product.status === 'approved' ? 'translate-x-[18px]' : 'translate-x-1'
+                                }`} />
+                            </button>
+                        ) : (
+                            <ProductStatusBadge status={product.status} />
+                        )}
+                    </div>
+
                     {/* Acciones */}
                     <div className="flex items-center gap-2 pt-1">
                         <button
@@ -232,6 +255,7 @@ interface OptimisticProductRowProps {
     onDelete:       (productId: string) => void;
     onViewInfo:     (product: Product) => void;
     onPriceUpdate:  (productId: string, newPrice: number) => void;
+    onToggleVisibility: (productId: string, visible: boolean) => void;
 }
 
 function OptimisticProductRow({
@@ -241,6 +265,7 @@ function OptimisticProductRow({
     onDelete,
     onViewInfo,
     onPriceUpdate,
+    onToggleVisibility,
 }: OptimisticProductRowProps) {
     const displayProduct = optimisticPrice !== undefined
         ? { ...product, price: optimisticPrice }
@@ -252,6 +277,7 @@ function OptimisticProductRow({
             onEdit={onEdit}
             onDelete={onDelete}
             onViewInfo={onViewInfo}
+            onToggleVisibility={onToggleVisibility}
             renderPrice={() => (
                 <PriceEditInput
                     product={product}
@@ -285,6 +311,8 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
 
     const { showToast }          = useToast();
     const { confirm, ConfirmDialog } = useConfirmDialog();
+    const { exceeds } = usePlanCapabilities();
+    const atProductLimit = exceeds('max_products', products.length);
 
     // ── Derived ──────────────────────────────────────────────────────────────
 
@@ -333,7 +361,7 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
         }
     };
 
-    const handleCreateProduct = () => { setSelectedProduct(null); setIsModalOpen(true); };
+    const handleCreateProduct = () => { if (atProductLimit) return; setSelectedProduct(null); setIsModalOpen(true); };
     const openEditModal       = (p: Product) => { setSelectedProduct(p); setIsModalOpen(true); };
     const openDetailModal     = (p: Product) => { setSelectedProduct(p); setIsDetailModalOpen(true); };
     const closeModal          = () => { setIsModalOpen(false); setSelectedProduct(null); };
@@ -436,6 +464,16 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
         }
     };
 
+    const onToggleVisibility = async (productId: string, visible: boolean) => {
+        try {
+            const updated = await productRepository.toggleProductVisibility(productId, visible);
+            setProducts((prev) => prev.map((p) => (p.id === productId ? updated : p)));
+            showToast(visible ? 'Producto publicado' : 'Producto oculto', 'success');
+        } catch (err: any) {
+            showToast(err.message || 'Error al cambiar la visibilidad', 'error');
+        }
+    };
+
     const onDelete = async (productId: string) => {
         const confirmed = await confirm('Eliminar producto', '¿Estás seguro de eliminar este ítem del catálogo activo?');
         if (!confirmed) return;
@@ -523,8 +561,9 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                                 variant="action"
                                 leftIcon="PlusCircle"
                                 size="lg"
+                                disabled={atProductLimit}
                             >
-                                Nuevo Producto
+                                {atProductLimit ? 'Límite Alcanzado' : 'Nuevo Producto'}
                             </BaseButton>
                             <button
                                 onClick={() => setShowGuide(true)}
@@ -535,6 +574,12 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                             </button>
                         </div>
                     </div>
+
+                    {atProductLimit && (
+                        <div className="mt-4">
+                            <PlanUpgradeMessage message="Has alcanzado el límite máximo de productos permitido por tu plan. Actualiza tu plan para agregar más." />
+                        </div>
+                    )}
                 </div>
 
                 {/* Tabla */}
@@ -549,16 +594,17 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                                     onEdit={openEditModal}
                                     onDelete={onDelete}
                                     onViewInfo={openDetailModal}
+                                    onToggleVisibility={onToggleVisibility}
                                 />
                             ))}
                         </div>
 
                         {/* ══ DESKTOP: tabla (hidden sm:block) ══════════════════════════ */}
-                        <div className="hidden sm:block rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-visible">
-                            <table className="w-full border-separate border-spacing-0">
+                        <div className="hidden sm:block rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-x-auto">
+                            <table className="w-full min-w-[720px] border-separate border-spacing-0">
                                 <thead>
                                     <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
-                                        {['Producto', 'Categoría', 'Precio', 'Stock', 'Acciones'].map(
+                                        {['Producto', 'Categoría', 'Precio', 'Stock', 'Estado', 'Acciones'].map(
                                             (h, i, arr) => (
                                                 <th
                                                     key={h}
@@ -583,6 +629,7 @@ export default function CatalogClient({ initialProducts }: CatalogClientProps) {
                                             onDelete={onDelete}
                                             onViewInfo={openDetailModal}
                                             onPriceUpdate={handlePriceUpdate}
+                                            onToggleVisibility={onToggleVisibility}
                                         />
                                     ))}
                                 </tbody>

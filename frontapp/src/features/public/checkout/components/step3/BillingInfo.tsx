@@ -13,11 +13,11 @@ export default function BillingInfo() {
   return (
     <div
       className="rounded-2xl border border-gray-200 dark:border-[var(--border-default)]
-      bg-white dark:bg-[var(--bg-card)] p-6 space-y-5 shadow-sm"
+      bg-white dark:bg-[var(--bg-card)] p-4 sm:p-6 space-y-4 sm:space-y-5 shadow-sm"
     >
       {/* Título */}
-      <h2 className="font-bold text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
-        <span className="w-7 h-7 rounded-full bg-[var(--brand-sky)] dark:bg-[var(--brand-green)] text-white text-xs font-black flex items-center justify-center">
+      <h2 className="font-bold text-sm sm:text-base text-gray-900 dark:text-[var(--text-primary)] flex items-center gap-2">
+        <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[var(--brand-sky)] dark:bg-[var(--brand-green)] text-white text-[10px] sm:text-xs font-black flex items-center justify-center flex-shrink-0">
           3
         </span>
         Método de pago
@@ -25,7 +25,7 @@ export default function BillingInfo() {
       </h2>
 
       {/* Izipay branding */}
-      <div className="flex items-center gap-3 p-4 bg-sky-50 dark:bg-emerald-900/20 rounded-xl border border-sky-100 dark:border-emerald-800/40">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-sky-50 dark:bg-emerald-900/20 rounded-xl border border-sky-100 dark:border-emerald-800/40">
         <div className="relative w-20 h-8 shrink-0">
           <Image
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS82g5FrC0YFl2vLYDBioVuYkTPKSMR9qyqHQ&s"

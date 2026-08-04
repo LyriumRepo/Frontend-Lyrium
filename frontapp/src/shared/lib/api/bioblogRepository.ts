@@ -108,33 +108,33 @@ export interface PaginatedResponse<T> {
 
 export const blogApi = {
     dashboard: () =>
-        request<{ success: boolean; data: BlogDashboard }>('/blog/dashboard'),
+        request<{ success: boolean; data: BlogDashboard }>('/seller/blog/dashboard'),
 
     articles: {
         list: (params?: { status?: string; search?: string; per_page?: number }) =>
-            request<PaginatedResponse<BlogArticle>>(`/blog/articles${buildQuery(params as any)}`),
-        get: (id: number) => request<{ success: boolean; data: BlogArticle }>(`/blog/articles/${id}`),
-        create: (data: Partial<BlogArticle>) => request<{ success: boolean; data: BlogArticle }>('/blog/articles', { method: 'POST', body: JSON.stringify(data) }),
-        update: (id: number, data: Partial<BlogArticle>) => request<{ success: boolean; data: BlogArticle }>(`/blog/articles/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-        delete: (id: number) => request<{ success: boolean }>(`/blog/articles/${id}`, { method: 'DELETE' }),
+            request<PaginatedResponse<BlogArticle>>(`/seller/blog/articles${buildQuery(params as any)}`),
+        get: (id: number) => request<{ success: boolean; data: BlogArticle }>(`/seller/blog/articles/${id}`),
+        create: (data: Partial<BlogArticle>) => request<{ success: boolean; data: BlogArticle }>('/seller/blog/articles', { method: 'POST', body: JSON.stringify(data) }),
+        update: (id: number, data: Partial<BlogArticle>) => request<{ success: boolean; data: BlogArticle }>(`/seller/blog/articles/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+        delete: (id: number) => request<{ success: boolean }>(`/seller/blog/articles/${id}`, { method: 'DELETE' }),
     },
 
     podcasts: {
         list: (params?: { status?: string; per_page?: number }) =>
-            request<PaginatedResponse<BlogPodcast>>(`/blog/podcasts${buildQuery(params as any)}`),
-        get: (id: number) => request<{ success: boolean; data: BlogPodcast }>(`/blog/podcasts/${id}`),
-        create: (data: Partial<BlogPodcast>) => request<{ success: boolean; data: BlogPodcast }>('/blog/podcasts', { method: 'POST', body: JSON.stringify(data) }),
-        update: (id: number, data: Partial<BlogPodcast>) => request<{ success: boolean; data: BlogPodcast }>(`/blog/podcasts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-        delete: (id: number) => request<{ success: boolean }>(`/blog/podcasts/${id}`, { method: 'DELETE' }),
+            request<PaginatedResponse<BlogPodcast>>(`/seller/blog/podcasts${buildQuery(params as any)}`),
+        get: (id: number) => request<{ success: boolean; data: BlogPodcast }>(`/seller/blog/podcasts/${id}`),
+        create: (data: Partial<BlogPodcast>) => request<{ success: boolean; data: BlogPodcast }>('/seller/blog/podcasts', { method: 'POST', body: JSON.stringify(data) }),
+        update: (id: number, data: Partial<BlogPodcast>) => request<{ success: boolean; data: BlogPodcast }>(`/seller/blog/podcasts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+        delete: (id: number) => request<{ success: boolean }>(`/seller/blog/podcasts/${id}`, { method: 'DELETE' }),
     },
 
     videos: {
         list: (params?: { status?: string; per_page?: number }) =>
-            request<PaginatedResponse<BlogVideo>>(`/blog/videos${buildQuery(params as any)}`),
-        get: (id: number) => request<{ success: boolean; data: BlogVideo }>(`/blog/videos/${id}`),
-        create: (data: Partial<BlogVideo>) => request<{ success: boolean; data: BlogVideo }>('/blog/videos', { method: 'POST', body: JSON.stringify(data) }),
-        update: (id: number, data: Partial<BlogVideo>) => request<{ success: boolean; data: BlogVideo }>(`/blog/videos/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-        delete: (id: number) => request<{ success: boolean }>(`/blog/videos/${id}`, { method: 'DELETE' }),
+            request<PaginatedResponse<BlogVideo>>(`/seller/blog/videos${buildQuery(params as any)}`),
+        get: (id: number) => request<{ success: boolean; data: BlogVideo }>(`/seller/blog/videos/${id}`),
+        create: (data: Partial<BlogVideo>) => request<{ success: boolean; data: BlogVideo }>('/seller/blog/videos', { method: 'POST', body: JSON.stringify(data) }),
+        update: (id: number, data: Partial<BlogVideo>) => request<{ success: boolean; data: BlogVideo }>(`/seller/blog/videos/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+        delete: (id: number) => request<{ success: boolean }>(`/seller/blog/videos/${id}`, { method: 'DELETE' }),
     },
 
     urlMetadata: (url: string) =>
@@ -142,11 +142,11 @@ export const blogApi = {
 
     shorts: {
         list: (params?: { status?: string; per_page?: number }) =>
-            request<PaginatedResponse<BlogShort>>(`/blog/shorts${buildQuery(params as any)}`),
-        get: (id: number) => request<{ success: boolean; data: BlogShort }>(`/blog/shorts/${id}`),
-        create: (data: Partial<BlogShort>) => request<{ success: boolean; data: BlogShort }>('/blog/shorts', { method: 'POST', body: JSON.stringify(data) }),
-        update: (id: number, data: Partial<BlogShort>) => request<{ success: boolean; data: BlogShort }>(`/blog/shorts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-        delete: (id: number) => request<{ success: boolean }>(`/blog/shorts/${id}`, { method: 'DELETE' }),
+            request<PaginatedResponse<BlogShort>>(`/seller/blog/shorts${buildQuery(params as any)}`),
+        get: (id: number) => request<{ success: boolean; data: BlogShort }>(`/seller/blog/shorts/${id}`),
+        create: (data: Partial<BlogShort>) => request<{ success: boolean; data: BlogShort }>('/seller/blog/shorts', { method: 'POST', body: JSON.stringify(data) }),
+        update: (id: number, data: Partial<BlogShort>) => request<{ success: boolean; data: BlogShort }>(`/seller/blog/shorts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+        delete: (id: number) => request<{ success: boolean }>(`/seller/blog/shorts/${id}`, { method: 'DELETE' }),
     },
 };
 
