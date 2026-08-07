@@ -15,11 +15,8 @@ const LARAVEL_API = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://127.0.0.1
 // Ruta del PDF estático de T&C (debe estar en /public/docs/)
 const TC_SELLERS_PDF = '/docs/tyc-sellers.pdf';
 
-// PDF provisional del Acuerdo Comercial / Políticas Monetarias — placeholder
-// mientras diseño entrega la versión final. Reemplazar el archivo en
-// /public/docs/politicas-monetarias.pdf cuando esté listo (no requiere
-// tocar este componente).
-const ACUERDO_PDF_PLACEHOLDER = '/docs/politicas-monetarias.pdf';
+// Ruta del PDF estático del Acuerdo Comercial / Políticas Monetarias (debe estar en /public/docs/)
+const ACUERDO_PDF = '/docs/politicas-monetarias.pdf';
 
 interface RegisterPanelProps {
     userType: UserType;
@@ -838,7 +835,7 @@ export function RegisterPanel({
                                         de Lyrium Biomarketplace
                                         <span className="text-red-500 ml-0.5">*</span>
                                         <a
-                                            href={ACUERDO_PDF_PLACEHOLDER}
+                                            href={ACUERDO_PDF}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center gap-1 ml-2 text-xs font-semibold text-sky-600 dark:text-[var(--icons-green)] hover:underline"
@@ -1012,7 +1009,7 @@ export function RegisterPanel({
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                             <a
-                                href={ACUERDO_PDF_PLACEHOLDER}
+                                href={ACUERDO_PDF}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-sky-600 dark:text-[var(--icons-green)] bg-sky-50 dark:bg-[var(--bg-primary)] hover:bg-sky-100 dark:hover:bg-[var(--bg-primary)]/80 transition-colors"

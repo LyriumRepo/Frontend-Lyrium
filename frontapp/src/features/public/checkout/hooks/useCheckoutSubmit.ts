@@ -77,6 +77,7 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
     }
 
     const hasProducts = selectedItems.some((i) => i.id > 0);
+    const isServiceOnly = !hasProducts && selectedItems.length > 0;
 
     // Solo los ítems que el cliente dejó marcados pasan a la orden — los que
     // desmarcó (p. ej. un producto, para comprar solo el servicio) se quedan
@@ -125,7 +126,21 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
 
       const isPickup = deliveryMethod === 'pickup';
 
-      const storeShipping = !isPickup
+      // Pedido solo de servicios: la modalidad (a domicilio / en tienda) ya viene
+      // definida por el vendedor del servicio. Sin productos no hay envío físico
+      // que cobrar — se evita el cargo fantasma de shipping_cost.
+      const serviceShippingType = selectedItems.some((i) => i.service_address)
+        ? 'service_home'
+        : 'service_store';
+      const shippingType = isPickup
+        ? 'pickup'
+        : isServiceOnly
+          ? (deliveryMethod === 'service_store' || deliveryMethod === 'service_home'
+              ? deliveryMethod
+              : serviceShippingType)
+          : selectedTipoEntrega;
+
+      const storeShipping = !isPickup && !isServiceOnly
         ? shippingQuotes?.tiendas
             ?.filter(t => !t.error)
             .map(t => {
@@ -142,11 +157,11 @@ export function useCheckoutSubmit(): UseCheckoutSubmitReturn {
         shipping_phone: personalData.celular,
         coupon_code:    orderData.promoCode   || undefined,
         lirios_used:    orderData.liriosUsed > 0 ? orderData.liriosUsed : undefined,
-        shipping_type:  isPickup ? 'pickup' : selectedTipoEntrega,
-        carrier:        isPickup ? undefined : selectedCourier?.toLowerCase(),
+        shipping_type:  shippingType,
+        carrier:        isPickup || isServiceOnly ? undefined : selectedCourier?.toLowerCase(),
         store_shipping: storeShipping?.length ? storeShipping : undefined,
         branch_id:      isPickup ? selectedBranchId : undefined,
-        shipping_cost:  isPickup ? 0 : orderData.deliveryCost,
+        shipping_cost:  isPickup || isServiceOnly ? 0 : orderData.deliveryCost,
         selected_product_ids:      selectedProductIds,
         selected_service_hold_ids: selectedServiceHoldIds,
       };

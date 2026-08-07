@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { ShoppingBag, Tag, ArrowRight, Loader2, Truck, Store } from 'lucide-react';
+import { ShoppingBag, Tag, ArrowRight, Loader2, Truck, Store, CalendarDays, Check } from 'lucide-react';
 import { useCheckoutStore } from '@/store/checkoutStore';
 import type { DeliveryMethod } from '@/store/checkoutStore';
 import BranchSelector from '@/features/public/checkout/components/step3/BranchSelector';
@@ -34,11 +34,24 @@ export default function CartSummary({ onContinue }: Props) {
   );
   const isMultiStoreCart = distinctStoreIds.size > 1;
 
+  // Pedido solo de servicios: la modalidad de atención ya la definió el vendedor
+  // (is_home_service) y la dirección se capturó al reservar (service_address).
+  // No hay nada que elegir: se muestra una sola opción informativa.
+  const hasPhysicalProducts = selectedItems.some((i) => i.id > 0);
+  const isServiceOnly = selectedItems.length > 0 && !hasPhysicalProducts;
+  const serviceMethod: DeliveryMethod = selectedItems.some((i) => i.service_address)
+    ? 'service_home'
+    : 'service_store';
+
   useEffect(() => {
-    if (isMultiStoreCart && deliveryMethod === 'pickup') {
-      setOrderData({ deliveryMethod: 'delivery', selectedBranchId: undefined });
+    if (isServiceOnly) {
+      setOrderData({
+        deliveryMethod: serviceMethod,
+        selectedBranchId: undefined,
+        deliveryCost: 0,
+      });
     }
-  }, [isMultiStoreCart, deliveryMethod, setOrderData]);
+  }, [isServiceOnly, serviceMethod, setOrderData]);
 
   // Cálculos del resumen
   const subtotal = selectedItems.reduce(
@@ -123,36 +136,49 @@ export default function CartSummary({ onContinue }: Props) {
             Modalidad de entrega
           </p>
           <div className="flex flex-col gap-1.5">
-            {DELIVERY_OPTIONS.map(({ key, label, sub, icon: Icon }) => {
-              const isDisabled = key === 'pickup' && isMultiStoreCart;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  disabled={isDisabled}
-                  onClick={() => setOrderData({ deliveryMethod: key, selectedBranchId: key === 'pickup' ? null : undefined })}
-                  title={isDisabled ? 'No disponible: tu pedido incluye productos de varias tiendas' : undefined}
-                  className={[
-                    'flex items-center gap-2.5 py-2 px-3 rounded-lg border transition-all duration-200 text-left',
-                    isDisabled
-                      ? 'border-gray-200 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)]/40 opacity-60 cursor-not-allowed'
-                      : deliveryMethod === key
-                        ? 'border-sky-400 dark:border-emerald-500 bg-sky-50 dark:bg-emerald-950/40 shadow-sm'
-                        : 'border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-gray-300 dark:hover:border-gray-600',
-                  ].join(' ')}
-                >
-                  <Icon className={`w-4 h-4 flex-shrink-0 ${isDisabled ? 'text-gray-300 dark:text-gray-600' : deliveryMethod === key ? 'text-sky-600 dark:text-emerald-400' : 'text-gray-400'}`} />
-                  <div className="flex-1 min-w-0">
-                    <span className={`text-xs font-bold ${isDisabled ? 'text-gray-400 dark:text-gray-500' : deliveryMethod === key ? 'text-sky-700 dark:text-emerald-300' : 'text-gray-700 dark:text-[var(--text-secondary)]'}`}>
-                      {label}
-                    </span>
-                    <span className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] ml-1.5">
-                      · {isDisabled ? 'No disponible con varias tiendas' : sub}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
+            {isServiceOnly ? (
+              <div className="flex items-center gap-2.5 py-2 px-3 rounded-lg border border-sky-400 dark:border-emerald-500 bg-sky-50 dark:bg-emerald-950/40 shadow-sm">
+                <CalendarDays className="w-4 h-4 text-sky-600 dark:text-emerald-400 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <span className="text-xs font-bold text-sky-700 dark:text-emerald-300">Servicio</span>
+                  <span className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] ml-1.5">
+                    · {serviceMethod === 'service_home' ? 'Atención a domicilio' : 'Atención en tienda'}
+                  </span>
+                </div>
+                <Check className="w-4 h-4 text-sky-600 dark:text-emerald-400 flex-shrink-0" />
+              </div>
+            ) : (
+              DELIVERY_OPTIONS.map(({ key, label, sub, icon: Icon }) => {
+                const isDisabled = key === 'pickup' && isMultiStoreCart;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    disabled={isDisabled}
+                    onClick={() => setOrderData({ deliveryMethod: key, selectedBranchId: key === 'pickup' ? null : undefined })}
+                    title={isDisabled ? 'No disponible: tu pedido incluye productos de varias tiendas' : undefined}
+                    className={[
+                      'flex items-center gap-2.5 py-2 px-3 rounded-lg border transition-all duration-200 text-left',
+                      isDisabled
+                        ? 'border-gray-200 dark:border-[var(--border-subtle)] bg-gray-50 dark:bg-[var(--bg-muted)]/40 opacity-60 cursor-not-allowed'
+                        : deliveryMethod === key
+                          ? 'border-sky-400 dark:border-emerald-500 bg-sky-50 dark:bg-emerald-950/40 shadow-sm'
+                          : 'border-gray-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-gray-300 dark:hover:border-gray-600',
+                    ].join(' ')}
+                  >
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${isDisabled ? 'text-gray-300 dark:text-gray-600' : deliveryMethod === key ? 'text-sky-600 dark:text-emerald-400' : 'text-gray-400'}`} />
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-xs font-bold ${isDisabled ? 'text-gray-400 dark:text-gray-500' : deliveryMethod === key ? 'text-sky-700 dark:text-emerald-300' : 'text-gray-700 dark:text-[var(--text-secondary)]'}`}>
+                        {label}
+                      </span>
+                      <span className="text-[10px] text-gray-400 dark:text-[var(--text-muted)] ml-1.5">
+                        · {isDisabled ? 'No disponible con varias tiendas' : sub}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
 
