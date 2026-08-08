@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import Image from 'next/image';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import Icon from '@/components/ui/Icon';
 
 /**
  * `true` mientras el viewport esté por debajo del breakpoint `md` (768px) de Tailwind —
@@ -64,20 +66,27 @@ type StageProps = {
     children: ReactNode;
 };
 
-/** Escenario donde los slides del carrusel se cruzan con fundido + desplazamiento corto. */
+/**
+ * Escenario donde los slides del carrusel se transicionan con un círculo que se
+ * cierra y luego se abre — el slide saliente se encoge hacia un punto central
+ * (clip-path circle), y el entrante se revela desde ese mismo punto hacia afuera
+ * hasta cubrir toda la tarjeta. Reemplaza al MotionPathPlugin de GSAP de la
+ * referencia por `clipPath` animado con framer-motion (ya en el proyecto), sin
+ * dependencias nuevas.
+ */
 export function CarouselStage({ activeKey, direction, className = '', children }: StageProps) {
     const reduceMotion = useReducedMotion();
-    const shift = reduceMotion ? 0 : 24 * (direction >= 0 ? 1 : -1);
+    void direction; // el círculo no necesita saber la dirección, a diferencia del deslizamiento anterior
 
     return (
-        <div className={`relative ${className}`}>
+        <div className={`relative overflow-hidden ${className}`}>
             <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                     key={activeKey}
-                    initial={{ opacity: 0, x: shift }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -shift }}
-                    transition={{ duration: reduceMotion ? 0.001 : 0.5, ease: [0.22, 1, 0.36, 1] }}
+                    initial={{ clipPath: 'circle(0% at 50% 50%)', opacity: reduceMotion ? 1 : 0.4 }}
+                    animate={{ clipPath: 'circle(75% at 50% 50%)', opacity: 1 }}
+                    exit={{ clipPath: 'circle(0% at 50% 50%)', opacity: reduceMotion ? 1 : 0.4 }}
+                    transition={{ duration: reduceMotion ? 0.001 : 0.6, ease: [0.65, 0, 0.35, 1] }}
                     className="h-full w-full"
                 >
                     {children}
@@ -111,6 +120,64 @@ export function CarouselDots({ total, activeIndex, label }: DotsProps) {
             <span className="sr-only">
                 {activeIndex + 1} de {total}
             </span>
+        </div>
+    );
+}
+
+export type CarouselTab = {
+    key: string;
+    label: string;
+    /** Ruta de imagen (relativa a /public) — para tabs con miniatura fotográfica, ej. los sellos de calidad. */
+    image?: string;
+    /** Nombre de ícono de lucide-react (ver ICON_MAP en Icon.tsx) — para tabs sin foto, ej. los valores. */
+    icon?: string;
+};
+
+type TabsProps = {
+    items: CarouselTab[];
+    activeIndex: number;
+    onSelect: (index: number) => void;
+    label: string;
+};
+
+/**
+ * Tabs circulares clicleables — cada uno con su miniatura (foto o ícono) — para saltar
+ * directo a un slide del carrusel en vez de esperar el auto-avance. Inspirado en los
+ * "tabs" de mini-círculo del componente de galería circular de 21st.dev, adaptado sin GSAP
+ * ni CDN externo: solo framer-motion (ya en el proyecto) y los tokens de color día/noche.
+ */
+export function CarouselTabs({ items, activeIndex, onSelect, label }: TabsProps) {
+    return (
+        <div role="tablist" aria-label={label} className="flex items-center justify-center gap-3">
+            {items.map((item, i) => {
+                const isActive = i === activeIndex;
+                return (
+                    <button
+                        key={item.key}
+                        type="button"
+                        role="tab"
+                        aria-selected={isActive}
+                        aria-label={item.label}
+                        onClick={() => onSelect(i)}
+                        className={`relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 transition-all duration-300 sm:h-10 sm:w-10 ${
+                            isActive
+                                ? 'scale-110 border-sky-500 shadow-md shadow-sky-500/20 dark:border-[var(--icons-green)] dark:shadow-black/30'
+                                : 'border-slate-200 opacity-60 hover:opacity-100 hover:border-sky-300 dark:border-[var(--border-subtle)] dark:hover:border-[var(--icons-green)]/60'
+                        }`}
+                    >
+                        {item.image ? (
+                            <Image src={`/${item.image}`} alt="" fill sizes="40px" className="object-contain p-1" />
+                        ) : item.icon ? (
+                            <Icon
+                                name={item.icon}
+                                className={`h-4 w-4 transition-colors duration-300 ${
+                                    isActive ? 'text-sky-600 dark:text-[var(--icons-green)]' : 'text-slate-400 dark:text-[var(--text-muted)]'
+                                }`}
+                            />
+                        ) : null}
+                    </button>
+                );
+            })}
         </div>
     );
 }

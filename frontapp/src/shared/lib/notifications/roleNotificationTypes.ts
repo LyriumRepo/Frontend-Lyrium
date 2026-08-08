@@ -116,6 +116,7 @@ export const ROLE_NOTIFICATION_TYPES: Record<string, RoleNotificationConfig> = {
             'pending_stores_overdue', 'PendingStoreOverdueNotification',
             'new_seller_registration', 'NewSellerRegistrationNotification',
             'contract_status_changed', 'ContractStatusNotification',
+            'rpa_verification_failed',
         ],
         toast: [
             'ticket_created', 'TicketCreatedNotification',
@@ -130,6 +131,7 @@ export const ROLE_NOTIFICATION_TYPES: Record<string, RoleNotificationConfig> = {
             'pending_stores_overdue', 'PendingStoreOverdueNotification',
             'new_seller_registration', 'NewSellerRegistrationNotification',
             'contract_status_changed', 'ContractStatusNotification',
+            'rpa_verification_failed',
         ],
     },
 

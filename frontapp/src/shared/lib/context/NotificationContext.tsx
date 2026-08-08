@@ -345,6 +345,12 @@ function mapApiNotificationToProactive(notification: Notification): ProactiveNot
                 action = { type: 'store', id: notification.store_id, label: 'Revisar tienda' };
             }
             break;
+        case 'rpa_verification_failed':
+            level = 'WARNING';
+            title = '⚠️ SUNAT no disponible';
+            message = notification.subject ?? `${notification.seller_name ?? 'Una solicitud'} no se pudo verificar automáticamente — requiere revisión manual`;
+            action = { type: 'seller_applications', label: 'Ver solicitudes' };
+            break;
         case 'shipment_status':
         case 'ShipmentStatusNotification':
             level = 'INFO';

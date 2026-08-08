@@ -4,10 +4,11 @@ import { useRef, useState, type PointerEvent } from 'react';
 import Image from 'next/image';
 import { motion, useReducedMotion, useMotionValue, useTransform, type Variants } from 'framer-motion';
 import Icon from '@/components/ui/Icon';
+import HowItWorks from '@/components/ui/how-it-works';
 import { aboutData } from '@/features/public/nosotros/data/aboutData';
 import { useScrollParallax, useScrollReveal } from '@/shared/hooks/useGsapScroll';
 import { fadeUp, staggerContainer, cardItem, wordUp } from '@/shared/lib/motion/variants';
-import { useAutoPingPong, useIsMobile, CarouselStage, CarouselDots } from '@/features/public/nosotros/components/AutoCarousel';
+import { useAutoPingPong, useIsMobile, CarouselStage, CarouselTabs } from '@/features/public/nosotros/components/AutoCarousel';
 
 /** Ensambla cada letra del acróstico con un salto elástico + destello final, tipo "juego" Google Labs. */
 const letterAssemble: Variants = {
@@ -31,16 +32,6 @@ const letterAssemble: Variants = {
 
 export default function AboutPage() {
     const reduceMotion = useReducedMotion();
-
-    const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
-    const toggleLetter = (letter: string) => {
-        setExpandedLetters((prev) => {
-            const next = new Set(prev);
-            if (next.has(letter)) next.delete(letter);
-            else next.add(letter);
-            return next;
-        });
-    };
 
     const [expandedBlocks, setExpandedBlocks] = useState<Set<number>>(new Set());
     const toggleBlock = (idx: number) => {
@@ -67,6 +58,19 @@ export default function AboutPage() {
     const [sealsPaused, setSealsPaused] = useState(false);
     const seals = useAutoPingPong(aboutData.premiumIcons.length, { intervalMs: 3800, paused: reduceMotion || sealsPaused || !isMobile });
     const activeSeal = aboutData.premiumIcons[seals.index];
+
+    // Saltar a un slide vía los tabs circulares — pausa el auto-avance unos segundos
+    // para que el salto manual no se sienta peleado con el "ida y vuelta" automático.
+    const selectValue = (i: number) => {
+        values.setIndex(i);
+        setValuesPaused(true);
+        window.setTimeout(() => setValuesPaused(false), 5000);
+    };
+    const selectSeal = (i: number) => {
+        seals.setIndex(i);
+        setSealsPaused(true);
+        window.setTimeout(() => setSealsPaused(false), 5000);
+    };
 
     // Scroll-linked choreography via the shared GSAP hooks (src/shared/hooks/useGsapScroll.ts):
     // hero parallax and image reveal. Each hook is self-cleaning and reduced-motion-gated —
@@ -350,7 +354,12 @@ export default function AboutPage() {
                         </CarouselStage>
 
                         <div className="mt-6">
-                            <CarouselDots total={aboutData.values.items.length} activeIndex={values.index} label="Nuestros valores" />
+                            <CarouselTabs
+                                items={aboutData.values.items.map((v) => ({ key: v.title, label: v.title, icon: v.icon }))}
+                                activeIndex={values.index}
+                                onSelect={selectValue}
+                                label="Nuestros valores"
+                            />
                         </div>
                     </motion.div>
 
@@ -483,133 +492,25 @@ export default function AboutPage() {
                                     <motion.span
                                         animate={reduceMotion ? undefined : { scale: [1, 1.06, 1] }}
                                         transition={{ duration: 3 + idx * 0.3, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.15 + 1.1 }}
-                                        className={`inline-block text-4xl md:text-5xl font-black tracking-tighter transition-colors duration-300 ${
-                                            expandedLetters.has(item.letter)
-                                                ? 'text-sky-600 dark:text-[var(--icons-green)]'
-                                                : 'text-sky-500/70 dark:text-[var(--icons-green)]/60'
-                                        }`}
+                                        className="inline-block text-4xl md:text-5xl font-black tracking-tighter text-sky-600 dark:text-[var(--icons-green)]"
                                     >
                                         {item.letter}
                                     </motion.span>
                                 </motion.span>
                             ))}
                         </div>
-
-                        {/* Pista didáctica — visible en cualquier dispositivo hasta que el usuario toque una letra */}
-                        {expandedLetters.size === 0 && (
-                            <motion.p
-                                variants={fadeUp}
-                                animate={reduceMotion ? undefined : { opacity: [0.5, 1, 0.5], y: [2, -2, 2] }}
-                                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-                                className="flex items-center justify-center gap-1.5 text-xs font-bold text-sky-500 dark:text-[var(--icons-green)] pt-1"
-                            >
-                                <Icon name="MousePointerClick" className="w-3.5 h-3.5" />
-                                Toca cualquier letra para descubrirla
-                            </motion.p>
-                        )}
                     </motion.div>
 
-                    {/* ── Lista vertical: una letra por fila ── */}
-                    <div style={{ perspective: '1000px' }}>
-                    <motion.div
-                        initial="hidden"
-                        whileInView="show"
-                        viewport={{ once: true, margin: '-60px' }}
-                        variants={staggerContainer}
-                        className="relative flex flex-col gap-4 md:gap-5"
-                        style={{ transformStyle: 'preserve-3d' }}
-                    >
-                        {/* Línea conectora — decorativa, ya no es una barra de progreso de scroll */}
-                        <motion.div
-                            initial={{ opacity: 0, scaleY: 0.6 }}
-                            whileInView={{ opacity: 1, scaleY: 1 }}
-                            viewport={{ once: true, margin: '-60px' }}
-                            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                            style={{ transformOrigin: 'top' }}
-                            className="absolute left-8 md:left-10 top-2 bottom-2 w-px bg-gradient-to-b from-sky-300 via-sky-200 to-transparent dark:from-[var(--icons-green)]/70 dark:via-[var(--border-subtle)] dark:to-transparent pointer-events-none"
-                        />
-
-                        {aboutData.acrosticSection.items.map((item, idx) => {
-                            const isOpen = expandedLetters.has(item.letter);
-                            return (
-                                <motion.div
-                                    key={item.letter}
-                                    variants={cardItem}
-                                    layout
-                                    role="button"
-                                    tabIndex={0}
-                                    aria-expanded={isOpen}
-                                    onClick={() => toggleLetter(item.letter)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            toggleLetter(item.letter);
-                                        }
-                                    }}
-                                    whileHover={{ y: -4, rotateX: 3, rotateY: -1 }}
-                                    className={`group relative flex items-center gap-4 sm:gap-5 md:gap-7 cursor-pointer select-none bg-white dark:bg-[var(--bg-secondary)] rounded-2xl border transition-all duration-500 p-5 md:p-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 dark:focus-visible:ring-[var(--icons-green)] ${
-                                        isOpen
-                                            ? 'border-sky-400 dark:border-[var(--icons-green)] shadow-xl ring-1 ring-sky-100 dark:ring-[var(--icons-green)]/30'
-                                            : 'border-slate-100 dark:border-[var(--border-subtle)] shadow-sm hover:shadow-xl dark:hover:shadow-[0_8px_40px_rgba(0,0,0,0.3)]'
-                                    }`}
-                                >
-                                    {/* ── Insignia de letra ── */}
-                                    <div
-                                        className={`relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-sky-400 via-sky-500 to-sky-600 dark:from-[var(--brand-green)] dark:via-[var(--brand-green-hover)] dark:to-[var(--icons-green)] flex items-center justify-center shadow-md transition-all duration-500 ${
-                                            isOpen ? 'scale-110 shadow-lg ring-4 ring-sky-200/60 dark:ring-[var(--icons-green)]/25' : 'group-hover:scale-105 group-hover:shadow-lg'
-                                        }`}
-                                    >
-                                        {/* Pulso continuo — invita a tocar en cualquier dispositivo, no solo hover */}
-                                        {!isOpen && !reduceMotion && (
-                                            <motion.span
-                                                aria-hidden
-                                                className="absolute inset-0 rounded-2xl ring-2 ring-sky-300 dark:ring-[var(--icons-green)]/70 pointer-events-none"
-                                                animate={{ opacity: [0.7, 0, 0.7], scale: [1, 1.22, 1] }}
-                                                transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut', delay: idx * 0.15 }}
-                                            />
-                                        )}
-                                        <span className="text-2xl sm:text-3xl md:text-4xl font-black text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)] select-none">
-                                            {item.letter}
-                                        </span>
-                                        <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white dark:bg-[var(--bg-primary)] border border-slate-100 dark:border-[var(--border-subtle)] flex items-center justify-center text-[10px] font-bold text-sky-600 dark:text-[#6BAF7B] shadow-sm">
-                                            {idx + 1}
-                                        </span>
-                                    </div>
-
-                                    {/* ── Contenido ── */}
-                                    <div className="min-w-0 flex-1">
-                                        <h3 className="flex items-center gap-2 text-base md:text-lg font-bold text-slate-800 dark:text-[var(--text-primary)] mb-1 tracking-tight leading-snug transition-colors duration-300">
-                                            <Icon name={item.icon} className="w-4 h-4 md:w-5 md:h-5 shrink-0 text-sky-500 dark:text-[#6BAF7B]" />
-                                            {item.title}
-                                        </h3>
-                                        <p
-                                            className={`text-sm md:text-[15px] font-medium leading-relaxed transition-colors duration-300 ${
-                                                isOpen ? 'text-slate-700 dark:text-[var(--text-primary)]' : 'text-slate-500 dark:text-[var(--text-muted)]'
-                                            }`}
-                                        >
-                                            {item.description}
-                                        </p>
-                                    </div>
-
-                                    {/* ── Indicador de expansión ── */}
-                                    <Icon
-                                        name="ChevronDown"
-                                        className={`shrink-0 w-5 h-5 text-slate-300 dark:text-[var(--text-muted)] transition-transform duration-500 ${
-                                            isOpen ? 'rotate-180 text-sky-500 dark:text-[var(--icons-green)]' : 'group-hover:translate-y-0.5'
-                                        }`}
-                                    />
-
-                                    {/* Barra lateral */}
-                                    <div
-                                        className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-gradient-to-b from-sky-400 to-sky-600 dark:from-[var(--icons-green)] dark:to-[var(--brand-green)] rounded-r-full transition-all duration-500 ${
-                                            isOpen ? 'h-2/3' : 'h-0 group-hover:h-2/3'
-                                        }`}
-                                    />
-                                </motion.div>
-                            );
-                        })}
-                    </motion.div>
-                    </div>
+                    {/* ── Tarjetas dispersas conectadas por línea punteada ── */}
+                    <HowItWorks
+                        className="mt-8 md:mt-6"
+                        steps={aboutData.acrosticSection.items.map((item) => ({
+                            marker: item.letter,
+                            title: item.title,
+                            description: item.description,
+                            icon: item.icon,
+                        }))}
+                    />
                 </div>
             </section>
 
@@ -648,7 +549,12 @@ export default function AboutPage() {
                         </CarouselStage>
 
                         <div className="mt-8">
-                            <CarouselDots total={aboutData.premiumIcons.length} activeIndex={seals.index} label="Sellos de calidad" />
+                            <CarouselTabs
+                                items={aboutData.premiumIcons.map((icon) => ({ key: icon.title, label: icon.title, image: icon.image }))}
+                                activeIndex={seals.index}
+                                onSelect={selectSeal}
+                                label="Sellos de calidad"
+                            />
                         </div>
                     </motion.div>
 

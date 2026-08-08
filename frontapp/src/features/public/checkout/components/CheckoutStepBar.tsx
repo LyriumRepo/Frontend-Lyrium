@@ -43,7 +43,8 @@ export default function CheckoutStepBar() {
   const connectorGradient = isDark ? CONNECTOR_GRADIENT_DARK : CONNECTOR_GRADIENT_LIGHT;
 
   const isPickup = deliveryMethod === 'pickup';
-  const visibleSteps = isPickup ? STEPS.filter((s) => s.id !== 2) : STEPS;
+  const isServiceOrder = deliveryMethod === 'service_store' || deliveryMethod === 'service_home';
+  const visibleSteps = isPickup || isServiceOrder ? STEPS.filter((s) => s.id !== 2) : STEPS;
 
   const getCircleClass = (stepId: number) => {
     if (stepId < currentStep) return 'step-circle--completed';

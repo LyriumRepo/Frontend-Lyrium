@@ -35,8 +35,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Bienvenido al Lyrium Marketplace',
-  description: 'Tu marketplace de confianza',
+  title: 'Lyrium BioMarketplace — Productos y servicios bio en Perú',
+  description:
+    'Lyrium BioMarketplace es el marketplace peruano de productos y servicios biológicos y orgánicos: compra productos naturales, agenda servicios de bienestar y compara tiendas verificadas, todo en un solo lugar.',
 };
 
 const IZIPAY_PUBLIC_KEY = process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY ?? '';

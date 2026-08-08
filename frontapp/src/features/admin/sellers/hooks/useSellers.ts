@@ -143,6 +143,14 @@ export function useSellers() {
     rechazados: data.filter((s) => s.estado === "RECHAZADO").length,
   }), [data]);
 
+  // Solicitudes cuya verificación automática con SUNAT falló por un motivo
+  // externo (RPA bloqueado/caído) en vez de un rechazo real — se marcan en
+  // el diagnóstico con este texto (ver ruc-checker/server.js).
+  const fallosRpa = useMemo(
+    () => data.filter((s) => s.diagnostico.some((d) => d.includes("No se pudo verificar automáticamente el RUC con SUNAT"))),
+    [data],
+  );
+
   const toggleExpandido = (id: number) =>
     setExpandido((prev) => (prev === id ? null : id));
 
@@ -157,6 +165,7 @@ export function useSellers() {
     expandido, toggleExpandido,
     pagina, totalPaginas, cambiarPagina,
     resumen,
+    fallosRpa,
     totalFiltrado: datosFiltrados.length,
     loading,
   };

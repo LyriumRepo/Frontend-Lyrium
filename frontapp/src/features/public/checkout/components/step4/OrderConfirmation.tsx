@@ -42,8 +42,21 @@ export default function OrderConfirmation() {
 
   const subtotalProductos = result.backendSubtotal ?? items.reduce((a, i) => a + i.price * i.quantity, 0);
 
-  const addressLines =
-    orderData.deliveryMethod !== 'pickup'
+  const isServiceOrder =
+    orderData.deliveryMethod === 'service_store' ||
+    orderData.deliveryMethod === 'service_home';
+
+  // Pedido de servicio: la dirección de atención ya vino en cada reserva
+  // (service_address). Solo-servicio a domicilio muestra la dirección capturada.
+  const serviceAddresses = items
+    .filter((i) => i.service_address)
+    .map((i) => i.service_address as string);
+
+  const addressLines = isServiceOrder
+    ? serviceAddresses.length > 0
+      ? serviceAddresses.join(', ')
+      : 'Atención en tienda'
+    : orderData.deliveryMethod !== 'pickup'
       ? [
           shippingData.avenida,
           shippingData.numero,

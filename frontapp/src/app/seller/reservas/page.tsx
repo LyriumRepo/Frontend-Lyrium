@@ -21,6 +21,20 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   no_show: { label: 'No asistió', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400' },
 };
 
+// Una reserva 'completed' todavía no está cerrada del todo: el cliente debe
+// validar la finalización (customer_validated_at) para ganar su Lirios. Hasta
+// entonces el vendedor debe ver que sigue esperando esa confirmación.
+const DISPLAY_STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  ...STATUS_LABELS,
+  awaiting_confirmation: {
+    label: 'Esperando confirmación',
+    color: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
+  },
+};
+
+const displayStatus = (b: BookingResponse): string =>
+  b.status === 'completed' && !b.customer_validated_at ? 'awaiting_confirmation' : b.status;
+
 const PAYMENT_LABELS: Record<string, string> = {
   card: 'Tarjeta', yape: 'Yape', plin: 'Plin', cash: 'Efectivo',
   transfer: 'Transferencia', izipay: 'Izipay',
@@ -395,8 +409,11 @@ export default function SellerReservasPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${STATUS_LABELS[booking.status]?.color ?? ''}`}>
-                        {STATUS_LABELS[booking.status]?.label ?? booking.status}
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${DISPLAY_STATUS_LABELS[displayStatus(booking)]?.color ?? ''}`}
+                        title={displayStatus(booking) === 'awaiting_confirmation' ? 'El cliente debe validar la finalización del servicio para cerrar la reserva' : undefined}
+                      >
+                        {DISPLAY_STATUS_LABELS[displayStatus(booking)]?.label ?? booking.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -467,8 +484,11 @@ export default function SellerReservasPage() {
                       <User className="w-3 h-3" /> {booking.customer_name}
                     </p>
                   </div>
-                  <span className={`shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full ${STATUS_LABELS[booking.status]?.color ?? ''}`}>
-                    {STATUS_LABELS[booking.status]?.label ?? booking.status}
+                  <span
+                    className={`shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full ${DISPLAY_STATUS_LABELS[displayStatus(booking)]?.color ?? ''}`}
+                    title={displayStatus(booking) === 'awaiting_confirmation' ? 'El cliente debe validar la finalización del servicio para cerrar la reserva' : undefined}
+                  >
+                    {DISPLAY_STATUS_LABELS[displayStatus(booking)]?.label ?? booking.status}
                   </span>
                 </div>
 
@@ -600,8 +620,8 @@ export default function SellerReservasPage() {
                   <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">Detalle de reserva</p>
                   <h2 className="text-lg font-black mt-1 leading-tight">{detailTarget.service_name}</h2>
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm">
-                      {STATUS_LABELS[detailTarget.status]?.label ?? detailTarget.status}
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm" title={displayStatus(detailTarget) === 'awaiting_confirmation' ? 'El cliente debe validar la finalización del servicio para cerrar la reserva' : undefined}>
+                      {DISPLAY_STATUS_LABELS[displayStatus(detailTarget)]?.label ?? detailTarget.status}
                     </span>
                     <span className="text-[11px] font-semibold text-white/90 flex items-center gap-1">
                       <User className="w-3 h-3" /> {detailTarget.customer_name}
@@ -621,7 +641,16 @@ export default function SellerReservasPage() {
                 <p className="text-[10px] font-black text-gray-400 dark:text-[var(--text-muted)] uppercase tracking-widest mb-3">
                   Seguimiento
                 </p>
-                <BookingTimeline status={detailTarget.status} isHome={!!detailTarget.is_home_service} />
+                <BookingTimeline
+                  status={detailTarget.status}
+                  isHome={!!detailTarget.is_home_service}
+                  validated={!!detailTarget.customer_validated_at}
+                />
+                {displayStatus(detailTarget) === 'awaiting_confirmation' && (
+                  <p className="text-[10px] font-semibold text-violet-600 dark:text-violet-300 flex items-center gap-1 mt-2">
+                    <Clock className="w-3 h-3 shrink-0" /> El cliente debe validar la finalización para cerrar la reserva.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

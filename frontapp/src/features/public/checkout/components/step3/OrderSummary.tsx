@@ -394,7 +394,7 @@ export default function OrderSummary() {
 
         <button
           type="button"
-          onClick={() => setStep(orderData.deliveryMethod === 'pickup' ? 1 : 2)}
+          onClick={() => setStep(orderData.deliveryMethod === 'pickup' || !hasProducts ? 1 : 2)}
           disabled={isBusy}
           className="w-full mt-2.5 py-3 rounded-2xl bg-gray-100 dark:bg-[var(--bg-muted)] hover:bg-gray-200 dark:hover:bg-[var(--bg-secondary)] text-gray-700 dark:text-[var(--text-secondary)] font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >

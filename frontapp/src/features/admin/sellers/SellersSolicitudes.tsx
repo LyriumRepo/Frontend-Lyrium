@@ -141,7 +141,7 @@ export default function SellersSolicitudes() {
     filtroEstado, setFiltroEstado,
     expandido, toggleExpandido,
     pagina, totalPaginas, cambiarPagina,
-    resumen, totalFiltrado, loading,
+    resumen, fallosRpa, totalFiltrado, loading,
   } = useSellers();
 
   return (
@@ -151,6 +151,18 @@ export default function SellersSolicitudes() {
         subtitle="Evaluación automática por RPA · Marketplace Bienestar & Salud"
         icon="Users"
       />
+
+      {!loading && fallosRpa.length > 0 && (
+        <div className="flex items-start gap-3 px-4 py-3 rounded-2xl bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/20 text-[var(--color-warning)]">
+          <Icon name="AlertTriangle" className="w-4 h-4 mt-0.5 shrink-0" />
+          <p className="text-xs font-semibold leading-relaxed">
+            {fallosRpa.length === 1
+              ? "1 solicitud no se pudo verificar automáticamente con SUNAT (servicio externo no disponible en ese momento) y quedó en Revisión."
+              : `${fallosRpa.length} solicitudes no se pudieron verificar automáticamente con SUNAT (servicio externo no disponible en ese momento) y quedaron en Revisión.`}
+            {" "}Verifica el RUC manualmente antes de decidir.
+          </p>
+        </div>
+      )}
 
       <AdminIndicatorGrid indicators={[
           { label: 'Total', value: resumen.total, icon: 'Users', color: 'lima' },
