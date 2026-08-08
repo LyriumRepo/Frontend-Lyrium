@@ -16,7 +16,7 @@ import { LaravelHomeRepository } from '@/shared/lib/api/laravel';
 import type { HomeSection } from '@/shared/lib/api/laravel/LaravelHomeRepository';
 import type { Banner, Categoria, Producto, Marca, Beneficio, BannersPub } from '@/types/public';
 
-const LARAVEL_BASE_URL = (process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api').replace('/api', '');
+const LARAVEL_BASE_URL = (process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api').replace(/\/api\/?$/, '');
 
 const HOME_SECTIONS: { slug: string; titulo: string }[] = [];
 

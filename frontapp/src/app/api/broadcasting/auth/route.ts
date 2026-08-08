@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const baseUrl = process.env.NEXT_PUBLIC_LARAVEL_API_URL?.replace('/api', '') ?? 'http://127.0.0.1:8000';
+    const baseUrl = process.env.NEXT_PUBLIC_LARAVEL_API_URL?.replace(/\/api\/?$/, '') ?? 'http://127.0.0.1:8000';
 
     const res = await fetch(`${baseUrl}/broadcasting/auth`, {
         method: 'POST',
