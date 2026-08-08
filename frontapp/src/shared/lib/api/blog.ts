@@ -36,13 +36,13 @@ export interface CommentApi {
 function cleanUrl(url: string | null): string | null {
     if (!url) return null;
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    if (url.startsWith('/storage/')) return `${LARAVEL_API_URL.replace('/api', '')}${url}`;
-    if (url.startsWith('storage/')) return `${LARAVEL_API_URL.replace('/api', '')}/${url}`;
+    if (url.startsWith('/storage/')) return `${LARAVEL_API_URL.replace(/\/api\/?$/, '')}${url}`;
+    if (url.startsWith('storage/')) return `${LARAVEL_API_URL.replace(/\/api\/?$/, '')}/${url}`;
     return url;
 }
 
 function fixContentImageUrls(html: string): string {
-    const baseUrl = LARAVEL_API_URL.replace('/api', '');
+    const baseUrl = LARAVEL_API_URL.replace(/\/api\/?$/, '');
     return html.replace(/(<img[^>]+src\s*=\s*["'])\/(?!\/)/gi, `$1${baseUrl}/`);
 }
 

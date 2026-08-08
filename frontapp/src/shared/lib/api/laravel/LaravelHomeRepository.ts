@@ -22,7 +22,7 @@ export class LaravelHomeRepository implements IHomeRepository {
     private transformUrl(url: string | undefined | null): string {
         if (!url) return '';
         if (url.startsWith('http')) return url;
-        const baseUrl = this.getBaseUrl().replace('/api', '');
+        const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
         return `${baseUrl}${url}`;
     }
 
@@ -50,7 +50,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             const json = await response.json();
             
             const data = json.success !== undefined && json.data !== undefined ? json.data : json;
-            const baseUrl = this.getBaseUrl().replace('/api', '');
+            const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
             
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '';
@@ -96,7 +96,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             const response = await this.request<any>('/categories?type=product&children_only=true&per_page=100');
             const categories = response.data || response;
             
-            const baseUrl = this.getBaseUrl().replace('/api', '');
+            const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '/img/no-image.png';
                 if (url.startsWith('http')) return url;
@@ -209,7 +209,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             }
 
             const data = json.data;
-            const baseUrl = this.getBaseUrl().replace('/api', '');
+            const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
 
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '';
@@ -249,7 +249,7 @@ export class LaravelHomeRepository implements IHomeRepository {
     async getHeroes(): Promise<Banner[]> {
         try {
             const response = await this.request<any>('/home/heroes');
-            const baseUrl = this.getBaseUrl().replace('/api', '');
+            const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
             
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '';
@@ -276,7 +276,7 @@ export class LaravelHomeRepository implements IHomeRepository {
     async getServiceCategories(): Promise<Categoria[]> {
         try {
             const response = await this.request<any>('/categories?type=service&children_only=true&per_page=100');
-            const baseUrl = this.getBaseUrl().replace('/api', '');
+            const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '/img/no-image.png';
                 if (url.startsWith('http')) return url;
@@ -306,7 +306,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             const data = response.data || response;
             const brands = Array.isArray(data) ? data : [];
             
-            const baseUrl = this.getBaseUrl().replace('/api', '');
+            const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
             
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '';
@@ -331,7 +331,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             const response = await this.request<any>(`/products?on_sale=true&per_page=${perPage}${typeParam}`);
             const products = response.data || response;
             
-            const baseUrl = this.getBaseUrl().replace('/api', '');
+            const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '';
                 if (url.startsWith('http')) return url;
@@ -362,7 +362,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             const response = await this.request<any>(`/products?sticker=nuevo&per_page=${perPage}`);
             const products = response.data || response;
             
-            const baseUrl = this.getBaseUrl().replace('/api', '');
+            const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '';
                 if (url.startsWith('http')) return url;
@@ -407,7 +407,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             const response = await this.request<any>(`/products?search=${encodeURIComponent(query)}&per_page=${limit}`);
             const products = response.data || response;
             
-            const baseUrl = this.getBaseUrl().replace('/api', '');
+            const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '';
                 if (url.startsWith('http')) return url;
@@ -433,7 +433,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             const response = await this.request<any>(`/categories?search=${encodeURIComponent(query)}&per_page=${limit}`);
             const categories = response.data || response;
             
-            const baseUrl = this.getBaseUrl().replace('/api', '');
+            const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '';
                 if (url.startsWith('http')) return url;
@@ -457,7 +457,7 @@ export class LaravelHomeRepository implements IHomeRepository {
             const response = await this.request<any>(`/products?category=${encodeURIComponent(slug)}&per_page=${limit}`);
             const products = response.data || response;
             
-            const baseUrl = this.getBaseUrl().replace('/api', '');
+            const baseUrl = this.getBaseUrl().replace(/\/api\/?$/, '');
             const transformUrl = (url: string | undefined): string => {
                 if (!url) return '';
                 if (url.startsWith('http')) return url;

@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { SearchResult, SearchFilters } from '@/types/public';
 import { home } from '@/shared/lib/api';
 
-const LARAVEL_BASE_URL = (process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api').replace('/api', '');
+const LARAVEL_BASE_URL = (process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api').replace(/\/api\/?$/, '');
 
 const transformUrl = (url: string | undefined | null): string => {
   if (!url) return '/img/no-image.png';
