@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Star, ShieldCheck, Leaf, Barcode, FolderOpen, Package, ExternalLink } from 'lucide-react';
+import { Star, ShieldCheck, Leaf, FolderOpen, Package, ExternalLink } from 'lucide-react';
 import { money, resolveImg, NO_IMAGE, ApiProduct } from '@/modules/cart/utils';
 import TopMedalBadge from '@/components/ui/TopMedalBadge';
 
@@ -118,11 +118,6 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                     <button onClick={() => onView(p.id)} className="text-left flex-1">
                         <p className="text-slate-800 dark:text-[var(--text-primary)] leading-snug line-clamp-2 min-h-[42px] text-sm font-medium">{p.nombre}</p>
                     </button>
-                    {p.sku && (
-                        <span className="shrink-0 text-[10px] px-2 py-1 rounded-full bg-gray-100 dark:bg-[var(--bg-muted)] text-slate-600 dark:text-[var(--text-secondary)] inline-flex items-center gap-1">
-                            <Barcode className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" /> {p.sku}
-                        </span>
-                    )}
                 </div>
 
                 {p.descripcion_corta && (
@@ -142,15 +137,15 @@ export default function ProductCard({ product: p, onAdd, onView }: Props) {
                         )}
                 </div>
 
-                <div className="flex items-end justify-between mt-1">
+                <div className="flex items-start justify-between mt-1">
                     <div>
-                        <p className="text-emerald-700 dark:text-emerald-400 text-xl font-bold">{money(finalPrice)}</p>
+                        <p className="text-emerald-700 dark:text-emerald-400 text-xl font-bold leading-none">{money(finalPrice)}</p>
                         {hasOffer
-                            ? <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] line-through">{money(basePrice)}</p>
-                            : <p className="text-xs text-transparent">-</p>
+                            ? <p className="text-xs text-gray-400 dark:text-[var(--text-muted)] line-through mt-1">{money(basePrice)}</p>
+                            : <p className="text-xs text-transparent mt-1">-</p>
                         }
                     </div>
-                    <span className={`text-sm inline-flex items-center gap-1 ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
+                    <span className={`text-sm inline-flex items-center gap-1 leading-none ${outOfStock ? 'text-rose-500' : 'text-slate-400 dark:text-[var(--text-muted)]'}`}>
                         <Package className="w-3 h-3 text-sky-500 dark:text-[var(--brand-sky)]" />
                         {outOfStock ? 'Agotado' : stock ? `Stock: ${stock}` : 'Disponible'}
                     </span>

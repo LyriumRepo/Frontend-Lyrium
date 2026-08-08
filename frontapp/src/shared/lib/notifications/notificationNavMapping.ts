@@ -92,6 +92,7 @@ export const ROLE_NAV_NOTIFICATION_MAP: Record<string, Record<string, string[]>>
         solicitudes: [
             'new_seller_registration', 'NewSellerRegistrationNotification',
             'pending_stores_overdue', 'PendingStoreOverdueNotification',
+            'rpa_verification_failed',
         ],
         helpdesk: [
             'ticket_created', 'TicketCreatedNotification',
