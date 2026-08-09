@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
-import { FileText, Plus, Search, Eye, Save, Folder, Info, AlertCircle, BookOpen, Headphones, Video, Clapperboard, X, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { FileText, Plus, Search, Eye, Save, Folder, Info, AlertCircle, BookOpen, Headphones, Video, Clapperboard, ArrowRight } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
+import BaseModal from '@/components/ui/BaseModal';
 import Pagination from '@/components/ui/Pagination';
 import dynamic from 'next/dynamic';
 const BlogEditor = dynamic(() => import('@/components/ui/BlogEditor').then(m => ({ default: m.BlogEditor })), { ssr: false, loading: () => <div className="h-[300px] bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" /> });
@@ -32,7 +33,6 @@ export function BlogArticlesClient() {
     const [error, setError] = useState<string | null>(null);
     const [previewHtml, setPreviewHtml] = useState<string | null>(null);
     const [page, setPage] = useState(1);
-    const editorRef = useRef<HTMLDivElement>(null);
 
     const PAGE_SIZE = 10;
     const totalPages = Math.ceil(articles.length / PAGE_SIZE);
@@ -290,16 +290,25 @@ export function BlogArticlesClient() {
                 <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={articles.length} itemLabel="artículos" />
             </div>
 
-            {showEditor && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setShowEditor(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-4xl max-h-[90vh] overflow-y-auto green-scrollbar" onClick={e => e.stopPropagation()} ref={editorRef}>
-                        <div className="relative px-6 py-5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] rounded-t-3xl">
-                            <button onClick={() => setShowEditor(false)} className="absolute top-5 right-5 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90">
-                                <X className="w-5 h-5" />
-                            </button>
-                            <h3 className="text-lg font-bold text-white pr-12">{editingId ? 'Editar Artículo' : 'Nuevo Artículo'}</h3>
-                        </div>
-                        <div className="p-6 space-y-5">
+            <BaseModal
+                isOpen={showEditor}
+                onClose={() => setShowEditor(false)}
+                title={editingId ? 'Editar Artículo' : 'Nuevo Artículo'}
+                size="4xl"
+                footer={
+                    <div className="flex flex-wrap justify-end gap-3 w-full">
+                        <button onClick={() => setShowEditor(false)} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
+                        <button onClick={() => { setPreviewHtml(form.content); window.open('', 'preview')?.document.write(form.content); }} className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 transition">
+                            <Eye className="w-4 h-4" /> Vista Previa
+                        </button>
+                        <button onClick={() => saveWithStatus(form.status)} disabled={saving || !form.title.trim()}
+                            className="flex items-center gap-1.5 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] hover:from-emerald-500 hover:to-sky-500 dark:hover:from-[var(--brand-green)] dark:hover:to-[var(--icons-green)] rounded-xl transition disabled:opacity-50 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70">
+                            <Save className="w-4 h-4" /> {saving ? 'Guardando...' : (editingId ? 'Guardar Cambios' : 'Crear Borrador')}
+                        </button>
+                    </div>
+                }
+            >
+                        <div className="space-y-5">
 
                         {/* Encabezado */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -440,22 +449,8 @@ export function BlogArticlesClient() {
                         </div>
 
                         {error && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">{error}</div>}
-
-                        {/* Action buttons */}
-                        <div className="flex flex-wrap justify-end gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
-                            <button onClick={() => setShowEditor(false)} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
-                            <button onClick={() => { setPreviewHtml(form.content); window.open('', 'preview')?.document.write(form.content); }} className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 transition">
-                                <Eye className="w-4 h-4" /> Vista Previa
-                            </button>
-                            <button onClick={() => saveWithStatus(form.status)} disabled={saving || !form.title.trim()}
-                                className="flex items-center gap-1.5 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] hover:from-emerald-500 hover:to-sky-500 dark:hover:from-[var(--brand-green)] dark:hover:to-[var(--icons-green)] rounded-xl transition disabled:opacity-50 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70">
-                                <Save className="w-4 h-4" /> {saving ? 'Guardando...' : (editingId ? 'Guardar Cambios' : 'Crear Borrador')}
-                            </button>
                         </div>
-                    </div>
-                </div>
-                </div>
-            )}
+            </BaseModal>
         </div>
     );
 }

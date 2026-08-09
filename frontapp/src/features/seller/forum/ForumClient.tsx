@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { MessagesSquare, Plus, Eye, MessageCircle, ThumbsUp, Pencil, Image as ImageIcon, X, Calendar, User, Hash, ChevronLeft, Heart, Send, CheckCircle, ArrowRight } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
+import BaseModal from '@/components/ui/BaseModal';
 import { forumApi, ForumTopic } from '@/shared/lib/api/bioblogRepository';
 import { LyriumSelect } from '@/components/ui';
 import { usePlanCapabilities } from '@/shared/lib/hooks/usePlanCapabilities';
@@ -345,130 +346,118 @@ export function ForumClient() {
         </div>
       )}
 
-      {showCreator && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setShowCreator(false)}>
-          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
-            <div className="relative px-6 py-5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] rounded-t-3xl flex-shrink-0">
-              <button onClick={() => { setShowCreator(false); setErrorMsg(''); }} className="absolute top-5 right-5 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90">
-                <X className="w-5 h-5" />
-              </button>
-              <h3 className="text-lg font-bold text-white pr-12">Crear Tema</h3>
+      <BaseModal
+        isOpen={showCreator}
+        onClose={() => { setShowCreator(false); setErrorMsg(''); }}
+        title="Crear Tema"
+        footer={
+          <div className="flex justify-end gap-3 w-full">
+            <button type="button" onClick={() => { setShowCreator(false); setErrorMsg(''); }} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
+            <button type="button" onClick={handleCreate} disabled={saving || !form.title.trim() || !form.content.trim()} className="px-6 py-2.5 bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] hover:from-emerald-500 hover:to-sky-500 dark:hover:from-[var(--brand-green)] dark:hover:to-[var(--icons-green)] text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70">{saving ? 'Creando...' : 'Guardar Borrador'}</button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-xs space-y-1">
+            <p className="font-semibold">Flujo de aprobación:</p>
+            <p>1. Crea el tema como borrador → 2. Envíalo a revisión → 3. Un administrador lo aprueba → 4. Publícalo</p>
+          </div>
+
+          {errorMsg && (
+            <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
+              {errorMsg}
             </div>
-            <div className="p-6 space-y-4 overflow-y-auto green-scrollbar">
+          )}
 
-              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-xs space-y-1">
-                <p className="font-semibold">Flujo de aprobación:</p>
-                <p>1. Crea el tema como borrador → 2. Envíalo a revisión → 3. Un administrador lo aprueba → 4. Publícalo</p>
-              </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Título</label>
+            <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="Ej: Beneficios de la alimentación consciente" />
+          </div>
 
-              {errorMsg && (
-                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
-                  {errorMsg}
-                </div>
-              )}
+          <div>
+            <LyriumSelect
+              label="Categoría"
+              value={form.forum_category_id}
+              onChange={(v) => setForm(f => ({ ...f, forum_category_id: v }))}
+              options={[
+                { value: '1', label: 'General' },
+                { value: '2', label: 'Nutricion' },
+                { value: '3', label: 'Microbiota' },
+                { value: '4', label: 'Fitness' },
+                { value: '5', label: 'Salud Mental' }
+              ]}
+            />
+          </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Título</label>
-                <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="Ej: Beneficios de la alimentación consciente" />
-              </div>
+          <ImageInput value={form.image} onChange={v => setForm(f => ({ ...f, image: v }))} label="Imagen (URL)" />
 
-              <div>
-                <LyriumSelect
-                  label="Categoría"
-                  value={form.forum_category_id}
-                  onChange={(v) => setForm(f => ({ ...f, forum_category_id: v }))}
-                  options={[
-                    { value: '1', label: 'General' },
-                    { value: '2', label: 'Nutricion' },
-                    { value: '3', label: 'Microbiota' },
-                    { value: '4', label: 'Fitness' },
-                    { value: '5', label: 'Salud Mental' }
-                  ]}
-                />
-              </div>
-
-              <ImageInput value={form.image} onChange={v => setForm(f => ({ ...f, image: v }))} label="Imagen (URL)" />
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Contenido</label>
-                <textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} rows={6} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="Escribe el contenido del tema aquí..." />
-              </div>
-            </div>
-
-            <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[var(--bg-secondary)] rounded-b-3xl">
-              <button type="button" onClick={() => { setShowCreator(false); setErrorMsg(''); }} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
-              <button type="button" onClick={handleCreate} disabled={saving || !form.title.trim() || !form.content.trim()} className="px-6 py-2.5 bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] hover:from-emerald-500 hover:to-sky-500 dark:hover:from-[var(--brand-green)] dark:hover:to-[var(--icons-green)] text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70">{saving ? 'Creando...' : 'Guardar Borrador'}</button>
-            </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Contenido</label>
+            <textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} rows={6} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="Escribe el contenido del tema aquí..." />
           </div>
         </div>
-      )}
+      </BaseModal>
 
-      {editingTopic && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setEditingTopic(null)}>
-          <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
-            <div className="relative px-6 py-5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] rounded-t-3xl flex-shrink-0">
-              <button onClick={() => { setEditingTopic(null); setErrorMsg(''); }} className="absolute top-5 right-5 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90">
-                <X className="w-5 h-5" />
-              </button>
-              <h3 className="text-lg font-bold text-white pr-12">Editar Tema</h3>
+      <BaseModal
+        isOpen={!!editingTopic}
+        onClose={() => { setEditingTopic(null); setErrorMsg(''); }}
+        title="Editar Tema"
+        footer={
+          <div className="flex justify-end gap-3 w-full">
+            <button type="button" onClick={() => { setEditingTopic(null); setErrorMsg(''); }} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
+            <button type="button" onClick={handleEdit} disabled={saving || !editForm.title.trim() || !editForm.content.trim()} className="px-6 py-2.5 bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] hover:from-emerald-500 hover:to-sky-500 dark:hover:from-[var(--brand-green)] dark:hover:to-[var(--icons-green)] text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70">{saving ? 'Guardando...' : 'Guardar Cambios'}</button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {errorMsg && (
+            <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
+              {errorMsg}
             </div>
-            <div className="p-6 space-y-4 overflow-y-auto green-scrollbar">
+          )}
 
-              {errorMsg && (
-                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
-                  {errorMsg}
-                </div>
-              )}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Título</label>
+            <input type="text" value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="Ej: Beneficios de la alimentación consciente" />
+          </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Título</label>
-                <input type="text" value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="Ej: Beneficios de la alimentación consciente" />
-              </div>
+          <div>
+            <LyriumSelect
+              label="Categoría"
+              value={editForm.forum_category_id}
+              onChange={(v) => setEditForm(f => ({ ...f, forum_category_id: v }))}
+              options={[
+                { value: '1', label: 'General' },
+                { value: '2', label: 'Nutricion' },
+                { value: '3', label: 'Microbiota' },
+                { value: '4', label: 'Fitness' },
+                { value: '5', label: 'Salud Mental' }
+              ]}
+            />
+          </div>
 
-              <div>
-                <LyriumSelect
-                  label="Categoría"
-                  value={editForm.forum_category_id}
-                  onChange={(v) => setEditForm(f => ({ ...f, forum_category_id: v }))}
-                  options={[
-                    { value: '1', label: 'General' },
-                    { value: '2', label: 'Nutricion' },
-                    { value: '3', label: 'Microbiota' },
-                    { value: '4', label: 'Fitness' },
-                    { value: '5', label: 'Salud Mental' }
-                  ]}
-                />
-              </div>
+          <ImageInput value={editForm.image} onChange={v => setEditForm(f => ({ ...f, image: v }))} label="Imagen (URL)" />
 
-              <ImageInput value={editForm.image} onChange={v => setEditForm(f => ({ ...f, image: v }))} label="Imagen (URL)" />
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Contenido</label>
+            <textarea value={editForm.content} onChange={e => setEditForm(f => ({ ...f, content: e.target.value }))} rows={6} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="Escribe el contenido del tema aquí..." />
+          </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Contenido</label>
-                <textarea value={editForm.content} onChange={e => setEditForm(f => ({ ...f, content: e.target.value }))} rows={6} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" placeholder="Escribe el contenido del tema aquí..." />
-              </div>
-
-              <div>
-                <LyriumSelect
-                  label="Estado"
-                  value={editForm.status}
-                  onChange={(v) => setEditForm(f => ({ ...f, status: v }))}
-                  options={[
-                    { value: 'draft', label: 'Borrador' },
-                    { value: 'pending_review', label: 'En revisión' },
-                    { value: 'published', label: 'Publicado' },
-                    { value: 'closed', label: 'Cerrado' }
-                  ]}
-                />
-              </div>
-            </div>
-
-            <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[var(--bg-secondary)] rounded-b-3xl">
-              <button type="button" onClick={() => { setEditingTopic(null); setErrorMsg(''); }} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
-              <button type="button" onClick={handleEdit} disabled={saving || !editForm.title.trim() || !editForm.content.trim()} className="px-6 py-2.5 bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] hover:from-emerald-500 hover:to-sky-500 dark:hover:from-[var(--brand-green)] dark:hover:to-[var(--icons-green)] text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70">{saving ? 'Guardando...' : 'Guardar Cambios'}</button>
-            </div>
+          <div>
+            <LyriumSelect
+              label="Estado"
+              value={editForm.status}
+              onChange={(v) => setEditForm(f => ({ ...f, status: v }))}
+              options={[
+                { value: 'draft', label: 'Borrador' },
+                { value: 'pending_review', label: 'En revisión' },
+                { value: 'published', label: 'Publicado' },
+                { value: 'closed', label: 'Cerrado' }
+              ]}
+            />
           </div>
         </div>
-      )}
+      </BaseModal>
     </div>
   );
 }

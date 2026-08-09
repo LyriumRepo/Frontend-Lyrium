@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Video, Plus, Globe, Clock, User, Save, Info, FileText, BookOpen, Headphones, Clapperboard, X, ArrowRight } from 'lucide-react';
+import { Video, Plus, Globe, Clock, User, Save, Info, FileText, BookOpen, Headphones, Clapperboard, ArrowRight } from 'lucide-react';
 import ModuleHeader from '@/components/layout/shared/ModuleHeader';
 import BaseButton from '@/components/ui/BaseButton';
+import BaseModal from '@/components/ui/BaseModal';
 import Pagination from '@/components/ui/Pagination';
 import { LyriumSelect } from '@/components/ui';
 import { blogApi, BlogVideo } from '@/shared/lib/api/bioblogRepository';
@@ -270,16 +271,20 @@ export function BlogVideosClient() {
                 <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={items.length} itemLabel="videos" />
             </div>
 
-            {showEditor && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setShowEditor(false)}>
-                    <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                        <div className="relative px-6 py-5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] rounded-t-3xl flex-shrink-0">
-                            <button onClick={() => setShowEditor(false)} className="absolute top-5 right-5 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90">
-                                <X className="w-5 h-5" />
-                            </button>
-                            <h3 className="text-lg font-bold text-white pr-12">{editingId ? 'Editar Video' : 'Nuevo Video'}</h3>
-                        </div>
-                        <div className="p-6 space-y-4 overflow-y-auto green-scrollbar">
+            <BaseModal
+                isOpen={showEditor}
+                onClose={() => setShowEditor(false)}
+                title={editingId ? 'Editar Video' : 'Nuevo Video'}
+                footer={
+                    <div className="flex justify-end gap-3 w-full">
+                        <button onClick={() => setShowEditor(false)} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
+                        <button onClick={handleSave} disabled={saving || !form.title.trim() || !form.url.trim()} className="flex items-center gap-1.5 px-6 py-2.5 bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] hover:from-emerald-500 hover:to-sky-500 dark:hover:from-[var(--brand-green)] dark:hover:to-[var(--icons-green)] text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70">
+                            <Save className="w-4 h-4" /> {saving ? 'Guardando...' : (editingId ? 'Guardar Cambios' : 'Crear Borrador')}
+                        </button>
+                    </div>
+                }
+            >
+                        <div className="space-y-4">
                         <div>
                             <LyriumSelect
                                 label="Plataforma"
@@ -332,16 +337,8 @@ export function BlogVideosClient() {
                             <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-[var(--bg-primary)] text-gray-800 dark:text-gray-200" />
                         </div>
                         {error && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">{error}</div>}
-                        <div className="flex justify-end gap-3 pt-2">
-                            <button onClick={() => setShowEditor(false)} className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
-                            <button onClick={handleSave} disabled={saving || !form.title.trim() || !form.url.trim()} className="flex items-center gap-1.5 px-6 py-2.5 bg-gradient-to-r from-emerald-400 to-sky-400 dark:from-[var(--brand-green)] dark:to-[var(--icons-green)] hover:from-emerald-500 hover:to-sky-500 dark:hover:from-[var(--brand-green)] dark:hover:to-[var(--icons-green)] text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-lg shadow-sky-500/25 dark:shadow-[#8FC3A1]/70">
-                                <Save className="w-4 h-4" /> {saving ? 'Guardando...' : (editingId ? 'Guardar Cambios' : 'Crear Borrador')}
-                            </button>
                         </div>
-                    </div>
-                </div>
-                </div>
-            )}
+            </BaseModal>
         </div>
     );
 }
