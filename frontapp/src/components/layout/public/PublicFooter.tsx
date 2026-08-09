@@ -17,9 +17,15 @@ export default function PublicFooter() {
 
     return (
         <footer className="bg-sky-500 dark:bg-[var(--bg-secondary)] dark:border-t dark:border-[var(--border-subtle)] text-white mt-12 transition-colors duration-300">
-            <p className="max-w-7xl mx-auto px-4 pt-5 text-center text-xs text-sky-100/70 dark:text-[var(--text-muted)]">
-                🌿 El marketplace peruano de productos y servicios biológicos y orgánicos — compra, compara y agenda con tiendas verificadas.
-            </p>
+            <div className="max-w-7xl mx-auto px-4 pt-8 pb-2">
+                <div className="relative h-px w-full max-w-md mx-auto">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-[var(--icons-green)]/70 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white dark:via-[var(--icons-green)] to-transparent blur-sm" />
+                </div>
+                <p className="mt-4 text-center text-xs sm:text-sm font-medium tracking-wide text-sky-50/90 dark:text-[var(--text-secondary)]">
+                    🌿 El marketplace peruano de productos y servicios biológicos y orgánicos — compra, compara y agenda con tiendas verificadas.
+                </p>
+            </div>
             <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col gap-10 lg:grid lg:grid-cols-5 lg:gap-10 text-base">
                 <div className="footer-section space-y-4 flex flex-col items-center text-center lg:items-start lg:text-left">
                     <div className="flex items-center gap-2">
