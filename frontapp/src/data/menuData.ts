@@ -24,12 +24,12 @@ export interface MegaCategoryData {
 export const megaMenuData: Record<string, MegaCategoryData> = {
     'Bebés y recién nacidos': {
         icons: [
-            { title: 'De paseo y en el coche', img: '/img/Productos/Bebes/1.webp', href: '/productos/bebes-recacidos' },
-            { title: 'Alimentación', img: '/img/Productos/Bebes/2.webp', href: '/productos/bebes/alimentacion' },
-            { title: 'Juguetes', img: '/img/Productos/Bebes/3.webp', href: '/productos/bebes/juguetes' },
-            { title: 'Ropa', img: '/img/Productos/Bebes/4.webp', href: '/productos/bebes/ropa' },
-            { title: 'Calzado', img: '/img/Productos/Bebes/5.webp', href: '/productos/bebes/calzado' },
-            { title: 'Lactancia y chupetes', img: '/img/Productos/Bebes/6.webp', href: '/productos/bebes/lactancia' },
+            { title: 'De paseo y en el coche', img: '/img/productos/Bebes/1.webp', href: '/productos/bebes-recacidos' },
+            { title: 'Alimentación', img: '/img/productos/Bebes/2.webp', href: '/productos/bebes/alimentacion' },
+            { title: 'Juguetes', img: '/img/productos/Bebes/3.webp', href: '/productos/bebes/juguetes' },
+            { title: 'Ropa', img: '/img/productos/Bebes/4.webp', href: '/productos/bebes/ropa' },
+            { title: 'Calzado', img: '/img/productos/Bebes/5.webp', href: '/productos/bebes/calzado' },
+            { title: 'Lactancia y chupetes', img: '/img/productos/Bebes/6.webp', href: '/productos/bebes/lactancia' },
         ],
         cols: [
             { h: 'ALIMENTACIÓN', items: ['Menaje infantil', 'Suplementos nutricionales', 'Tronas y elevadores'] },
@@ -41,9 +41,9 @@ export const megaMenuData: Record<string, MegaCategoryData> = {
     },
     'Belleza': {
         icons: [
-            { title: 'Hombres', img: '/img/Productos/Belleza/1.webp', href: '/productos/belleza/hombres' },
-            { title: 'Mujeres', img: '/img/Productos/Belleza/2.webp', href: '/productos/belleza/mujeres' },
-            { title: 'Adolescentes, Niños y bebes', img: '/img/Productos/Belleza/3.webp', href: '/productos/belleza/jovenes' },
+            { title: 'Hombres', img: '/img/productos/Belleza/1.webp', href: '/productos/belleza/hombres' },
+            { title: 'Mujeres', img: '/img/productos/Belleza/2.webp', href: '/productos/belleza/mujeres' },
+            { title: 'Adolescentes, Niños y bebes', img: '/img/productos/Belleza/3.webp', href: '/productos/belleza/jovenes' },
         ],
         cols: [
             { h: 'ADOLESCENTES', items: ['Aseo e higiene personal', 'Coloración', 'Cuidado corporal', 'Cuidado del cabello', 'Cuidado facial', 'Maquillaje'] },
@@ -53,12 +53,12 @@ export const megaMenuData: Record<string, MegaCategoryData> = {
     },
     'Bienestar emocional y medicina natural': {
         icons: [
-            { title: 'Sistema Nervioso', img: '/img/Productos/Bienestar/1.webp', href: '/productos/bienestar/nervioso' },
-            { title: 'Sistema Digestivo', img: '/img/Productos/Bienestar/2.webp', href: '/productos/bienestar/digestivo' },
-            { title: 'Sistema Circulatorio', img: '/img/Productos/Bienestar/3.webp', href: '/productos/bienestar/circulatorio' },
-            { title: 'Sistema Oseo', img: '/img/Productos/Bienestar/4.webp', href: '/productos/bienestar/oseo' },
-            { title: 'Sistema Muscular', img: '/img/Productos/Bienestar/5.webp', href: '/productos/bienestar/muscular' },
-            { title: 'Sistema Inmunologico', img: '/img/Productos/Bienestar/6.webp', href: '/productos/bienestar/inmune' },
+            { title: 'Sistema Nervioso', img: '/img/productos/Bienestar/1.webp', href: '/productos/bienestar/nervioso' },
+            { title: 'Sistema Digestivo', img: '/img/productos/Bienestar/2.webp', href: '/productos/bienestar/digestivo' },
+            { title: 'Sistema Circulatorio', img: '/img/productos/Bienestar/3.webp', href: '/productos/bienestar/circulatorio' },
+            { title: 'Sistema Oseo', img: '/img/productos/Bienestar/4.webp', href: '/productos/bienestar/oseo' },
+            { title: 'Sistema Muscular', img: '/img/productos/Bienestar/5.webp', href: '/productos/bienestar/muscular' },
+            { title: 'Sistema Inmunologico', img: '/img/productos/Bienestar/6.webp', href: '/productos/bienestar/inmune' },
         ],
         cols: [
             { h: 'RELAX', items: ['Aromas', 'Velas', 'Difusores'] },
@@ -70,12 +70,12 @@ export const megaMenuData: Record<string, MegaCategoryData> = {
     },
     'Bienestar físico y deportes': {
         icons: [
-            { title: 'Calzado Mujer', img: '/img/Productos/BienestarF/1.webp', href: '/productos/deportes/calzado-mujer' },
-            { title: 'Ropa mujer', img: '/img/Productos/BienestarF/2.webp', href: '/productos/deportes/ropa-mujer' },
-            { title: 'Calzado Hombre', img: '/img/Productos/BienestarF/3.webp', href: '/productos/deportes/calzado-hombre' },
-            { title: 'Ropa Hombre', img: '/img/Productos/BienestarF/4.webp', href: '/productos/deportes/ropa-hombre' },
-            { title: 'Deportes Niños', img: '/img/Productos/BienestarF/5.webp', href: '/productos/deportes/ninos' },
-            { title: 'Deportes Hombre', img: '/img/Productos/BienestarF/6.webp', href: '/productos/deportes/deportes-hombre' },
+            { title: 'Calzado Mujer', img: '/img/productos/BienestarF/1.webp', href: '/productos/deportes/calzado-mujer' },
+            { title: 'Ropa mujer', img: '/img/productos/BienestarF/2.webp', href: '/productos/deportes/ropa-mujer' },
+            { title: 'Calzado Hombre', img: '/img/productos/BienestarF/3.webp', href: '/productos/deportes/calzado-hombre' },
+            { title: 'Ropa Hombre', img: '/img/productos/BienestarF/4.webp', href: '/productos/deportes/ropa-hombre' },
+            { title: 'Deportes Niños', img: '/img/productos/BienestarF/5.webp', href: '/productos/deportes/ninos' },
+            { title: 'Deportes Hombre', img: '/img/productos/BienestarF/6.webp', href: '/productos/deportes/deportes-hombre' },
         ],
         cols: [
             { h: 'CALZADO MUJER', items: ['Basquet', 'Calzado plataforma', 'Chimpunes', 'Gimnasio', 'Running', 'Sandalias'] },
@@ -87,12 +87,12 @@ export const megaMenuData: Record<string, MegaCategoryData> = {
     },
     'Digestión saludable': {
         icons: [
-            { title: 'Abarrotes', img: '/img/Productos/Digestion/1.webp', href: '/productos/digestion/abarrotes' },
-            { title: 'Desayunos', img: '/img/Productos/Digestion/2.webp', href: '/productos/digestion/desayunos' },
-            { title: 'Lácteos y frescos', img: '/img/Productos/Digestion/3.webp', href: '/productos/digestion/lacteos' },
-            { title: 'Bebidas', img: '/img/Productos/Digestion/4.webp', href: '/productos/digestion/bebidas' },
-            { title: 'Dulces y snacks', img: '/img/Productos/Digestion/5.webp', href: '/productos/digestion/dulces' },
-            { title: 'Panadería', img: '/img/Productos/Digestion/6.webp', href: '/productos/digestion/panaderia' },
+            { title: 'Abarrotes', img: '/img/productos/Digestion/1.webp', href: '/productos/digestion/abarrotes' },
+            { title: 'Desayunos', img: '/img/productos/Digestion/2.webp', href: '/productos/digestion/desayunos' },
+            { title: 'Lácteos y frescos', img: '/img/productos/Digestion/3.webp', href: '/productos/digestion/lacteos' },
+            { title: 'Bebidas', img: '/img/productos/Digestion/4.webp', href: '/productos/digestion/bebidas' },
+            { title: 'Dulces y snacks', img: '/img/productos/Digestion/5.webp', href: '/productos/digestion/dulces' },
+            { title: 'Panadería', img: '/img/productos/Digestion/6.webp', href: '/productos/digestion/panaderia' },
         ],
         cols: [
             { h: 'ABARROTES', items: ['Aceites', 'Arroz', 'Cereales', 'Conservas', 'Harinas', 'Pastas'] },
@@ -104,12 +104,12 @@ export const megaMenuData: Record<string, MegaCategoryData> = {
     },
     'Equipos y dispositivos médicos': {
         icons: [
-            { title: 'Diagnóstico', img: '/img/Productos/Equipos/1.webp', href: '/productos/equipos/diagnostico' },
-            { title: 'Tratamiento', img: '/img/Productos/Equipos/2.webp', href: '/productos/equipos/tratamiento' },
-            { title: 'Rehabilitación', img: '/img/Productos/Equipos/3.webp', href: '/productos/equipos/rehabilitacion' },
-            { title: 'Movilidad', img: '/img/Productos/Equipos/4.webp', href: '/productos/equipos/movilidad' },
-            { title: 'Cuidado en casa', img: '/img/Productos/Equipos/5.webp', href: '/productos/equipos/casa' },
-            { title: 'Emergencias', img: '/img/Productos/Equipos/6.webp', href: '/productos/equipos/emergencias' },
+            { title: 'Diagnóstico', img: '/img/productos/Equipos/1.webp', href: '/productos/equipos/diagnostico' },
+            { title: 'Tratamiento', img: '/img/productos/Equipos/2.webp', href: '/productos/equipos/tratamiento' },
+            { title: 'Rehabilitación', img: '/img/productos/Equipos/3.webp', href: '/productos/equipos/rehabilitacion' },
+            { title: 'Movilidad', img: '/img/productos/Equipos/4.webp', href: '/productos/equipos/movilidad' },
+            { title: 'Cuidado en casa', img: '/img/productos/Equipos/5.webp', href: '/productos/equipos/casa' },
+            { title: 'Emergencias', img: '/img/productos/Equipos/6.webp', href: '/productos/equipos/emergencias' },
         ],
         cols: [
             { h: 'DIAGNÓSTICO', items: ['Básculas', 'Glucómetros', 'Oxímetros', 'Termómetros', 'Tensiómetros'] },
@@ -121,11 +121,11 @@ export const megaMenuData: Record<string, MegaCategoryData> = {
     },
     'Mascotas': {
         icons: [
-            { title: 'Perros', img: '/img/Productos/Mascotas/1.webp', href: '/productos/mascotas/perros' },
-            { title: 'Gatos', img: '/img/Productos/Mascotas/2.webp', href: '/productos/mascotas/gatos' },
-            { title: 'Aves', img: '/img/Productos/Mascotas/3.webp', href: '/productos/mascotas/aves' },
-            { title: 'Peces', img: '/img/Productos/Mascotas/4.webp', href: '/productos/mascotas/peces' },
-            { title: 'Otros', img: '/img/Productos/Mascotas/5.webp', href: '/productos/mascotas/otros' },
+            { title: 'Perros', img: '/img/productos/Mascotas/1.webp', href: '/productos/mascotas/perros' },
+            { title: 'Gatos', img: '/img/productos/Mascotas/2.webp', href: '/productos/mascotas/gatos' },
+            { title: 'Aves', img: '/img/productos/Mascotas/3.webp', href: '/productos/mascotas/aves' },
+            { title: 'Peces', img: '/img/productos/Mascotas/4.webp', href: '/productos/mascotas/peces' },
+            { title: 'Otros', img: '/img/productos/Mascotas/5.webp', href: '/productos/mascotas/otros' },
         ],
         cols: [
             { h: 'PERROS', items: ['Alimento', 'Juguetes', 'Camas', 'Collares', 'Medicamentos'] },
@@ -137,10 +137,10 @@ export const megaMenuData: Record<string, MegaCategoryData> = {
     },
     'Protección limpieza y desinfección': {
         icons: [
-            { title: 'Limpieza Hogar', img: '/img/Productos/Limpieza/1.webp', href: '/productos/limpieza/hogar' },
-            { title: 'Desinfección', img: '/img/Productos/Limpieza/2.webp', href: '/productos/limpieza/desinfeccion' },
-            { title: 'Protección Personal', img: '/img/Productos/Limpieza/3.webp', href: '/productos/limpieza/proteccion' },
-            { title: 'Antibacteriales', img: '/img/Productos/Limpieza/4.webp', href: '/productos/limpieza/antibacteriales' },
+            { title: 'Limpieza Hogar', img: '/img/productos/Limpieza/1.webp', href: '/productos/limpieza/hogar' },
+            { title: 'Desinfección', img: '/img/productos/Limpieza/2.webp', href: '/productos/limpieza/desinfeccion' },
+            { title: 'Protección Personal', img: '/img/productos/Limpieza/3.webp', href: '/productos/limpieza/proteccion' },
+            { title: 'Antibacteriales', img: '/img/productos/Limpieza/4.webp', href: '/productos/limpieza/antibacteriales' },
         ],
         cols: [
             { h: 'LIMPIEZA HOGAR', items: ['Detergentes', 'Suavizantes', 'Limpiadores', 'Escobas', 'Trapeadores'] },
@@ -151,12 +151,12 @@ export const megaMenuData: Record<string, MegaCategoryData> = {
     },
     'Suplementos vitamínicos': {
         icons: [
-            { title: 'Vitaminas', img: '/img/Productos/Suplementos/1.webp', href: '/productos/suplementos/vitaminas' },
-            { title: 'Minerales', img: '/img/Productos/Suplementos/2.webp', href: '/productos/suplementos/minerales' },
-            { title: 'Proteínas', img: '/img/Productos/Suplementos/3.webp', href: '/productos/suplementos/proteinas' },
-            { title: 'Aminoácidos', img: '/img/Productos/Suplementos/4.webp', href: '/productos/suplementos/aminoacidos' },
-            { title: 'Hierbas', img: '/img/Productos/Suplementos/5.webp', href: '/productos/suplementos/hierbas' },
-            { title: 'Deportivos', img: '/img/Productos/Suplementos/6.webp', href: '/productos/suplementos/deportivos' },
+            { title: 'Vitaminas', img: '/img/productos/Suplementos/1.webp', href: '/productos/suplementos/vitaminas' },
+            { title: 'Minerales', img: '/img/productos/Suplementos/2.webp', href: '/productos/suplementos/minerales' },
+            { title: 'Proteínas', img: '/img/productos/Suplementos/3.webp', href: '/productos/suplementos/proteinas' },
+            { title: 'Aminoácidos', img: '/img/productos/Suplementos/4.webp', href: '/productos/suplementos/aminoacidos' },
+            { title: 'Hierbas', img: '/img/productos/Suplementos/5.webp', href: '/productos/suplementos/hierbas' },
+            { title: 'Deportivos', img: '/img/productos/Suplementos/6.webp', href: '/productos/suplementos/deportivos' },
         ],
         cols: [
             { h: 'VITAMINAS', items: ['Vitamina A', 'Vitamina C', 'Vitamina D', 'Vitamina E', 'Vitamina B'] },
@@ -168,13 +168,13 @@ export const megaMenuData: Record<string, MegaCategoryData> = {
     },
     'Servicios médicos': {
         icons: [
-            { title: 'Gastroenterología', img: '/img/Servicios/ServiciosMedicos/1.svg', href: '#' },
-            { title: 'Geriatría', img: '/img/Servicios/ServiciosMedicos/2.svg', href: '#' },
-            { title: 'Laboratorio clínico', img: '/img/Servicios/ServiciosMedicos/3.svg', href: '#' },
-            { title: 'Medicina general', img: '/img/Servicios/ServiciosMedicos/4.svg', href: '#' },
-            { title: 'Nutriología', img: '/img/Servicios/ServiciosMedicos/5.svg', href: '#' },
-            { title: 'Pediatría', img: '/img/Servicios/ServiciosMedicos/6.svg', href: '#' },
-            { title: 'Psicología', img: '/img/Servicios/ServiciosMedicos/7.svg', href: '#' },
+            { title: 'Gastroenterología', img: '/img/servicios/ServiciosMedicos/1.svg', href: '#' },
+            { title: 'Geriatría', img: '/img/servicios/ServiciosMedicos/2.svg', href: '#' },
+            { title: 'Laboratorio clínico', img: '/img/servicios/ServiciosMedicos/3.svg', href: '#' },
+            { title: 'Medicina general', img: '/img/servicios/ServiciosMedicos/4.svg', href: '#' },
+            { title: 'Nutriología', img: '/img/servicios/ServiciosMedicos/5.svg', href: '#' },
+            { title: 'Pediatría', img: '/img/servicios/ServiciosMedicos/6.svg', href: '#' },
+            { title: 'Psicología', img: '/img/servicios/ServiciosMedicos/7.svg', href: '#' },
         ],
         cols: [
             { h: 'ESPECIALIDADES', items: ['Cardiología', 'Radiología', 'Dermatología', 'Medicina General', 'Endocrinología', 'Enfermería'] },
@@ -184,8 +184,8 @@ export const megaMenuData: Record<string, MegaCategoryData> = {
     },
     'Belleza servicios': {
         icons: [
-            { title: 'Peluquerías', img: '/img/Servicios/Belleza/1.svg', href: '#' },
-            { title: 'Spas', img: '/img/Servicios/Belleza/2.svg', href: '#' },
+            { title: 'Peluquerías', img: '/img/servicios/Belleza/1.svg', href: '#' },
+            { title: 'Spas', img: '/img/servicios/Belleza/2.svg', href: '#' },
         ],
         cols: [
             { h: 'TRATAMIENTOS', items: ['Limpieza Facial', 'Anti-Edah', 'Acné'] },
@@ -194,7 +194,7 @@ export const megaMenuData: Record<string, MegaCategoryData> = {
     },
     'Deportes servicios': {
         icons: [
-            { title: 'Gimnasio', img: '/img/Servicios/Deportes/1.png', href: '#' },
+            { title: 'Gimnasio', img: '/img/servicios/Deportes/1.png', href: '#' },
         ],
         cols: [
             { h: 'SERVICIOS', items: ['Fisioterapia', 'Rehabilitación'] },
