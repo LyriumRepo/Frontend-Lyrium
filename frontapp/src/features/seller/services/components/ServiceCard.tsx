@@ -42,7 +42,15 @@ export default function ServiceCard({
 }: ServiceCardProps) {
   const isPublished = service.estado === 'publicado';
   const wasApproved = !!service.reviewedAt;
-  const canEdit = wasApproved;
+  // Un servicio ya publicado (status 'active'/'approved' en el backend) debe
+  // poder editarse siempre, tenga o no reviewed_at seteado. reviewed_at solo
+  // se escribe cuando pasa por el flujo formal de revisión del admin
+  // (ServiceController@updateStatus) - servicios sembrados/creados
+  // directamente como activos (seeders, datos demo) nunca lo tienen, y antes
+  // quedaban bloqueados para editar con el mensaje "esperando aprobación del
+  // admin" aunque ya estuvieran publicados y no hubiera nada pendiente de
+  // revisar. Mismo criterio que ya usa canTogglePublication un poco más abajo.
+  const canEdit = wasApproved || isPublished;
   const canTogglePublication = canPublish(service) && (wasApproved || isPublished);
 
   const assignedSpecialists = service.especialistasAsignados

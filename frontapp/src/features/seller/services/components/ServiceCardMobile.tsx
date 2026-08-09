@@ -41,7 +41,10 @@ export default function ServiceCardMobile({
 }: ServiceCardMobileProps) {
   const isPublished = service.estado === 'publicado';
   const wasApproved = !!service.reviewedAt;
-  const canEdit = wasApproved;
+  // Ver comentario equivalente en ServiceCard.tsx: un servicio publicado
+  // debe poder editarse aunque nunca haya pasado por el flujo formal de
+  // revisión del admin (reviewed_at null en datos sembrados/demo).
+  const canEdit = wasApproved || isPublished;
   const canTogglePublication = canPublish(service) && (wasApproved || isPublished);
 
   const assignedSpecialists = service.especialistasAsignados
