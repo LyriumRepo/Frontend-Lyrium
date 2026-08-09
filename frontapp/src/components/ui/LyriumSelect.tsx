@@ -107,7 +107,23 @@ export default function LyriumSelect({
 
     const raf = requestAnimationFrame(() => {
       const triggerRect = trigger.getBoundingClientRect();
-      const dropdownHeight = dropdownRef.current?.offsetHeight ?? 0;
+      // dropdownRef.current es SIEMPRE null en la primera apertura: el
+      // dropdown solo existe en el DOM una vez que `coords` está seteado, y
+      // `coords` es justo lo que este efecto calcula (dependencia circular).
+      // Medir con offsetHeight ahí da 0 -> spaceBelow < 0 nunca es cierto ->
+      // "flip" nunca se activa la primera vez, el dropdown abre siempre hacia
+      // abajo aunque no entre, y queda cortado contra el borde del viewport
+      // sin forma de hacer scroll para verlo. Se estima el alto real a partir
+      // del contenido (determinístico, no depende de haber montado antes) y
+      // se usa esa estimación — nunca la medición del ref — para decidir.
+      const SEARCH_BOX_H = 54;
+      const OPTION_ROW_H = 38;
+      const EMPTY_ROW_H = 72;
+      const CHROME_H = 10;
+      const listHeight = filteredOptions.length === 0
+        ? EMPTY_ROW_H
+        : Math.min(filteredOptions.length * OPTION_ROW_H, 240);
+      const dropdownHeight = (searchable ? SEARCH_BOX_H : 0) + listHeight + CHROME_H;
       const spaceBelow = window.innerHeight - triggerRect.bottom;
       const spaceAbove = triggerRect.top;
       const flip = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
@@ -125,9 +141,16 @@ export default function LyriumSelect({
       }
       if (left < viewportMargin) left = viewportMargin;
 
+      // Clamp final contra el viewport: cubre el caso extremo en que ni
+      // arriba ni abajo hay espacio suficiente para el alto estimado (ej.
+      // viewport muy bajo) — nunca debe quedar con top negativo ni empujado
+      // más allá del borde inferior.
+      let top = flip ? triggerRect.top - dropdownHeight - 6 : triggerRect.bottom + 6;
+      top = Math.max(viewportMargin, Math.min(top, window.innerHeight - viewportMargin - dropdownHeight));
+
       setOpenUpward(flip);
       setCoords({
-        top: flip ? triggerRect.top - dropdownHeight - 6 : triggerRect.bottom + 6,
+        top,
         left,
         width,
       });
