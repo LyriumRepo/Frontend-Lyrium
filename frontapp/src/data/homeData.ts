@@ -134,9 +134,9 @@ export const homeData: HomeData = {
   ],
 
   productosMedicina: [
-    { id: 1, titulo: 'Masajes Corporales', precio: 30, imagen: '/img/Servicios/MedicinaNatural/MASAJE CORPORAL.webp', estrellas: '★★★★★' },
-    { id: 2, titulo: 'Pedicura', precio: 40, imagen: '/img/Servicios/MedicinaNatural/4-PEDICURA-1-300x300.webp', estrellas: '★★★★★' },
-    { id: 3, titulo: 'Exfoliación Corporal', precio: 150, imagen: '/img/Servicios/MedicinaNatural/4-EXFOLIACION-CORPORAL-1-300x300.webp', estrellas: '★★★★★' },
+    { id: 1, titulo: 'Masajes Corporales', precio: 30, imagen: '/img/servicios/MedicinaNatural/MASAJE CORPORAL.webp', estrellas: '★★★★★' },
+    { id: 2, titulo: 'Pedicura', precio: 40, imagen: '/img/servicios/MedicinaNatural/4-PEDICURA-1-300x300.webp', estrellas: '★★★★★' },
+    { id: 3, titulo: 'Exfoliación Corporal', precio: 150, imagen: '/img/servicios/MedicinaNatural/4-EXFOLIACION-CORPORAL-1-300x300.webp', estrellas: '★★★★★' },
   ],
 
   bannersPub: {

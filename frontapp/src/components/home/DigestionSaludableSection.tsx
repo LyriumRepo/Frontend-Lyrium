@@ -157,17 +157,17 @@ export default function DigestionSaludableSection() {
 
   // 2. DATA SECCIÓN: Belleza  
   const bellezaProducts = [
-    { id: 1, title: 'Espuma Limpiadora', price: 55.00, image: '/img/inicio/9/2.png', rating: 5 },
-    { id: 2, title: 'Espuma Limpiadora', price: 55.00, image: '/img/inicio/9/2.png', rating: 5 },
-    { id: 3, title: 'Espuma Limpiadora', price: 55.00, image: '/img/inicio/9/2.png', rating: 5 },
+    { id: 1, title: 'Espuma Limpiadora', price: 55.00, image: '/img/Inicio/9/2.png', rating: 5 },
+    { id: 2, title: 'Espuma Limpiadora', price: 55.00, image: '/img/Inicio/9/2.png', rating: 5 },
+    { id: 3, title: 'Espuma Limpiadora', price: 55.00, image: '/img/Inicio/9/2.png', rating: 5 },
     
   ];
 
   // 3. DATA SECCIÓN: Servicios Médicos
   const medicosProducts = [
-    { id: 1, title: 'Blanqueamiento D...', price: 120.00, image: '/img/inicio/10/2.png', rating: 5 },
-    { id: 2, title: 'Masajes Corporales', price: 30.00, image: '/img/inicio/10/3.png', rating: 5 },
-    { id: 3, title: 'Diagnostico unipol...', price: 120.00, image: '/img/inicio/10/4.png', rating: 5 },
+    { id: 1, title: 'Blanqueamiento D...', price: 120.00, image: '/img/Inicio/10/2.png', rating: 5 },
+    { id: 2, title: 'Masajes Corporales', price: 30.00, image: '/img/Inicio/10/3.png', rating: 5 },
+    { id: 3, title: 'Diagnostico unipol...', price: 120.00, image: '/img/Inicio/10/4.png', rating: 5 },
     
     
   ];
@@ -192,14 +192,14 @@ export default function DigestionSaludableSection() {
       {/* 2. SECCIÓN: Belleza */}
       <MarketplaceSection
         title="Belleza"
-        bannerImage="/img/inicio/9/1.png"
+        bannerImage="/img/Inicio/9/1.png"
         products={bellezaProducts}
       />
 
       {/* 3. SECCIÓN: Servicios Médicos */}
       <MarketplaceSection
         title="Servicios médicos"
-        bannerImage="/img/inicio/10/1.png"
+        bannerImage="/img/Inicio/10/1.png"
         products={medicosProducts}
       />
 
