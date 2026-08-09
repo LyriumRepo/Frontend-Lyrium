@@ -162,10 +162,10 @@ function ServiceStylePromo({ promo, index }: { promo: PromoVariant; index: numbe
   return (
     <Link href={promo.href} className="block h-full">
       <div className="group bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col h-full">
-        <div className={`relative h-28 sm:h-36 overflow-hidden bg-gradient-to-br ${promo.bg}`}>
+        <div className={`relative h-20 sm:h-24 overflow-hidden bg-gradient-to-br ${promo.bg}`}>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
-            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <Icon className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <p className="text-white/90 text-xs sm:text-sm font-bold drop-shadow-lg max-w-[160px] px-2">
               {promo.title}

@@ -30,14 +30,12 @@ export default function LayoutEmprende({ products, banners }: LayoutEmprendeProp
 
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
-      {productosServicio.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
-            Servicios de la tienda
-          </h2>
-          <ProductGrid productos={productosServicio} />
-        </div>
-      )}
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
+          Servicios de la tienda
+        </h2>
+        <ProductGrid productos={productosServicio} />
+      </div>
     </div>
   );
 }

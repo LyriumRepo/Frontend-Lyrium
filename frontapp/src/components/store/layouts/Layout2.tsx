@@ -40,21 +40,19 @@ export default function Layout2({ products, banners }: Layout2Props) {
 
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
-      {productosServicio.length > 0 && (
-        <div className="space-y-3 sm:space-y-4">
-          <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
-            Servicios de la tienda
-          </h2>
-          <div className="flex flex-col md:flex-row gap-4 sm:gap-5 md:gap-6">
-            <ScrollableSection visibleRows={2} className="flex-1 min-h-0">
-              <ProductGrid productos={productosServicio} />
-            </ScrollableSection>
-            <div className="w-full md:w-56 lg:w-80 flex-shrink-0">
-              <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={4} fallback={4} filterOrientation="vertical" />
-            </div>
+      <div className="space-y-3 sm:space-y-4">
+        <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
+          Servicios de la tienda
+        </h2>
+        <div className="flex flex-col md:flex-row gap-4 sm:gap-5 md:gap-6">
+          <ScrollableSection visibleRows={2} className="flex-1 min-h-0">
+            <ProductGrid productos={productosServicio} />
+          </ScrollableSection>
+          <div className="w-full md:w-56 lg:w-80 flex-shrink-0">
+            <AdBannersCarousel banners={banners} maxBanners={4} vertical startIndex={4} fallback={4} filterOrientation="vertical" />
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

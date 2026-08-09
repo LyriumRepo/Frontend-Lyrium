@@ -75,7 +75,7 @@ export function BlogPodcastsClient() {
     };
     const openEdit = (p: BlogPodcast) => {
         setEditingId(p.id); setError(null); setPreview(null);
-        setForm({ type: p.type, platform: p.platform, url: p.url, title: p.title, description: p.description || '', cover_image: p.cover_image || '', duration: p.duration || '', status: p.status });
+        setForm({ type: p.type || 'audio', platform: p.platform || '', url: p.url || '', title: p.title || '', description: p.description || '', cover_image: p.cover_image || '', duration: p.duration || '', status: p.status });
         setShowEditor(true);
     };
 

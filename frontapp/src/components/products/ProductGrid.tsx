@@ -10,6 +10,7 @@ import { useAddToCart } from '@/features/public/product/hooks/useAddToCart';
 import { money } from '@/modules/cart/utils';
 import QuickViewModal from './QuickViewModal';
 import PromoCard from './PromoCard';
+import EmptyStoreState from './EmptyStoreState';
 
 const stickerConfig: Record<string, { label: string; class: string }> = {
   oferta: { label: 'Oferta', class: 'bg-red-500' },
@@ -199,7 +200,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
   return (
     <div className="group bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col">
       {/* Header with image or gradient */}
-      <Link href={producto.enlace || '#'} className="block relative h-28 sm:h-36 overflow-hidden bg-gray-100 dark:bg-[var(--bg-secondary)]">
+      <Link href={producto.enlace || '#'} className="block relative h-20 sm:h-24 overflow-hidden bg-gray-100 dark:bg-[var(--bg-secondary)]">
         {producto.imagen ? (
           <Image
             src={producto.imagen}
@@ -210,7 +211,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
           />
         ) : (
           <div className="flex items-center justify-center h-full">
-            <Calendar className="w-10 h-10 text-white/40" />
+            <Calendar className="w-8 h-8 text-white/40" />
           </div>
         )}
         {discount > 0 && (
@@ -235,7 +236,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
         </Link>
 
         {producto.descripcion && (
-          <p className="hidden sm:block text-xs text-gray-500 dark:text-[var(--text-secondary)] line-clamp-2">
+          <p className="hidden sm:block text-xs text-gray-500 dark:text-[var(--text-secondary)] line-clamp-1">
             {producto.descripcion}
           </p>
         )}
@@ -307,26 +308,7 @@ export default function ProductGrid({ productos, loading = false, className = ''
   }
 
   if (productos.length === 0) {
-    return (
-      <div className="text-center py-16">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-[var(--bg-secondary)] mb-4">
-          <span className="text-4xl">📦</span>
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text-primary)] mb-2">
-          Inventario vacío por ahora
-        </h3>
-        <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-          Estamos preparando los mejores productos para ti. 
-          Pronto tendrás acceso a nuestra selección completa en esta categoría.
-        </p>
-        <Link 
-          href="/" 
-          className="inline-block mt-6 px-6 py-2 bg-sky-500 text-white rounded-full hover:bg-sky-600 transition-colors"
-        >
-          Explorar otras categorías
-        </Link>
-      </div>
-    );
+    return <EmptyStoreState />;
   }
 
   const isThreeCol = className.includes('lg:!grid-cols-3');
@@ -348,7 +330,7 @@ export default function ProductGrid({ productos, loading = false, className = ''
       {emptySlots > 0 && Array.from({ length: emptySlots }).map((_, i) => (
         <PromoCard
           key={`promo-${i}`}
-          variant={isThreeCol ? 'service' : 'product'}
+          variant={productos[0]?.tipo === 'service' ? 'service' : 'product'}
           index={count + i}
         />
       ))}

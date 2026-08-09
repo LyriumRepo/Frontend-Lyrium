@@ -43,16 +43,14 @@ export default function Layout3({ products, banners }: Layout3Props) {
 
       <hr className="border-gray-200 dark:border-[var(--border-subtle)]" />
 
-      {productosServicio.length > 0 && (
-        <div className="space-y-3 sm:space-y-4">
-          <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
-            Servicios de la tienda
-          </h2>
-          <ScrollableSection visibleRows={2}>
-            <ProductGrid productos={productosServicio} className="lg:!grid-cols-3" />
-          </ScrollableSection>
-        </div>
-      )}
+      <div className="space-y-3 sm:space-y-4">
+        <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-[var(--text-primary)]">
+          Servicios de la tienda
+        </h2>
+        <ScrollableSection visibleRows={2}>
+          <ProductGrid productos={productosServicio} className="lg:!grid-cols-3" />
+        </ScrollableSection>
+      </div>
     </div>
   );
 }

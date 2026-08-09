@@ -74,7 +74,7 @@ export function BlogVideosClient() {
     };
     const openEdit = (v: BlogVideo) => {
         setEditingId(v.id); setError(null); setPreview(null);
-        setForm({ platform: v.platform, url: v.url, title: v.title, description: v.description || '', thumbnail: v.thumbnail || '', duration: v.duration || '', status: v.status });
+        setForm({ platform: v.platform || '', url: v.url || '', title: v.title || '', description: v.description || '', thumbnail: v.thumbnail || '', duration: v.duration || '', status: v.status });
         setShowEditor(true);
     };
 
