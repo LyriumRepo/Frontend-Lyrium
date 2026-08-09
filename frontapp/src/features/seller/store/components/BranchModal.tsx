@@ -260,7 +260,7 @@ export default function BranchModal({ isOpen, onClose, onSave, branch }: BranchM
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-4 sm:pt-5 border-t border-[var(--border-subtle)] sticky bottom-0 bg-[var(--bg-card)]/95 backdrop-blur-md -mx-6 sm:-mx-8 -mb-8 sm:-mb-10 p-4 sm:p-6 rounded-b-[2rem] sm:rounded-b-[2.5rem]">
+                <div className="flex flex-col sm:flex-row gap-3 pt-4 sm:pt-5 border-t border-[var(--border-subtle)] bg-[var(--bg-card)]/95 backdrop-blur-md -mx-4 sm:-mx-8 -mb-4 sm:-mb-8 px-4 sm:px-8 pb-4 sm:pb-8 mt-4 sm:mt-6 rounded-b-[2rem] sm:rounded-b-[2.5rem]">
                     <BaseButton
                         onClick={onClose}
                         variant="ghost"

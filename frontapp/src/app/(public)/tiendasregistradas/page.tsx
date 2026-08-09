@@ -166,7 +166,7 @@ export default function TiendasRegistradasPage() {
                       </div>
                     </div>
 
-                    <div className="absolute right-4 -bottom-5 z-20 w-20 h-20 rounded-full bg-white dark:bg-[var(--bg-card)] border-4 border-white/85 dark:border-[var(--border-subtle)] shadow-2xl flex items-center justify-center overflow-hidden">
+                    <div className="absolute right-4 -bottom-5 z-20 w-20 h-20 rounded-full bg-white border-4 border-white/85 dark:border-white/20 shadow-2xl flex items-center justify-center overflow-hidden">
                       <div className="relative w-full h-full flex items-center justify-center">
                         <img
                           src={store.logo || '/img/stores/default-logo.webp'}

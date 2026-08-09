@@ -39,8 +39,8 @@ export default function PublicFooter() {
                         <a href="https://www.facebook.com/people/Lyrium-Biomarketplace/61579938364350/" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Síguenos en Facebook">
                             <Icon name="Facebook" className="text-base" />
                         </a>
-                        <a href="https://www.tiktok.com/@lyrium.biomarkep" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="Síguenos en TikTok">
-                            <Image src="/img/tiktok-icon.png" alt="TikTok" width={16} height={16} className="w-4 h-4 object-contain brightness-0 invert" />
+                        <a href="https://www.tiktok.com/@lyrium.biomarkep" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Síguenos en TikTok">
+                            <Icon name="Music" className="text-base" />
                         </a>
                         <button
                             type="button"
@@ -50,8 +50,8 @@ export default function PublicFooter() {
                         >
                             <Icon name="Bot" className="text-base" />
                         </button>
-                        <a href="https://wa.me/51937093420" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="Escríbenos por WhatsApp">
-                            <Image src="/img/whatsapp-icon.png" alt="WhatsApp" width={16} height={16} className="w-4 h-4 object-contain brightness-0 invert" />
+                        <a href="https://wa.me/51937093420" target="_blank" rel="noopener noreferrer" className="social-icon-btn w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 dark:text-[var(--text-secondary)] dark:hover:text-[#9BAF9F] transition-colors" title="Escríbenos por WhatsApp">
+                            <Icon name="MessageCircle" className="text-base" />
                         </a>
                     </div>
                 </div>
