@@ -346,7 +346,7 @@ export function ForumClient() {
       )}
 
       {showCreator && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm pt-10 pb-10 overflow-y-auto" onClick={() => setShowCreator(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setShowCreator(false)}>
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
             <div className="relative px-6 py-5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] rounded-t-3xl flex-shrink-0">
               <button onClick={() => { setShowCreator(false); setErrorMsg(''); }} className="absolute top-5 right-5 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90">
@@ -404,7 +404,7 @@ export function ForumClient() {
       )}
 
       {editingTopic && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm pt-10 pb-10 overflow-y-auto" onClick={() => setEditingTopic(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setEditingTopic(null)}>
           <div className="bg-white dark:bg-[var(--bg-secondary)] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-lg mx-4 flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
             <div className="relative px-6 py-5 bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] rounded-t-3xl flex-shrink-0">
               <button onClick={() => { setEditingTopic(null); setErrorMsg(''); }} className="absolute top-5 right-5 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-90">
