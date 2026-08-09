@@ -302,8 +302,8 @@ export function BlogArticlesClient() {
                         <div className="p-6 space-y-5">
 
                         {/* Encabezado */}
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="col-span-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="sm:col-span-2">
                                 <label className="block text-xs font-semibold text-gray-500 mb-1">
                                     Título *
                                     <span title="Elige un título llamativo y descriptivo para captar la atención."><Info className="w-3.5 h-3.5 inline ml-1 text-gray-300" /></span>
@@ -409,7 +409,7 @@ export function BlogArticlesClient() {
                                 <span title="El SEO ayuda a que tu artículo aparezca en Google. Personaliza estos campos para mejorar el posicionamiento."><Info className="w-3.5 h-3.5 text-gray-300" /></span>
                             </h4>
                             <p className="text-[10px] text-gray-400 mb-3">Personaliza cómo aparece tu artículo en los resultados de búsqueda.</p>
-                            <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 mb-1">
                                         Meta Title
