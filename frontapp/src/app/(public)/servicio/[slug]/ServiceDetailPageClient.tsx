@@ -1482,7 +1482,9 @@ function RelatedServiceCard({ s }: { s: any }) {
           </p>
           <div className="flex items-center gap-1 mt-1.5">
             <Star className="w-3.5 h-3.5 fill-[#FACC15] text-[#FACC15]" />
-            <span className="text-xs text-gray-400">4.8</span>
+            <span className="text-xs text-gray-400">
+              {s.rating?.count ? s.rating.average.toFixed(1) : 'Sin reseñas'}
+            </span>
           </div>
           <p className="text-sm font-black text-cyan-600 dark:text-white mt-1.5">
             {s.discount_percentage && s.discount_percentage > 0 ? (
@@ -1858,11 +1860,13 @@ export function ServiceDetailPageClient({ service }: Props) {
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-[#FACC15] text-[#FACC15]" />
                       <span className="font-bold text-gray-800 dark:text-[var(--text-primary)]">
-                        4.8
+                        {service.rating?.count ? service.rating.average.toFixed(1) : 'Sin reseñas'}
                       </span>
-                      <span className="text-xs text-gray-400 dark:text-[var(--text-muted)]">
-                        (256 reseñas)
-                      </span>
+                      {service.rating?.count ? (
+                        <span className="text-xs text-gray-400 dark:text-[var(--text-muted)]">
+                          ({service.rating.count} reseña{service.rating.count === 1 ? '' : 's'})
+                        </span>
+                      ) : null}
                     </div>
                     <span className="text-gray-300 dark:text-[var(--text-secondary)]">
                       |

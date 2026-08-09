@@ -121,6 +121,10 @@ export interface Service {
     max_appointments: number;
   }>;
   specialists: ServiceSpecialist[];
+  rating: {
+    average: number;
+    count: number;
+  };
   created_at: string;
   updated_at: string;
 }
