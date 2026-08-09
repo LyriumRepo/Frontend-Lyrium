@@ -9,8 +9,8 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
-      { source: '/backend/:path*', destination: 'http://127.0.0.1:8000/:path*' },
-      { source: '/storage/:path*', destination: 'http://127.0.0.1:8000/storage/:path*' },
+      { source: '/backend/:path*', destination: 'http://10.0.2.86:8000/:path*' },
+      { source: '/storage/:path*', destination: 'http://10.0.2.86:8000/storage/:path*' },
     ];
   },
 
