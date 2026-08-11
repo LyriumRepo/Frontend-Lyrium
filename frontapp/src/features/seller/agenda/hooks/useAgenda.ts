@@ -4,7 +4,8 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { AgendaEvent, AgendaResponse, AgendaFilterType } from '../types';
 
-const API_BASE = '/backend/api';
+const API_BASE =
+    process.env.NEXT_PUBLIC_LARAVEL_API_URL ?? 'http://localhost:8000/api';
 
 function getAuthHeaders(): Record<string, string> {
     if (typeof window === 'undefined') return {};

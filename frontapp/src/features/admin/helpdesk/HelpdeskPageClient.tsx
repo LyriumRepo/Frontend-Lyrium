@@ -8,7 +8,8 @@ import { ChatView } from '@/modules/chat';
 import { adaptAdminTicket } from '@/modules/chat/adapters/adminTicketAdapter';
 import { UnifiedTicket, ChatViewProps } from '@/modules/chat/types';
 import { TicketListProps } from '@/modules/helpdesk/types';
-import { AlertCircle, ArrowLeft, Loader2, Settings2, Store, Users, Info, X } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Loader2, Settings2, Store, Users, Info } from 'lucide-react';
+import BaseModal from '@/components/ui/BaseModal';
 import type { Priority as AdminPriority } from '@/features/admin/helpdesk/types';
 
 type Channel = 'vendedores' | 'clientes';
@@ -230,65 +231,38 @@ export function HelpdeskPageClient() {
       </div>
 
       {showLegend && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[99999] flex items-center justify-center p-4"
-          onClick={() => setShowLegend(false)}
-          onKeyDown={(e) => { if (e.key === 'Escape') setShowLegend(false); }}
-          role="dialog"
-          aria-modal="true"
-          tabIndex={-1}
+        <BaseModal
+          isOpen={showLegend}
+          onClose={() => setShowLegend(false)}
+          title="Soporte Lyrium"
+          subtitle="¿Qué puedes hacer aquí?"
+          accentColor="from-[var(--turquesa-500)] to-[var(--verde-500)]"
+          size="md"
         >
-          {/* Card centrado tanto en móvil como en sm+ */}
-          <div
-            className="w-full max-w-sm sm:max-w-md bg-[var(--bg-card)] rounded-[2rem] shadow-2xl overflow-hidden max-h-[80vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-          >
-            {/* Header — mismos colores que HelpPageClient */}
-            <div className="bg-gradient-to-r from-[var(--turquesa-500)] to-[var(--verde-500)] p-5 sm:p-8 text-white relative shrink-0">
-              <div className="absolute top-0 right-0 w-24 h-24 sm:w-40 sm:h-40 bg-white/10 rounded-full -mr-12 -mt-12 sm:-mr-20 sm:-mt-20 blur-3xl" />
-              <div className="relative z-10 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
-                    <Users className="w-5 h-5 sm:w-6 sm:h-6" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-lg sm:text-2xl font-black tracking-tighter truncate">Mesa de Ayuda</h3>
-                    <p className="text-[9px] sm:text-[10px] font-bold text-white/70 uppercase tracking-[0.2em] truncate">¿Qué puedes hacer aquí?</p>
-                  </div>
+          <div className="space-y-3 sm:space-y-4">
+            {[
+              { icon: Store, title: 'Tickets de vendedores', desc: 'Gestiona incidencias técnicas, consultas administrativas y solicitudes de soporte de las tiendas registradas en Lyrium.' },
+              { icon: Users, title: 'Tickets de clientes', desc: 'Atiende reclamos, consultas y problemas de los compradores que no pudieron ser resueltos por el vendedor.' },
+              { icon: AlertCircle, title: 'Asignar y escalar', desc: 'Asigna tickets a administradores específicos o escálalos a un nivel superior cuando requieren atención prioritaria.' },
+              { icon: Settings2, title: 'Prioridad y estado', desc: 'Actualiza la prioridad (Baja, Media, Alta, Crítica) y el estado del ticket (abierto, en proceso, resuelto, cerrado) en tiempo real.' },
+            ].map((item) => (
+              <div key={item.title} className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-[var(--bg-muted)]/50 rounded-2xl border border-[var(--border-subtle)]">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--bg-card)] flex items-center justify-center shadow-sm border border-[var(--border-subtle)] shrink-0">
+                  <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--icons-green)]" />
                 </div>
-                <button onClick={() => setShowLegend(false)} aria-label="Cerrar leyenda" className="min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] shrink-0 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20">
-                  <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </button>
-              </div>
-            </div>
-
-            {/* Items — scrollable en móvil */}
-            <div className="p-4 sm:p-8 space-y-3 sm:space-y-4 overflow-y-auto green-scrollbar flex-1">
-              {[
-                { icon: Store, title: 'Tickets de vendedores', desc: 'Gestiona incidencias técnicas, consultas administrativas y solicitudes de soporte de las tiendas registradas en Lyrium.' },
-                { icon: Users, title: 'Tickets de clientes', desc: 'Atiende reclamos, consultas y problemas de los compradores que no pudieron ser resueltos por el vendedor.' },
-                { icon: AlertCircle, title: 'Asignar y escalar', desc: 'Asigna tickets a administradores específicos o escálalos a un nivel superior cuando requieren atención prioritaria.' },
-                { icon: Settings2, title: 'Prioridad y estado', desc: 'Actualiza la prioridad (Baja, Media, Alta, Crítica) y el estado del ticket (abierto, en proceso, resuelto, cerrado) en tiempo real.' },
-              ].map((item) => (
-                <div key={item.title} className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-[var(--bg-muted)]/50 rounded-2xl border border-[var(--border-subtle)]">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--bg-card)] flex items-center justify-center shadow-sm border border-[var(--border-subtle)] shrink-0">
-                    <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--icons-green)]" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-black text-xs sm:text-sm text-[var(--text-primary)] mb-0.5">{item.title}</p>
-                    <p className="text-[11px] sm:text-xs text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
-                  </div>
+                <div className="min-w-0">
+                  <p className="font-black text-xs sm:text-sm text-[var(--text-primary)] mb-0.5">{item.title}</p>
+                  <p className="text-[11px] sm:text-xs text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
                 </div>
-              ))}
-              <div className="flex justify-end pt-2">
-                <button onClick={() => setShowLegend(false)} className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-2xl bg-[var(--bg-muted)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all">
-                  Cerrar
-                </button>
               </div>
+            ))}
+            <div className="flex justify-end pt-2">
+              <button onClick={() => setShowLegend(false)} className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-2xl bg-[var(--bg-muted)] text-[var(--text-primary)] font-black text-xs uppercase tracking-widest hover:bg-[var(--bg-hover)] transition-all">
+                Cerrar
+              </button>
             </div>
           </div>
-        </div>
+        </BaseModal>
       )}
     </div>
   );

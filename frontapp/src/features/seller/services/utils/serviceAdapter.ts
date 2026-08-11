@@ -243,7 +243,7 @@ export function adaptServiceToFrontend(beService: LaravelService): Service {
     descripcion: beService.description || '',
     beneficios: beService.benefits || '',
     imagen: beService.image || '',
-    categoria: beService.category || 'Salud y bienestar',
+    categoria: beService.category || '',
     duracion: beService.duration_minutes || 30,
     diasAtencion,
     especialistasAsignados,

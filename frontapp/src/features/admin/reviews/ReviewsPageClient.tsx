@@ -286,6 +286,8 @@ function TopStoresTab() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [limit, setLimit] = useState(10);
+  const [page, setPage] = useState(1);
+  const perPage = 10;
 
   useEffect(() => {
     setLoading(true);
@@ -316,68 +318,76 @@ function TopStoresTab() {
       </div>
     );
 
-  const displayed = stores.slice(0, limit);
+  const limited = stores.slice(0, limit);
+  const totalPages = Math.max(1, Math.ceil(limited.length / perPage));
+  const paginated = limited.slice((page - 1) * perPage, page * perPage);
 
   return (
     <div className="space-y-4">
       {/* Limit */}
       <div className="flex justify-end">
-        <LimitSelector value={limit} onChange={setLimit} />
+        <LimitSelector value={limit} onChange={(v) => { setLimit(v); setPage(1); }} />
       </div>
 
-      {displayed.length === 0 ? (
+      {paginated.length === 0 ? (
         <EmptyState
           icon={Store}
           title="Sin tiendas"
           subtitle="Aún no hay tiendas con reseñas"
         />
       ) : (
-        displayed.map((store, i) => (
-          <div
-            key={store.id}
-            className="flex items-center gap-4 p-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl hover:border-[var(--icons-green)]/20 transition-all"
-          >
-            {/* Rank */}
+        paginated.map((store, i) => {
+          const rank = (page - 1) * perPage + i + 1;
+          return (
             <div
-              className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm ${i === 0 ? 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]' : i === 1 ? 'bg-[var(--bg-muted)] text-[var(--text-secondary)]' : i === 2 ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' : 'bg-[var(--bg-muted)] text-[var(--text-muted)]'}`}
+              key={store.id}
+              className="flex items-center gap-4 p-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl hover:border-[var(--icons-green)]/20 transition-all"
             >
-              {i < 3 ? <Trophy className="w-4 h-4" /> : i + 1}
-            </div>
+              {/* Rank */}
+              <div
+                className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm ${rank === 1 ? 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]' : rank === 2 ? 'bg-[var(--bg-muted)] text-[var(--text-secondary)]' : rank === 3 ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' : 'bg-[var(--bg-muted)] text-[var(--text-muted)]'}`}
+              >
+                {rank <= 3 ? <Trophy className="w-4 h-4" /> : rank}
+              </div>
 
-            {/* Logo */}
-            <div className="w-10 h-10 rounded-xl bg-[var(--color-success)]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
-              {store.logo ? (
-                <Image
-                  src={store.logo}
-                  alt={store.name}
-                  width={40}
-                  height={40}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <Store className="w-5 h-5 text-[var(--color-success)]" />
-              )}
-            </div>
+              {/* Logo */}
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-success)]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {store.logo ? (
+                  <Image
+                    src={store.logo}
+                    alt={store.name}
+                    width={40}
+                    height={40}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <Store className="w-5 h-5 text-[var(--color-success)]" />
+                )}
+              </div>
 
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                {store.name}
-                <BadgeCheck className="w-3.5 h-3.5 text-[var(--icons-green)] flex-shrink-0" />
-              </p>
-              <Stars value={store.rating_average} />
-            </div>
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                  {store.name}
+                  <BadgeCheck className="w-3.5 h-3.5 text-[var(--icons-green)] flex-shrink-0" />
+                </p>
+                <Stars value={store.rating_average} />
+              </div>
 
-            {/* Rating */}
-            <div className="flex flex-col items-end gap-1 flex-shrink-0">
-              <RatingBadge value={store.rating_average} />
-              <p className="text-xs text-[var(--text-muted)]">
-                {store.review_count} reseñas
-              </p>
+              {/* Rating */}
+              <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                <RatingBadge value={store.rating_average} />
+                <p className="text-xs text-[var(--text-muted)]">
+                  {store.review_count} reseñas
+                </p>
+              </div>
             </div>
-          </div>
-        ))
+          );
+        })
       )}
+
+      {/* Paginación */}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }
@@ -522,33 +532,39 @@ function ModerationTab() {
     'pending',
   );
   const [actionId, setActionId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const perPage = 10;
 
   const fetchReports = useCallback(() => {
     setLoading(true);
     setError(null);
     rankingApi
-      .getReportedReviews({ status, per_page: 20 })
+      .getReportedReviews({ status, page, per_page: perPage })
       .then((res) => {
         // FIX 3: normalizar igual que los otros tabs
         const list = Array.isArray(res) ? res : ((res as any).data ?? []);
         setReports(Array.isArray(list) ? list : []);
+        if (res && !Array.isArray(res) && res.meta) {
+          setTotalPages(Math.max(1, res.meta.total_pages));
+        }
       })
       .catch(() => setError('No se pudieron cargar los reportes.'))
       .finally(() => setLoading(false));
-  }, [status]);
+  }, [status, page]);
 
   useEffect(() => {
     fetchReports();
   }, [fetchReports]);
 
   const handleModerate = async (
-    reviewId: string,
+    reportId: string,
     action: 'accept' | 'dismiss',
   ) => {
-    setActionId(reviewId);
+    setActionId(reportId);
     try {
-      await rankingApi.moderateReview(reviewId, action);
-      setReports((prev) => prev.filter((r) => r.review.id !== reviewId));
+      await rankingApi.moderateReview(reportId, action);
+      setReports((prev) => prev.filter((r) => r.id !== reportId));
     } catch {
       setError('Error al moderar. Intenta nuevamente.');
     } finally {
@@ -571,7 +587,7 @@ function ModerationTab() {
         {(['pending', 'accepted', 'dismissed'] as const).map((s) => (
           <button
             key={s}
-            onClick={() => setStatus(s)}
+            onClick={() => { setStatus(s); setPage(1); }}
             className={`px-4 py-2 min-h-[44px] rounded-xl text-xs font-black uppercase tracking-wider transition-all ${status === s ? 'bg-sky-500 text-white shadow-sm' : 'bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'}`}
           >
             {s === 'pending'
@@ -686,8 +702,8 @@ function ModerationTab() {
                   <BaseButton
                     variant="danger"
                     size="sm"
-                    isLoading={actionId === report.review.id}
-                    onClick={() => handleModerate(report.review.id, 'accept')}
+                    isLoading={actionId === report.id}
+                    onClick={() => handleModerate(report.id, 'accept')}
                     leftIcon="Trash2"
                   >
                     Eliminar reseña
@@ -695,8 +711,8 @@ function ModerationTab() {
                   <BaseButton
                     variant="outline"
                     size="sm"
-                    isLoading={actionId === report.review.id}
-                    onClick={() => handleModerate(report.review.id, 'dismiss')}
+                    isLoading={actionId === report.id}
+                    onClick={() => handleModerate(report.id, 'dismiss')}
                     leftIcon="XCircle"
                   >
                     Desestimar
@@ -707,6 +723,9 @@ function ModerationTab() {
           ))}
         </div>
       )}
+
+      {/* Paginación */}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

@@ -32,6 +32,8 @@ interface ProductGridProps {
   productos: Producto[];
   loading?: boolean;
   className?: string;
+  /** Alto exacto (px) para el estado vacío (EmptyStoreState), p.ej. para igualarlo a un banner vertical fijo vecino. */
+  emptyStateHeightPx?: number;
 }
 
 function StarRating({ estrellas, total }: { estrellas: string; total?: number }) {
@@ -193,6 +195,7 @@ function ProductCard({ producto, onQuickView }: { producto: Producto; onQuickVie
 
 function ServiceCard({ producto }: { producto: Producto }) {
   const durationMinutes = producto.duration_minutes || 60;
+  const serviceHref = producto.enlace || (producto.slug ? `/servicio/${producto.slug}` : '#');
   const discount = producto.descuento || (producto.precioAnterior && producto.precioAnterior > producto.precio
     ? Math.round(((producto.precioAnterior - producto.precio) / producto.precioAnterior) * 100)
     : 0);
@@ -200,7 +203,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
   return (
     <div className="group bg-white dark:bg-[var(--bg-secondary)] border border-gray-100 dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden hover:shadow-xl hover:border-sky-200 dark:hover:border-[#4A7C59]/40 transition-all duration-200 flex flex-col">
       {/* Header with image or gradient */}
-      <Link href={producto.enlace || '#'} className="block relative h-20 sm:h-24 overflow-hidden bg-gray-100 dark:bg-[var(--bg-secondary)]">
+      <Link href={serviceHref} className="block relative h-20 sm:h-24 overflow-hidden bg-gray-100 dark:bg-[var(--bg-secondary)]">
         {producto.imagen ? (
           <Image
             src={producto.imagen}
@@ -229,7 +232,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
 
       {/* Info */}
       <div className="p-2.5 sm:p-3 flex flex-col gap-1.5 flex-1">
-        <Link href={producto.enlace || '#'}>
+        <Link href={serviceHref}>
           <p className="text-sm font-bold text-gray-800 dark:text-[var(--text-primary)] line-clamp-2 leading-tight">
             {producto.titulo}
           </p>
@@ -266,7 +269,7 @@ function ServiceCard({ producto }: { producto: Producto }) {
         </div>
 
         <Link
-          href={producto.enlace || '#'}
+          href={serviceHref}
           className="block w-full text-center py-2 rounded-xl bg-sky-50 dark:bg-[var(--pd-accent2)]/20 text-sky-600 dark:text-[var(--pd-accent2)] text-xs font-black uppercase tracking-wider hover:bg-sky-500 hover:text-white dark:hover:bg-[var(--pd-accent2)] dark:hover:text-white transition-all mt-1"
         >
           <span className="flex items-center justify-center gap-1.5">
@@ -293,7 +296,7 @@ function ProductCardSkeleton() {
   );
 }
 
-export default function ProductGrid({ productos, loading = false, className = '' }: ProductGridProps) {
+export default function ProductGrid({ productos, loading = false, className = '', emptyStateHeightPx }: ProductGridProps) {
   const [quickViewProduct, setQuickViewProduct] = useState<Producto | null>(null);
   const { addToCart: addToCartApi } = useAddToCart();
 
@@ -308,7 +311,7 @@ export default function ProductGrid({ productos, loading = false, className = ''
   }
 
   if (productos.length === 0) {
-    return <EmptyStoreState />;
+    return <EmptyStoreState heightPx={emptyStateHeightPx} />;
   }
 
   const isThreeCol = className.includes('lg:!grid-cols-3');

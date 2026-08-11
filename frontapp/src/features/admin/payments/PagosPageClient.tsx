@@ -134,15 +134,11 @@ export function PagosPageClient() {
       className: 'bg-rose-50/40 dark:bg-rose-500/5',
       render: (tx) => (
         <div className="text-right text-xs">
-          {tx.stores.length > 1 ? (
-            <div className="space-y-0.5">
-              <p className="font-semibold">{formatCurrency(tx.commissionTotal ?? 0)}</p>
-              <p className="text-[10px] text-[var(--text-secondary)]">Base: {formatCurrency(tx.commissionAmount ?? 0)}</p>
-              <p className="text-[10px] text-[var(--text-secondary)]">IGV: {formatCurrency(tx.commissionIgv ?? 0)}</p>
-            </div>
-          ) : (
-            <span className="text-[var(--text-secondary)]">—</span>
-          )}
+          <div className="space-y-0.5">
+            <p className="font-semibold">{formatCurrency(tx.commissionTotal ?? 0)}</p>
+            <p className="text-[10px] text-[var(--text-secondary)]">Base: {formatCurrency(tx.commissionAmount ?? 0)}</p>
+            <p className="text-[10px] text-[var(--text-secondary)]">IGV: {formatCurrency(tx.commissionIgv ?? 0)}</p>
+          </div>
         </div>
       ),
     },
@@ -579,6 +575,24 @@ function TransactionDetail({ transaction }: { transaction: Transaction }) {
           <div className="flex justify-between font-bold pt-1 border-t border-[var(--border-subtle)]">
             <span>Total</span>
             <span>{formatCurrency(transaction.total)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-[var(--border-subtle)] pt-4">
+        <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-3">Comisión Lyrium</p>
+        <div className="space-y-1.5 text-xs">
+          <div className="flex justify-between">
+            <span className="text-[var(--text-secondary)]">Base</span>
+            <span>{formatCurrency(transaction.commissionAmount ?? 0)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-[var(--text-secondary)]">IGV (18%)</span>
+            <span>{formatCurrency(transaction.commissionIgv ?? 0)}</span>
+          </div>
+          <div className="flex justify-between font-bold pt-1 border-t border-[var(--border-subtle)]">
+            <span>Total Comisión</span>
+            <span className="text-[var(--brand-sky)]">{formatCurrency(transaction.commissionTotal ?? 0)}</span>
           </div>
         </div>
       </div>

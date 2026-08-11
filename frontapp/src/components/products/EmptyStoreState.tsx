@@ -10,14 +10,27 @@ const ECO_MESSAGES = [
   { icon: Wind, text: 'Un espacio fresco, listo para florecer muy pronto.' },
 ];
 
-export default function EmptyStoreState() {
+interface EmptyStoreStateProps {
+  /**
+   * Alto exacto (px) a usar desde el breakpoint `md` en vez del min-height por
+   * defecto (que se mantiene siempre en mobile). Pensado para rellenar un
+   * hueco de tamaño conocido junto a un banner vertical fijo vecino, sin
+   * forzar ese alto grande en pantallas chicas donde no hay tal banner al lado.
+   */
+  heightPx?: number;
+}
+
+export default function EmptyStoreState({ heightPx }: EmptyStoreStateProps = {}) {
   const { icon: Icon, text } = useMemo(
     () => ECO_MESSAGES[Math.floor(Math.random() * ECO_MESSAGES.length)],
     []
   );
 
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-slate-100 dark:border-[var(--border-subtle)] bg-gradient-to-br from-emerald-50 via-sky-50 to-white dark:from-[var(--bg-card)] dark:via-[var(--bg-secondary)] dark:to-[var(--bg-card)] min-h-[280px] sm:min-h-[380px] flex items-center justify-center px-6 text-center">
+    <div
+      className={`relative overflow-hidden rounded-[2rem] border border-slate-100 dark:border-[var(--border-subtle)] bg-gradient-to-br from-emerald-50 via-sky-50 to-white dark:from-[var(--bg-card)] dark:via-[var(--bg-secondary)] dark:to-[var(--bg-card)] flex items-center justify-center px-6 text-center min-h-[280px] sm:min-h-[380px] ${heightPx ? 'md:min-h-0 md:h-[var(--fill-h)]' : ''}`}
+      style={heightPx ? ({ '--fill-h': `${heightPx}px` } as React.CSSProperties) : undefined}
+    >
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-sky-400/10 dark:from-[var(--brand-green)]/10 dark:to-[var(--icons-green)]/10 pointer-events-none" />
 
       <div className="relative flex flex-col items-center gap-5">

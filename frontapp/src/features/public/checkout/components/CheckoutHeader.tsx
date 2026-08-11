@@ -28,11 +28,11 @@ export default function CheckoutHeader() {
                 {/* Decorative blur */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />
 
-                <div className="relative z-10 flex flex-row items-center justify-center sm:justify-start gap-3 sm:gap-4 md:gap-6 text-white text-left">
+                <div className="relative z-10 flex flex-row items-center justify-center gap-3 sm:gap-4 md:gap-6 text-white">
                     <div className="w-9 h-9 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner shrink-0">
                         <Icon className="w-4 h-4 sm:w-6 sm:h-6 text-white transition-all duration-500" />
                     </div>
-                    <div className="flex flex-col items-start min-w-0">
+                    <div className="flex flex-col items-start text-left min-w-0">
                         <h3 className="text-sm sm:text-lg md:text-2xl font-black tracking-tighter leading-none transition-all duration-500">
                             {title}
                         </h3>

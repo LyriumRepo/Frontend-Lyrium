@@ -282,6 +282,24 @@ export default function AboutPage() {
                 </div>
             </section>
 
+            {/* ── Franja divisoria de punta a punta ── */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.8 }}
+                className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden"
+            >
+                <Image
+                    src="/img/nosotros/no-planet-b.jpg"
+                    alt="There is NO Planet B — cuidemos el planeta"
+                    fill
+                    sizes="100vw"
+                    className="object-cover object-left"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10" />
+            </motion.div>
+
             {/* ── Nuestros Valores — tiles estilo Google Labs ── */}
             <section className="py-24 md:py-32 px-6 bg-white dark:bg-[var(--bg-secondary)]">
                 <div className="max-w-7xl mx-auto">
@@ -442,6 +460,24 @@ export default function AboutPage() {
                 </div>
             </section>
 
+            {/* ── Franja divisoria de punta a punta ── */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.8 }}
+                className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden"
+            >
+                <Image
+                    src="/img/nosotros/save-the-planet.jpg"
+                    alt="Save the Planet — salvemos el planeta"
+                    fill
+                    sizes="100vw"
+                    className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10" />
+            </motion.div>
+
             {/* ── Nuestra Relación Contigo · Acróstico LYRIUM — el juego estrella ── */}
             <section className="relative py-24 md:py-32 px-6 overflow-hidden bg-[#f8f9fa] dark:bg-[var(--bg-primary)]">
                 <div className="relative max-w-6xl mx-auto">
@@ -513,6 +549,24 @@ export default function AboutPage() {
                     />
                 </div>
             </section>
+
+            {/* ── Franja divisoria de punta a punta ── */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.8 }}
+                className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden"
+            >
+                <Image
+                    src="/img/nosotros/go-green.jpg"
+                    alt="Go Green — vive de forma sostenible"
+                    fill
+                    sizes="100vw"
+                    className="object-cover object-right"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10" />
+            </motion.div>
 
             {/* ── Premium Icons: Orgánico · Natural · Bienestar · Saludable ── */}
             <section className="py-24 md:py-32 bg-white dark:bg-[var(--bg-secondary)] relative overflow-hidden">

@@ -226,7 +226,7 @@ export default function StoreBannerCarousel({
         {/* Logo + Medalla — AHORA FUERA del overflow-hidden, puede sobresalir */}
         {logo && (
           <div className="absolute -left-3 -bottom-16 sm:-bottom-25 z-20">
-            <div className="relative w-60 h-50 sm:w-60 sm:h-60">
+              <div className="relative w-40 h-40 sm:w-60 sm:h-60">
               <div className="w-full h-full rounded-full bg-white/95 backdrop-blur-sm border-4 border-white shadow-xl flex items-center justify-center overflow-hidden">
                 <Image
                   src={logo}

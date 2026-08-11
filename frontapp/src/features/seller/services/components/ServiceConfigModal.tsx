@@ -615,10 +615,11 @@ export default function ServiceConfigModal({
   const validateStep = (s: 1 | 2 | 3): boolean => {
     const e: typeof errors = {};
     if (s === 1) {
-      if (!form.imagen) e.imagen = 'Sube una imagen para el servicio';
+      const isEditing = Boolean(service);
+      if (!isEditing && !form.imagen) e.imagen = 'Sube una imagen para el servicio';
       if (!form.denominacion.trim()) e.denominacion = 'Requerido';
-      if (!form.categoriaL1) e.categoriaL1 = 'Selecciona una categoría';
-      if (!form.categoriaL2) e.categoriaL2 = 'Selecciona una subcategoría';
+      if (!isEditing && !form.categoriaL1) e.categoriaL1 = 'Selecciona una categoría';
+      if (!isEditing && !form.categoriaL2) e.categoriaL2 = 'Selecciona una subcategoría';
     }
     if (s === 2) {
       if (form.diasAtencion.length === 0) e.diasAtencion = 'Selecciona al menos un día';

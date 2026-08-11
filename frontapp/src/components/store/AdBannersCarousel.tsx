@@ -29,7 +29,18 @@ interface AdBannersCarouselProps {
    * para no perder banners ya existentes.
    */
   filterOrientation?: 'horizontal' | 'vertical';
+  /**
+   * Alto real (px) de una fila de la grilla de productos/servicios vecina
+   * (medido por ScrollableSection). En modo vertical, cada slide se fija a
+   * esta altura para que el slide 1 coincida con la fila 1 y el slide 2 con
+   * la fila 2, en vez de estirarse o usar un alto fijo arbitrario.
+   */
+  rowHeight?: number;
 }
+
+const DEFAULT_VERTICAL_ROW_HEIGHT = 427; // (866 - 12 de espacio) / 2, alto original por slide
+// Alto total fijo del banner vertical cuando no se le pasa `rowHeight` (diseño original).
+export const VERTICAL_BANNER_FIXED_HEIGHT = DEFAULT_VERTICAL_ROW_HEIGHT * 2 + 12;
 
 const LYRIUM_DEFAULTS: Banner[] = [
   { url: '/img/BANNER_GRANDE_INICIO/1.png', titulo: 'Lyrium', link: '/' },
@@ -45,7 +56,7 @@ function padWithDefaults(banners: Banner[], target: number): Banner[] {
   return result;
 }
 
-export default function AdBannersCarousel({ banners = [], maxBanners = 4, startIndex = 0, vertical = false, fallback, filterOrientation }: AdBannersCarouselProps) {
+export default function AdBannersCarousel({ banners = [], maxBanners = 4, startIndex = 0, vertical = false, fallback, filterOrientation, rowHeight }: AdBannersCarouselProps) {
   const pool = filterOrientation
     ? banners.filter((b) => (b.orientation || 'horizontal') === filterOrientation)
     : banners;
@@ -58,8 +69,12 @@ export default function AdBannersCarousel({ banners = [], maxBanners = 4, startI
   if (vertical) {
     const vSlidesPerView = 2;
     const canNavigate = allBanners.length > vSlidesPerView;
+    // Alto fijo total = 2 filas reales (slide 1 = fila 1, slide 2 = fila 2) + el
+    // espacio entre ellas. Si aún no se midió la fila vecina, usa el alto original.
+    const singleRowHeight = rowHeight ?? DEFAULT_VERTICAL_ROW_HEIGHT;
+    const totalHeight = singleRowHeight * vSlidesPerView + 12 * (vSlidesPerView - 1);
     return (
-      <div className="w-full h-full">
+      <div className="w-full" style={{ height: totalHeight }}>
         <Swiper
           modules={canNavigate ? [Navigation, Pagination, Autoplay] : []}
           direction="vertical"
@@ -72,7 +87,7 @@ export default function AdBannersCarousel({ banners = [], maxBanners = 4, startI
           } : {})}
           loop={canNavigate}
           className="w-full h-full rounded-2xl [&_.swiper-button-next]:text-white [&_.swiper-button-prev]:text-white [&_.swiper-button-next]:scale-[0.4] [&_.swiper-button-prev]:scale-[0.4] [&_.swiper-pagination-bullet]:bg-white/60 [&_.swiper-pagination-bullet-active]:bg-white"
-          style={{ height: 866 }}
+          style={{ height: totalHeight }}
         >
           {allBanners.map((banner, idx) => (
             <SwiperSlide key={idx} className="h-full">

@@ -39,15 +39,15 @@ interface CardPosition {
 }
 
 const CARD_POSITIONS: CardPosition[] = [
-    { top: 0, side: 'left', offset: '15%', rotate: 'rotate-6' },
-    { top: 160, side: 'right', offset: '13%', rotate: '-rotate-6' },
-    { top: 440, side: 'left', offset: '13%', rotate: '-rotate-5' },
-    { top: 580, side: 'right', offset: '15%', rotate: 'rotate-6' },
-    { top: 860, side: 'left', offset: '15%', rotate: 'rotate-5' },
-    { top: 1000, side: 'right', offset: '13%', rotate: '-rotate-6' },
+    { top: 0, side: 'left', offset: '15%', rotate: '' },
+    { top: 160, side: 'right', offset: '13%', rotate: '' },
+    { top: 440, side: 'left', offset: '13%', rotate: '' },
+    { top: 580, side: 'right', offset: '15%', rotate: '' },
+    { top: 860, side: 'left', offset: '15%', rotate: '' },
+    { top: 1000, side: 'right', offset: '13%', rotate: '' },
 ];
 
-const MOBILE_ROTATE = ['rotate-2', '-rotate-2', 'rotate-3', '-rotate-3', 'rotate-2', '-rotate-2'];
+const MOBILE_ROTATE = ['', '', '', '', '', ''];
 
 /** Ancla aproximada (x,y) de cada tarjeta dentro del viewBox 1000×height, usada solo para la línea punteada decorativa. */
 const PATH_ANCHORS = [

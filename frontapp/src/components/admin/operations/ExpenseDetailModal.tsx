@@ -1,15 +1,14 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
+import AdminModal from '@/components/admin/AdminModal';
 import {
-  X,
   FileText,
   Building2,
   User,
   Receipt,
   Calendar,
   CreditCard,
-  Hash,
   ExternalLink,
   CheckCircle2,
   Clock,
@@ -475,14 +474,6 @@ export function ExpenseDetailModal({
   expense,
   onClose,
 }: ExpenseDetailModalProps) {
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
   if (!expense) return null;
 
   const scan = expense.scan_data as ScanData | null | undefined;
@@ -510,121 +501,100 @@ export function ExpenseDetailModal({
       expense.amount)
     : (scan?.totals?.grand_total ?? expense.amount);
 
+  const docNumber =
+    scan?.document_number ??
+    expense.voucher_number ??
+    expense.receipt_number ??
+    '—';
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[rgba(4,52,44,0.45)] dark:bg-[rgba(0,0,0,0.7)]"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
-      role="dialog"
-      aria-modal="true"
-      tabIndex={-1}
-    >
-      <div
-        className="relative w-full max-w-xl max-h-[88vh] flex flex-col rounded-2xl overflow-hidden border border-[var(--border-default)] shadow-[0_24px_64px_rgba(0,0,0,0.15)] bg-[var(--bg-card)]"
-      >
-        <div
-          className="flex items-start justify-between px-5 pt-5 pb-4 shrink-0 border-b border-[var(--border-default)]"
-        >
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] bg-[var(--bg-card)] px-2.5 py-1 rounded-full self-start">
-              {typeLabel}
-            </span>
-            <span className="text-[12px] font-mono text-[var(--text-secondary)]">
-              {scan?.document_number ??
-                expense.voucher_number ??
-                expense.receipt_number ??
-                '—'}
-            </span>
-          </div>
-
-          <div className="flex flex-col items-end gap-2 mr-8">
-            <AmountPill amount={mainAmount} label="Total" />
-            <div className="flex items-center gap-1.5">
-              <StatusIcon status={expense.status} />
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
-                {expense.status}
-              </span>
-            </div>
-          </div>
-
+    <AdminModal
+      isOpen={expense !== null}
+      onClose={onClose}
+      title={typeLabel}
+      subtitle={`N.° ${docNumber} · Registrado ${new Date(expense.created_at).toLocaleDateString('es-PE')}`}
+      icon="Receipt"
+      size="2xl"
+      footer={
+        <div className="flex w-full items-center justify-end gap-3">
+          {expense.file_url && (
+            <a
+              href={expense.file_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 border border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--text-primary)] rounded-xl text-xs font-bold transition-all hover:border-[var(--text-primary)]"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Ver PDF original
+            </a>
+          )}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-7 h-7 inline-flex items-center justify-center rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-card)] transition-colors"
+            className="flex-1 px-4 py-2 border border-[var(--border-subtle)] bg-transparent text-[var(--text-secondary)] rounded-xl text-xs font-bold transition-all hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]"
           >
-            <X className="w-4 h-4" />
+            Cerrar
           </button>
         </div>
-
-        <div className="flex items-center gap-4 px-5 py-2.5 bg-[var(--bg-card)]/50 border-b border-[var(--border-default)]/50 shrink-0">
-          <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>{scan?.issue_date ?? expense.issued_at ?? '—'}</span>
-          </div>
-          {expense.paid_at && (
-            <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Pagado {expense.paid_at}</span>
-            </div>
-          )}
-          {expense.registered_by && (
-            <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)] ml-auto">
-              <User className="w-3.5 h-3.5" />
-              <span>{expense.registered_by.name}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="flex-1 overflow-y-auto green-scrollbar px-5 py-4">
-          {scan ? (
-            <>
-              {isBankStatement && (
-                <BankStatementContent scan={scan} />
-              )}
-              {!isBankStatement && isHonorarios && (
-                <HonorariosContent expense={expense} scan={scan} />
-              )}
-              {!isBankStatement && (isFactura || isBoleta) && (
-                <FacturaContent expense={expense} scan={scan} />
-              )}
-              {!isBankStatement && !isHonorarios && !isFactura && !isBoleta && (
-                <GenericContent expense={expense} />
-              )}
-            </>
-          ) : (
-            <GenericContent expense={expense} />
-          )}
-        </div>
-
-        <div
-          className="flex items-center justify-between px-5 py-3.5 shrink-0 border-t border-[var(--border-default)] bg-[var(--bg-card)]/50"
-        >
-          <span className="text-[11px] text-[var(--text-secondary)]">
-            Registrado{' '}
-            {new Date(expense.created_at).toLocaleDateString('es-PE')}
+      }
+    >
+      {/* Resumen superior */}
+      <div className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] px-4 py-3">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
+            {typeLabel}
           </span>
-          <div className="flex gap-2">
-            {expense.file_url && (
-              <a
-                href={expense.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)] bg-[var(--bg-card)] hover:bg-[var(--bg-muted)] px-3.5 py-1.5 rounded-lg transition-colors border border-[var(--border-default)]"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                Ver PDF original
-              </a>
-            )}
-            <button
-              onClick={onClose}
-              className="text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-card)] px-3.5 py-1.5 rounded-lg transition-colors border border-[var(--border-default)]"
-            >
-              Cerrar
-            </button>
+          <span className="text-[12px] font-mono text-[var(--text-secondary)]">
+            {docNumber}
+          </span>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <AmountPill amount={mainAmount} label="Total" />
+          <div className="flex items-center gap-1.5">
+            <StatusIcon status={expense.status} />
+            <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
+              {expense.status}
+            </span>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Meta: fecha emisión / pago / registrado por */}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
+          <Calendar className="w-3.5 h-3.5" />
+          {scan?.issue_date ?? expense.issued_at ?? '—'}
+        </span>
+        {expense.paid_at && (
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Pagado {expense.paid_at}
+          </span>
+        )}
+        {expense.registered_by && (
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
+            <User className="w-3.5 h-3.5" />
+            {expense.registered_by.name}
+          </span>
+        )}
+      </div>
+
+      {/* Detalle */}
+      {scan ? (
+        <>
+          {isBankStatement && <BankStatementContent scan={scan} />}
+          {!isBankStatement && isHonorarios && (
+            <HonorariosContent expense={expense} scan={scan} />
+          )}
+          {!isBankStatement && (isFactura || isBoleta) && (
+            <FacturaContent expense={expense} scan={scan} />
+          )}
+          {!isBankStatement && !isHonorarios && !isFactura && !isBoleta && (
+            <GenericContent expense={expense} />
+          )}
+        </>
+      ) : (
+        <GenericContent expense={expense} />
+      )}
+    </AdminModal>
   );
 }
