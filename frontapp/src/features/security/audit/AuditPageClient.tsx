@@ -16,9 +16,9 @@ import type { AuditLog, AuditSource } from '@/features/security/audit/types';
 import { Eye, Shield, AlertTriangle, Activity, ChevronDown, ChevronRight, AlertCircle, Clock } from 'lucide-react';
 
 const SEVERITY_MAP = [
-  { status: 'info', label: 'Info', class: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: 'Info' },
-  { status: 'warning', label: 'Advertencia', class: 'bg-amber-50 text-amber-600 border-amber-100', icon: 'AlertTriangle' },
-  { status: 'critical', label: 'Crítico', class: 'bg-rose-50 text-rose-600 border-rose-100', icon: 'AlertCircle' },
+  { status: 'info', label: 'Info', class: 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800/40', icon: 'Info' },
+  { status: 'warning', label: 'Advertencia', class: 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800/40', icon: 'AlertTriangle' },
+  { status: 'critical', label: 'Crítico', class: 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800/40', icon: 'AlertCircle' },
 ];
 
 const MODULE_OPTIONS = [
@@ -320,7 +320,7 @@ export default function AuditPageClient() {
                 {realtimeEvents.map((ev) => (
                   <div
                     key={ev.id}
-                    className="flex items-start gap-3 p-3 rounded-2xl bg-rose-50/50 border border-rose-100 hover:bg-rose-50 cursor-pointer transition-colors"
+                    className="flex items-start gap-3 p-3 rounded-2xl bg-rose-50/50 border border-rose-100 hover:bg-rose-50 dark:bg-rose-950/20 dark:border-rose-900/40 dark:hover:bg-rose-950/30 cursor-pointer transition-colors"
                     onClick={() => setSelectedLog(ev)}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedLog(ev); } }}
                     role="button"
@@ -331,7 +331,7 @@ export default function AuditPageClient() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">
+                        <span className="text-[11px] font-bold text-rose-700 dark:text-rose-300 uppercase tracking-wider">
                           {ev.event}
                         </span>
                         <span className="text-[10px] font-mono text-[var(--text-muted)]">
