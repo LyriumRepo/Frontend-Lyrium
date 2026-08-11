@@ -121,7 +121,7 @@ export default function AuditPageClient() {
       header: 'Actor',
       render: (log) => (
         <span className="text-sm text-[var(--text-primary)]">
-          {log.actor.email ?? 'Sistema'}
+          {log.actor?.email ?? 'Sistema'}
         </span>
       ),
     },
@@ -544,15 +544,15 @@ function AuditLogDetail({ log }: { log: AuditLog }) {
         <div className="grid grid-cols-2 gap-x-8 gap-y-3">
           <div className="flex justify-between">
             <span className="text-[10px] font-semibold text-[var(--text-secondary)]">ID</span>
-            <span className="text-xs font-semibold">{log.actor.id ?? '—'}</span>
+            <span className="text-xs font-semibold">{log.actor?.id ?? '—'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-[10px] font-semibold text-[var(--text-secondary)]">Email</span>
-            <span className="text-xs font-semibold">{log.actor.email ?? 'Sistema'}</span>
+            <span className="text-xs font-semibold">{log.actor?.email ?? 'Sistema'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-[10px] font-semibold text-[var(--text-secondary)]">Rol</span>
-            <span className="text-xs font-semibold capitalize">{log.actor.role ?? '—'}</span>
+            <span className="text-xs font-semibold capitalize">{log.actor?.role ?? '—'}</span>
           </div>
         </div>
       </div>

@@ -30,7 +30,7 @@ export interface AuditLog {
   new_values: Record<string, unknown> | null;
   metadata: Record<string, unknown> | null;
   created_at: string;
-  actor: AuditActor;
+  actor?: AuditActor | null;
   auditable: AuditAuditable | null;
 }
 
